@@ -7,7 +7,10 @@
 <html lang="es">
 <head>
     <meta charset="utf-8" />
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#003366">
     <link rel="icon" type="image/botellas.svg" href="svg/botellas.svg" />
     <title>Envibol RRHH</title>       
     <base href="~/" />
@@ -51,6 +54,13 @@
             document.body.appendChild(element);
             element.click();
             document.body.removeChild(element);
+        }
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/service-worker.published.js')
+            .then(() => console.log('✅ Service Worker registrado'))
+            .catch(err => console.error('❌ Error registrando Service Worker:', err));
         }
     </script>
 </body>

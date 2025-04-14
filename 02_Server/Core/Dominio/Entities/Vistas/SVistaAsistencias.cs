@@ -23,17 +23,6 @@ namespace Dominio.Entities.Vistas
         public DateTime FechaRealEntrada { get; set; }
         public DateTime? FechaRealSalida { get; set; } 
 
-  
-        //public int IdrrhPersona { get; set; }
-        //public string NombreApellido { get; set; }
-        //public string Ci { get; set; }
-        //public DateTime? ShiftDate { get; set; }
-        //public DateTime? Entrada { get; set; }
-        //public DateTime? Salida { get; set; }
-        //public string UsuarioCreacion { get; set; }
-        //public DateTime? FechaCreacion { get; set; }
-        //public string UsuarioModificacion { get; set; }
-        //public DateTime? FechaModificacion { get; set; }
     }
 
 }

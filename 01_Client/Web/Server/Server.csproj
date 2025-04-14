@@ -9,6 +9,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
+	      <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>	  
   </PropertyGroup>
 
   <!--<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -88,6 +89,7 @@
   <ItemGroup>
     <Folder Include="Resources\Aplicacion\" />
     <Folder Include="wwwroot\Documentos\" />
+    <Folder Include="wwwroot\icons\" />
   </ItemGroup>
 
   <ItemGroup>
