@@ -1,0 +1,145 @@
+﻿@page "/asistencia"
+@using Infraestructura.Models.Biometrico
+@using Infraestructura.Models.Clasificador
+@using Microsoft.AspNetCore.Components
+@using Syncfusion.Blazor.Grids
+@using System.Globalization
+@using Server.Pages.Pages.Biometrico
+@using MudBlazor
+@using Syncfusion.Blazor.Buttons
+@inherits MainBaseComponent
+@layout MainLayout
+@inject NavigationManager Navigation
+@inject NavigationManager Nav
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
+
+
+<MudContainer MaxWidth="MaxWidth.False" Class="p-6">
+
+    <!-- ░░░░░  CABECERA DEL FUNCIONARIO  ░░░░░ -->
+    @if (Marcaciones?.Count > 0)
+    {
+        <MudCard Class="mb-6" Elevation="2" Hover="true" Style="--mud-elevation-hover:4">
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.h6"><b>Usuario:</b> @Marcaciones[0].NombreApellido</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.h6"><b>CI:</b> @Marcaciones[0].Ci</MudText>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+    }
+
+    <!-- ░░░░░  FORMULARIO DE FILTRO  ░░░░░ -->
+    <MudCard Class="mb-6" Outlined="true" Elevation="1">
+        <MudCardHeader>
+            <MudText Typo="Typo.h6">Filtrar marcaciones</MudText>
+        </MudCardHeader>
+        <MudCardContent>
+            <MudGrid Spacing="3">
+                <MudItem xs="12" md="4">
+                    <MudTextField T="string" @bind-Value="BusquedaCi" Label="Cédula" Disabled="true"
+                                  Placeholder="CI del funcionario" Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Filled.Person" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudDatePicker @bind-Date="FechaInicio" Label="Fecha inicio" DateFormat="dd/MM/yyyy"
+                                   PickerVariant="PickerVariant.Inline" AdornmentIcon="@Icons.Filled.CalendarToday" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudDatePicker @bind-Date="FechaFin" Label="Fecha fin" DateFormat="dd/MM/yyyy"
+                                   PickerVariant="PickerVariant.Inline" AdornmentIcon="@Icons.Filled.EventAvailable" />
+                </MudItem>
+                <MudItem xs="12" Class="d-flex justify-end gap-4 mt-4">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Filled.Search"
+                               Disabled="!HayParametrosValidos" OnClick="GetMarcaciones">Filtrar</MudButton>
+                </MudItem>
+            </MudGrid>
+        </MudCardContent>
+    </MudCard>
+    <style>
+        .input-disabled .mud-input-outlined-border {
+            border-color: var(--mud-palette-primary-hover) !important;
+        }
+
+        .date-picker .mud-input-adornment button {
+            color: var(--mud-palette-primary) !important;
+        }
+
+        .mud-button-root:hover {
+            transform: translateY(-1px);
+            transition: transform 0.2s ease;
+        }
+    </style>
+    <MudPaper Class="pa-4 mt-4" Elevation="5" Outlined="true" Style="border-radius: 8px;">
+        <MudTable Items="@Marcaciones" Hover="true" Bordered="true" Striped="true" Dense="true">
+            <HeaderContent>
+                <MudTh Style="width: 30%; text-align: center;">Fecha</MudTh>
+                <MudTh Style="width: 35%; text-align: center;">Hora</MudTh>
+                <MudTh Style="width: 35%; text-align: center;">Tipo</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Fecha" Class="text-center">@context.Timestamp.ToString("dd/MM/yyyy")</MudTd>
+                <MudTd DataLabel="Hora" Class="text-center">@context.Hora</MudTd>
+                <MudTd DataLabel="Tipo" Class="text-center">@context.TipoRegistro</MudTd>
+            </RowTemplate>
+            <FooterContent>
+                <MudTd ColSpan="3">
+                    <div class="d-flex justify-space-between align-center">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">Total registros: @Marcaciones?.Count</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@DateTime.Now.ToString("dd MMM yyyy HH:mm")</MudText>
+                    </div>
+                </MudTd>
+            </FooterContent>
+        </MudTable>
+    </MudPaper>
+</MudContainer>
+@code {
+    // Variables para ordenamiento
+    private string _sortBy = nameof(SVistaAsistenciasDto.ShiftDate);
+    private Syncfusion.Blazor.Grids.SortDirection _sortDirection = Syncfusion.Blazor.Grids.SortDirection.Descending;
+    private bool HayParametrosValidos =>
+
+    FechaInicio.HasValue &&
+    FechaFin.HasValue &&
+    FechaInicio <= FechaFin;
+
+ 
+}
+<style>
+    .custom-table .missing-register {
+        background-color: #fff3f2;
+        border-left: 4px solid #ff4444;
+    }
+
+    .custom-table .mud-table-cell {
+        vertical-align: middle;
+    }
+
+    .custom-table .mud-table-row:hover .missing-register {
+        background-color: #ffeceb;
+    }
+
+    .row-missing {
+        background-color: rgba(255, 204, 204, 0.3);
+    }
+
+
+    .custom-table .missing-register {
+        background-color: #fff3f2;
+        border-left: 4px solid #ff4444;
+    }
+
+    .custom-table .mud-table-cell {
+        vertical-align: middle;
+    }
+
+    .custom-table .mud-table-row:hover .missing-register {
+        background-color: #ffeceb;
+    }
+</style>

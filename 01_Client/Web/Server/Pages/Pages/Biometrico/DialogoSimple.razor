@@ -1,0 +1,14 @@
+﻿
+
+@code {
+    [Parameter]
+    public string ContentText { get; set; } = "";
+}
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.body1" Align="Align.Center">
+            @((MarkupString)ContentText)
+        </MudText>
+    </DialogContent>
+</MudDialog>
