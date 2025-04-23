@@ -23,6 +23,7 @@ namespace Persistencia.Contexts
         public DbSet<SAsistencia> SAsistencia { get; set; }
         public DbSet<SVistaAsistencias> SVistaAsistencias { get; set; }
         public DbSet<RrhPersona> RrhPersona { get; set; }
+        public DbSet<VwMarcacionBiometrico> VwMarcacionBiometrico { get; set; }
 
         #endregion
 

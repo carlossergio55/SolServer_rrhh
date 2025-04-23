@@ -29,7 +29,7 @@ namespace Aplicacion.Mappings
             CreateMap<SAsistencia, SAsistenciaDto>();
             CreateMap<SVistaAsistencias, SVistaAsistenciasDto>();
             CreateMap<RrhPersona, RrhPersonaDto>();
-
+            CreateMap<VwMarcacionBiometrico, VwMarcacionBiometricoDto>();
 
 
             #endregion

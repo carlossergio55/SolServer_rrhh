@@ -24,6 +24,33 @@ function CargaReportePdf(objParam) {
     return urlFinal;
 }
 
+function CargaReportePdfCi(objParam) {
+    var urlConfig = "_flowId=viewReportFlow&standAlone=true&decorate=no&";
+    var urlHost = document.getElementById("rptUrlDes").value;
+    var urlRender = "&j_username=envibol&j_password=123456789&output=pdf";
+    var urlReport = objParam.ruta;
+    urlReport = "reportUnit=" + urlReport.replace(/\//g, '%2F');
+
+    var urlParam = '';
+    var urlFinal = '';
+
+    // Parámetros específicos del reporte
+    if (objParam.fecha_inicio) {
+        urlParam += "&fecha_inicio=" + encodeURIComponent(objParam.fecha_inicio);
+    }
+    if (objParam.fecha_fin) {
+        urlParam += "&fecha_fin=" + encodeURIComponent(objParam.fecha_fin);
+    }
+    if (objParam.ci) {
+        urlParam += "&ci=" + encodeURIComponent(objParam.ci);
+    }
+
+    urlFinal = urlHost + urlConfig + urlReport + urlParam + urlRender;
+    console.log("URL Generada (CI):", urlFinal);
+    return urlFinal;
+}
+
+
 function CargaReportePop(objParam) {
 
     var urlConfig = "_flowId=viewReportFlow&standAlone=true&decorate=no&";

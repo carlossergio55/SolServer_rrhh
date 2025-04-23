@@ -31,9 +31,9 @@ namespace Webapi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(); 
+            services.AddControllers();
             services.AddMediatRHandlers(Assembly.GetExecutingAssembly(), Assembly.GetCallingAssembly()); //agregado para utilizar consultas linq en WebApi/Services
-            
+
 
 
             services.AddCors(p =>

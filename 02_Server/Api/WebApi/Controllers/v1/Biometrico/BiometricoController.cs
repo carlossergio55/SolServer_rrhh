@@ -37,6 +37,20 @@ namespace WebApi.Controllers.v1.Biometrico
         public async Task<IActionResult> GetAll([FromQuery] GetAllSVistaAsistenciasQuery query)
         {
             return Ok(await Mediator.Send(query));
+        } 
+        
+        [HttpGet("GetAllCi")]
+        [Authorize]
+        public async Task<IActionResult> GetAllCi([FromQuery] GetAllSVistaAsistenciasByCiQuery query)
+        {
+            return Ok(await Mediator.Send(query));
+        }
+
+        [HttpGet("GetAllbioCi")]
+        [Authorize]
+        public async Task<IActionResult> GetAllCi([FromQuery] GetAllVwMarcacionByCiQuery query)
+        {
+            return Ok(await Mediator.Send(query));
         }
 
         // Nuevo endpoint para sugerencias

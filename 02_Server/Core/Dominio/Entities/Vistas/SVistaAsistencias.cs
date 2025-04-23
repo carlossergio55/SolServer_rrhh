@@ -20,8 +20,7 @@ namespace Dominio.Entities.Vistas
         public DateTime ShiftDate { get; set; }
         public string HoraEntrada { get; set; }
         public string HoraSalida { get; set; }
-        public DateTime FechaRealEntrada { get; set; }
-        public DateTime? FechaRealSalida { get; set; } 
+ 
 
     }
 

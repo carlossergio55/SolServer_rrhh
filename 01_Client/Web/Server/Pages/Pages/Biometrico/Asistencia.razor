@@ -1,4 +1,4 @@
-﻿@page "/asistencia"
+﻿@page "/asistencia1"
 @using Infraestructura.Models.Biometrico
 @using Infraestructura.Models.Clasificador
 @using Microsoft.AspNetCore.Components
@@ -16,132 +16,110 @@
 @inject IDialogService DialogService
 
 
-<MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
-    <!-- Filtros -->
-    <MudPaper Class="pa-4" Outlined="true">
-        <MudGrid>
-            <!-- Autocomplete para nombre -->
-            <MudItem xs="12" sm="4">
-                <MudAutocomplete T="string"
-                                 @bind-Value="BusquedaNombre"
-                                 Label="Nombre del funcionario"
-                                 Placeholder="Ej: Juan Pérez"
-                                 HelperText="Busque por nombre completo"
-                                 Required="true"
-                                 RequiredError="Campo obligatorio"
-                                 Variant="Variant.Outlined"
-                                 Margin="Margin.Dense"
-                                 AdornmentIcon="@Icons.Material.Filled.PersonSearch"
-                                 SearchFunc="@SearchNombres"
-                                 OnValueChanged="async (value) => {
-                             BusquedaNombre = value;
-                             await GetAsistencias();
-                         }"
-                                 MinCharacters="3"
-                                 DebounceInterval="500" />
-            </MudItem>
+<MudContainer MaxWidth="MaxWidth.False" Class="p-6">
 
-            <!-- Selector de fecha inicio -->
-            <MudItem xs="12" sm="4">
-                <MudDatePicker Label="Fecha Inicio"
-                               @bind-Date="FechaInicio"
-                               Placeholder="DD/MM/AAAA"
-                               HelperText="Seleccione fecha inicial"
-                               Required="true"
-                               RequiredError="Fecha requerida"
-                               Variant="Variant.Outlined"
-                               Margin="Margin.Dense"
-                               DateFormat="dd/MM/yyyy"
-                               AdornmentIcon="@Icons.Material.Filled.CalendarToday" />
-            </MudItem>
+    <!-- ░░░░░  CABECERA DEL FUNCIONARIO  ░░░░░ -->
+    @if (AsistenciasList?.Count > 0)
+    {
+        <MudCard Class="mb-6" Elevation="2" Hover="true" Style="--mud-elevation-hover:4">
+            <MudCardContent>
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.h6"><b>Usuario:</b> @AsistenciasList[0].NombreApellido</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText Typo="Typo.h6"><b>CI:</b> @AsistenciasList[0].Ci</MudText>
+                    </MudItem>
+                </MudGrid>
+            </MudCardContent>
+        </MudCard>
+    }
 
-            <!-- Selector de fecha fin -->
-            <MudItem xs="12" sm="4">
-                <MudDatePicker Label="Fecha Fin"
-                               @bind-Date="FechaFin"
-                               Placeholder="DD/MM/AAAA"
-                               HelperText="Seleccione fecha final"
-                               Required="true"
-                               RequiredError="Fecha requerida"
-                               Variant="Variant.Outlined"
-                               Margin="Margin.Dense"
-                               DateFormat="dd/MM/yyyy"
-                               AdornmentIcon="@Icons.Material.Filled.CalendarMonth" />
-            </MudItem>
-        </MudGrid>
+    <!-- ░░░░░  FORMULARIO DE FILTRO  ░░░░░ -->
+    <MudCard Class="mb-6" Outlined="true" Elevation="1">
+        <MudCardHeader>
+            <MudText Typo="Typo.h6">Filtrar asistencias</MudText>
+        </MudCardHeader>
+        <MudCardContent>
 
-        <!-- Botón mejorado -->
-        <MudButton Variant="Variant.Filled"
-                   Color="Color.Primary"
-                   Size="Size.Large"
-                   EndIcon="@Icons.Material.Filled.PictureAsPdf"
-                   Class="mt-4"
-                   Margin="Margin.Dense"
-                   Disabled="@(!HayParametrosValidos)"
-                   OnClick="FiltrarAsistenciasYGenerarReporte"
-                   Style="width: 300px; letter-spacing: 1px;">
-            <MudText Typo="Typo.h6">Generar Reporte PDF</MudText>
-        </MudButton>
-    </MudPaper>
+
+    <MudGrid Spacing="3">
+        <MudItem xs="12" md="4">
+            <MudTextField T="string"
+                          @bind-Value="BusquedaCi"
+                          Label="Cédula"
+                          Disabled="true"
+                          Placeholder="CI del funcionario"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Filled.Person" />
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudDatePicker @bind-Date="FechaInicio"
+                           Label="Fecha inicio"
+                           DateFormat="dd/MM/yyyy"
+                           PickerVariant="PickerVariant.Inline"
+                           AdornmentIcon="@Icons.Filled.CalendarToday" />
+        </MudItem>
+
+        <MudItem xs="12" md="4">
+            <MudDatePicker @bind-Date="FechaFin"
+                           Label="Fecha fin"
+                           DateFormat="dd/MM/yyyy"
+                           PickerVariant="PickerVariant.Inline"
+                           AdornmentIcon="@Icons.Filled.EventAvailable" />
+        </MudItem>
+
+        <MudItem xs="12" Class="d-flex justify-end gap-4 mt-4">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                       EndIcon="@Icons.Filled.Search"
+                       Disabled="!HayParametrosValidos"
+                       OnClick="GetAsistenciasCi">Filtrar</MudButton>
+
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary"
+                       EndIcon="@Icons.Filled.Print"
+                       Disabled="AsistenciasList?.Count == 0"
+                       OnClick="GenerarReporteMarcaciones">Imprimir</MudButton>
+        </MudItem>
+    </MudGrid>
+
+        </MudCardContent>
+    </MudCard>
+
+        <style>
+            .input-disabled .mud-input-outlined-border {
+                border-color: var(--mud-palette-primary-hover) !important;
+            }
+
+            .date-picker .mud-input-adornment button {
+                color: var(--mud-palette-primary) !important;
+            }
+
+            .mud-button-root:hover {
+                transform: translateY(-1px);
+                transition: transform 0.2s ease;
+            }
+        </style>
 
     <!-- Tabla de Asistencias -->
-<MudPaper Class="pa-4 mt-4" Elevation="5" Outlined="true" Style="border-radius: 8px;">
-    <MudTable Items="@AsistenciasList"
-              Hover="true"
-              Bordered="true"
-              Striped="true"
-              Dense="true"
-              SortLabel="Ordenar por"
-              @bind-SortBy="_sortBy"
-              @bind-SortDirection="_sortDirection"
-              Breakpoint="Breakpoint.None"
-              Class="custom-table">
-
-        <HeaderContent>
-            <MudTh SortBy="@nameof(SVistaAsistenciasDto.NombreApellido)" Style="width: 25%;">
-                Funcionario
-            </MudTh>
-
-            <MudTh SortBy="@nameof(SVistaAsistenciasDto.Ci)" Style="width: 15%;">
-                Cédula
-            </MudTh>
-
-            <MudTh SortBy="@nameof(SVistaAsistenciasDto.ShiftDate)" Style="width: 20%; text-align: center;">
-                Fecha
-            </MudTh>
-
-            <MudTh Style="width: 20%; text-align: center;">
-                Registro Entrada
-            </MudTh>
-
-            <MudTh Style="width: 20%; text-align: center;">
-                Registro Salida
-            </MudTh>
-        </HeaderContent>
-
-        <RowTemplate>
-            <!-- Nombre -->
-            <MudTd DataLabel="Funcionario" Class="font-weight-medium">
-                @context.NombreApellido
-            </MudTd>
-
-            <!-- Cédula -->
-            <MudTd DataLabel="Cédula">
-                <MudText>@context.Ci</MudText>
-            </MudTd>
-
-            <!-- Fecha -->
-            <MudTd DataLabel="Fecha" Class="text-center">
-                @context.ShiftDate?.ToString("dd MMM yyyy", 
-                    CultureInfo.CreateSpecificCulture("es-ES"))
-            </MudTd>
-
-                <!-- Entrada -->
-                <MudTd DataLabel="Entrada"
-                       Class="@($"text-center {(string.IsNullOrEmpty(context.HoraEntrada) ? "missing-register" : "")}")">
+    <MudPaper Class="pa-4 mt-4" Elevation="5" Outlined="true" Style="border-radius: 8px;">
+        <MudTable Items="@AsistenciasList"
+                  Hover="true"
+                  Bordered="true"
+                  Striped="true"
+                  Dense="true">
+            <HeaderContent>
+                <MudTh Style="width: 30%; text-align: center;">Fecha</MudTh>
+                <MudTh Style="width: 35%; text-align: center;">Registro Entrada</MudTh>
+                <MudTh Style="width: 35%; text-align: center;">Registro Salida</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Fecha" Class="text-center">
+                    @context.ShiftDate?.ToString("dd MMM yyyy", CultureInfo.CreateSpecificCulture("es-ES"))
+                </MudTd>
+                <MudTd DataLabel="Entrada" Class="text-center">
                     @if (string.IsNullOrEmpty(context.HoraEntrada))
                     {
-      
                         <MudText Color="Color.Error">Sin registro</MudText>
                     }
                     else
@@ -149,13 +127,9 @@
                         @DateTime.Parse(context.HoraEntrada).ToString("HH:mm")
                     }
                 </MudTd>
-
-                <!-- Salida -->
-                <MudTd DataLabel="Salida"
-                       Class="@($"text-center {(string.IsNullOrEmpty(context.HoraSalida) ? "missing-register" : "")}")">
+                <MudTd DataLabel="Salida" Class="text-center">
                     @if (string.IsNullOrEmpty(context.HoraSalida))
                     {
-    
                         <MudText Color="Color.Error">Sin registro</MudText>
                     }
                     else
@@ -163,62 +137,32 @@
                         @DateTime.Parse(context.HoraSalida).ToString("HH:mm")
                     }
                 </MudTd>
-        </RowTemplate>
-
-        <FooterContent>
-            <MudTd ColSpan="5">
-                <div class="d-flex justify-space-between align-center">
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        Total registros: @AsistenciasList?.Count
-                    </MudText>
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">
-                        @DateTime.Now.ToString("dd MMM yyyy HH:mm", CultureInfo.CreateSpecificCulture("es-ES"))
-                    </MudText>
-                </div>
-            </MudTd>
-        </FooterContent>
-    </MudTable>
-</MudPaper>
+            </RowTemplate>
+            <FooterContent>
+                <MudTd ColSpan="3">
+                    <div class="d-flex justify-space-between align-center">
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            Total registros: @AsistenciasList?.Count
+                        </MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">
+                            @DateTime.Now.ToString("dd MMM yyyy HH:mm", CultureInfo.CreateSpecificCulture("es-ES"))
+                        </MudText>
+                    </div>
+                </MudTd>
+            </FooterContent>
+        </MudTable>
+    </MudPaper>
 </MudContainer>
-
-
 @code {
     // Variables para ordenamiento
     private string _sortBy = nameof(SVistaAsistenciasDto.ShiftDate);
     private Syncfusion.Blazor.Grids.SortDirection _sortDirection = Syncfusion.Blazor.Grids.SortDirection.Descending;
     private bool HayParametrosValidos =>
-    !string.IsNullOrWhiteSpace(BusquedaNombre) &&
+
     FechaInicio.HasValue &&
     FechaFin.HasValue &&
     FechaInicio <= FechaFin;
-    private async Task GenerarReporte()
-    {
-        var parametrosReporte = new
-        {
-            ruta = "/Reports/ENVIBOL/RRHH/Asistencia",
-            fecha_inicio = FechaInicio?.ToString("yyyy-MM-dd"),
-            fecha_fin = FechaFin?.ToString("yyyy-MM-dd"),
-            nombre_apellido = BusquedaNombre
-        };
 
-        var urlReporte = await JSRuntime.InvokeAsync<string>(
-            "CargaReportePdf",
-            parametrosReporte
-        );
-
-        var parameters = new DialogParameters {
-            { "UrlReporte", urlReporte }
-        };
-
-        var options = new DialogOptions
-            {
-                MaxWidth = MaxWidth.Large,
-                FullWidth = true,
-                CloseOnEscapeKey = true
-            };
-
-        DialogService.Show<PdfDialog>("Reporte de Asistencias", parameters, options);
-    }
  
 }
 <style>
@@ -234,4 +178,25 @@
     .custom-table .mud-table-row:hover .missing-register {
         background-color: #ffeceb;
     }
+
+    <style >
+    .row-missing {
+        background-color: rgba(255, 204, 204, 0.3);
+    }
+
+
+    .custom-table .missing-register {
+        background-color: #fff3f2;
+        border-left: 4px solid #ff4444;
+    }
+
+    .custom-table .mud-table-cell {
+        vertical-align: middle;
+    }
+
+    .custom-table .mud-table-row:hover .missing-register {
+        background-color: #ffeceb;
+    }
+</style>
+
 </style>

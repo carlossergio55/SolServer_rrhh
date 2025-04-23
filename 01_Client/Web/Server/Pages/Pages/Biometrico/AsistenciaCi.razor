@@ -1,0 +1,59 @@
+﻿@page "/asistencia"
+@using Infraestructura.Models.Biometrico
+@using Infraestructura.Models.Clasificador
+@using Microsoft.AspNetCore.Components
+@using Syncfusion.Blazor.Grids
+@using System.Globalization
+@using Server.Pages.Pages.Biometrico
+@using MudBlazor
+@using Syncfusion.Blazor.Buttons
+@inherits MainBaseComponent
+@layout MainLayout
+@inject NavigationManager Navigation
+@inject NavigationManager Nav
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
+
+<MudContainer MaxWidth="MaxWidth.False" Class="pa-4">
+    <MudPaper Class="pa-6" Elevation="5"
+              Style="border-radius: 8px; background-color: #F1F8E9; border: 1px solid var(--mud-palette-primary-light);">
+        <MudText Typo="Typo.h3" Align="@Align.Center" Color="Color.Primary" Class="mb-2">
+            ¡Bienvenido!
+        </MudText>
+        <MudText Typo="Typo.h5" Align="@Align.Center" Color="Color.Secondary" Class="mb-1">
+            Estamos trabajando en nuevas mejoras.
+        </MudText>
+        <MudText Typo="Typo.subtitle1" Align="@Align.Center" Color="Color.Info">
+            Pronto podrá consultar e imprimir sus registros de asistencia.
+        </MudText>
+    </MudPaper>
+</MudContainer>
+
+
+@code {
+    // Variables para ordenamiento
+    private string _sortBy = nameof(SVistaAsistenciasDto.ShiftDate);
+    private Syncfusion.Blazor.Grids.SortDirection _sortDirection = Syncfusion.Blazor.Grids.SortDirection.Descending;
+    private bool HayParametrosValidos =>
+
+    FechaInicio.HasValue &&
+    FechaFin.HasValue &&
+    FechaInicio <= FechaFin;
+
+ 
+}
+<style>
+    .custom-table .missing-register {
+        background-color: #fff3f2;
+        border-left: 4px solid #ff4444;
+    }
+
+    .custom-table .mud-table-cell {
+        vertical-align: middle;
+    }
+
+    .custom-table .mud-table-row:hover .missing-register {
+        background-color: #ffeceb;
+    }
+</style>

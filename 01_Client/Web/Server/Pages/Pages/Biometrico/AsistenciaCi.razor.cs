@@ -13,7 +13,7 @@ using System.Text.Json;
 
 namespace Server.Pages.Pages.Biometrico
 {
-    public partial class Asistencia
+    public partial class AsistenciaCi
     {
 
         // No se está usando _sortDirection en este ejemplo de MudTable, pero puedes agregarlo según tu lógica

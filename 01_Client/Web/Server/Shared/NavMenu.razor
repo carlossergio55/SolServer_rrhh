@@ -8,7 +8,7 @@
 <MudText><center><small>@_UserSession.sucursal</small></center>  </MudText>
 <MudDivider Class="mb-4" />
 
-<MudNavMenu>
+<MudNavMenu Class="@($"mobile-drawer {(IsMobile ? "mobile-view" : "")}")">
     @if (_menuListaPrinci == null)
     {
         <p><em>Cargando...</em></p>
@@ -63,6 +63,8 @@
 </MudNavMenu>
 
 @code {
+    [Parameter]
+    public bool IsMobile { get; set; }
 
     private IEnumerable _menuListaPrinci;
     List<SegMenuResponse> _menuLista = new List<SegMenuResponse>();
@@ -166,3 +168,34 @@
     // Ejemplo de ícono inline si quisieras
     string AlertAssignmentIcon { get; set; } = "<path d=\"M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H9.18C9.6,1.84 10.7,1 12,1C13.3,1 14.4,1.84 14.82,3H19M12,3A1,1 0 0,0 11,4A1,1 0 0,0 12,5A1,1 0 0,0 13,4A1,1 0 0,0 12,3M7,7V5H5V19H19V5H17V7H7M11,9H13V13.5H11V9M11,15H13V17H11V15Z\" />";
 }
+<style>
+    /* Para móviles */
+    @@media (max-width: 600px) {
+        .mobile-drawer {
+            width: 100% !important;
+            min-width: 100% !important;
+        }
+
+        .mud-drawer--closed.mud-drawer-responsive {
+            transform: translateX(-100%);
+        }
+    }
+
+
+    .mobile-drawer {
+        width: 240px;
+        transition: transform 0.3s ease !important;
+    }
+
+    .mobile-view {
+        width: 100vw !important;
+        min-width: 100vw !important;
+    }
+
+    @@media (min-width: 601px) {
+        .mud-drawer-responsive:not(.mud-drawer-open) {
+            transform: translateX(-100%) !important;
+        }
+    }
+
+</style>

@@ -2,6 +2,8 @@
 @attribute [Authorize]
 @using Infraestructura.Abstract
 @using System.Globalization
+@inject IJSRuntime JSRuntime
+@inject NavigationManager _navMgr
 
 <MudThemeProvider Theme="_themeManager.Theme" />
 <MudDialogProvider FullWidth="true"
@@ -46,19 +48,17 @@
             <MudDrawer @bind-Open="_drawerOpen"
                        Elevation="_themeManager.DrawerElevation"
                        ClipMode="_themeManager.DrawerClipMode"
-                       Variant="@DrawerVariant.Mini"
-                       OpenMiniOnHover="true"
-                       PreserveOpenState="true">
-                <NavMenu />
+                       Variant="DrawerVariant.Responsive"
+                       Breakpoint="Breakpoint.SmAndDown"
+                       PreserveOpenState="false"
+                       Style="@_drawerStyle">
+                <NavMenu IsMobile="_isMobile" /> <!-- Así se pasa el parámetro -->
             </MudDrawer>
+
 
             <MudMainContent>
                 <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
                     <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                     @*    <MudToolBar DisableGutters="false">
-                            <MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" Class="ml-3" />
-                            <CBreadCrumCustom />
-                        </MudToolBar> *@
                     </MudHidden>
                     @Body
                 </MudContainer>
@@ -150,6 +150,8 @@
             DrawerElevation = 1
         };
 
+    private bool _isMobile = false;
+    private string _drawerStyle => _drawerOpen ? "" : "transform: translateX(-100%); transition: transform 0.3s ease;";
 
     public bool _drawerOpen = true;
     public bool _themeManagerOpen = false;
@@ -169,32 +171,40 @@
         _themeManager = value;
         StateHasChanged();
     }
-    protected override void OnInitialized()
-    {
-        // Barra superior (AppBar) en azul
-        _themeManager.Theme.Palette.Primary = "#0f6751"; // Azul principal
+   protected override async Task OnInitializedAsync()
+    {       
+       // Cierra el drawer por defecto en móviles
+        if (_isMobile)
+        {
+            _drawerOpen = false;
+        }
+
+        // Mantén tu configuración de tema actual
+        _themeManager.Theme.Palette.Primary = "#0f6751";
         _themeManager.Theme.Palette.AppbarBackground = "#007BFF";
-
-        // Menú lateral (Drawer) en blanco/gris claro
-        _themeManager.Theme.Palette.DrawerBackground = "#FFFFFF"; // Blanco
-        _themeManager.Theme.Palette.DrawerText = "#212121"; // Texto oscuro para contraste
-        _themeManager.Theme.Palette.DrawerIcon = "#212121"; // Íconos en negro
-
-        // Fondo general de la aplicación (contenido principal)
-        _themeManager.Theme.Palette.Background = "#F5F5F5"; // Gris claro
-
-        // Botones de acción en verde (éxito) o naranja (advertencia)
-        _themeManager.Theme.Palette.Success = "#28A745"; // Verde para acciones exitosas
-        _themeManager.Theme.Palette.Warning = "#FD7E14"; // Naranja para advertencias
-
-        StateHasChanged();
+        _themeManager.Theme.Palette.DrawerBackground = "#FFFFFF";
+        _themeManager.Theme.Palette.DrawerText = "#212121";
+        _themeManager.Theme.Palette.DrawerIcon = "#212121";
+        _themeManager.Theme.Palette.Background = "#F5F5F5";
+        _themeManager.Theme.Palette.Success = "#28A745";
+        _themeManager.Theme.Palette.Warning = "#FD7E14";
     }
-
-
-    protected override void OnAfterRender(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        _BreadList.Update(_navMgr.Uri.ToString().Replace(_navMgr.BaseUri, ""));
-    }
+        if (firstRender)
+        {
+            _isMobile = await JSRuntime.InvokeAsync<bool>("deviceHelper.isMobile");
+            if (_isMobile)
+            {
+                _drawerOpen = false;
+                StateHasChanged();
+            }
+        }
 
+        // Asegúrate que _BreadList está definido/inyectado
+        _BreadList?.Update(_navMgr.Uri.ToString().Replace(_navMgr.BaseUri, ""));
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
 
 }
