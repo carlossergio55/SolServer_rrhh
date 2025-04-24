@@ -30,8 +30,7 @@ namespace Server.Pages.Pages.Biometrico
             {
                 BusquedaCi = _usuarioSeg.loginUsuario;
             }
-            // Fijar la fecha fin como hoy
-            FechaFin = DateTime.Today;
+            FechaFin = DateTime.Today.AddDays(1);
             // Fijar la fecha inicio como el día 20 del mes anterior
             FechaInicio = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 20).AddMonths(-1);
             // Ejecutar la consulta automáticamente con los filtros por defecto
@@ -79,25 +78,25 @@ namespace Server.Pages.Pages.Biometrico
                 _MessageShow($"Error al obtener marcaciones: {ex.Message}", State.Error);
             }
         }
-
         private async Task MostrarDialogoBienvenida()
         {
-            var options = new DialogOptions { CloseButton = false, MaxWidth = MaxWidth.ExtraSmall, FullWidth = true };
+            var options = new DialogOptions
+            {
+                CloseButton = false,
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true,
+                CloseOnEscapeKey = false,
+                DisableBackdropClick = true
+            };
 
             var parameters = new DialogParameters
-                {
-                       {
-                        "ContentText",
-                       "📌 Recuerda: Esta app solo te muestra lo que marcaste en el biométrico.<br />No toma en cuenta tu horario asignado."
-                    }
-                };
+    {
+        { "ContentText", "Configuración inicial" } // Mantenemos el parámetro aunque no se use
+    };
 
-            var dialog = DialogService.Show<DialogoSimple>("Bienvenido", parameters, options);
-
-            await Task.Delay(10000); // Espera 10 segundos
-
-            dialog.Close(); // Cierra el diálogo automáticamente
+            var dialog = DialogService.Show<DialogoSimple>("", parameters, options);
+            await Task.Delay(10000);
+            dialog.Close();
         }
-
     }
 }

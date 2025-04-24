@@ -1,14 +1,49 @@
-﻿
-
+﻿@inject IDialogService DialogService
 @code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
     [Parameter]
     public string ContentText { get; set; } = "";
+
+    private void CerrarDialogo() => MudDialog.Close();
 }
 
 <MudDialog>
     <DialogContent>
-        <MudText Typo="Typo.body1" Align="Align.Center">
-            @((MarkupString)ContentText)
-        </MudText>
+        <MudContainer Class="d-flex align-center flex-column">
+            <!-- Icono decorativo -->
+            <MudIcon Icon="@Icons.Material.Filled.Info" Color="Color.Primary" Size="Size.Large" Class="mb-4" />
+
+            <!-- Título -->
+            <MudText Typo="Typo.h5" Class="mb-3 text-primary font-weight-bold">¡Bienvenido!</MudText>
+
+            <!-- Contenido -->
+            <MudPaper Elevation="0" Class="pa-4 rounded-lg" Style="background-color: #f8f9fa;">
+                <MudText Typo="Typo.body1" Class="mb-2">
+                    <MudIcon Icon="@Icons.Material.Filled.Bookmark" Class="mr-2" Color="Color.Secondary" />
+                    <strong>Recuerda:</strong>
+                </MudText>
+
+                <MudList Dense="true" DisablePadding="true">
+                    <MudListItem>
+                        <MudIcon Icon="@Icons.Material.Filled.Fingerprint" Class="mr-2" Color="Color.Info" />
+                        <MudText>Esta app solo te muestra lo que marcaste en el biométrico</MudText>
+                    </MudListItem>
+                    <MudListItem>
+                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Class="mr-2" Color="Color.Warning" />
+                        <MudText>No considera horarios asignados</MudText>
+                    </MudListItem>
+                </MudList>
+            </MudPaper>
+
+            <!-- Nota y botón -->
+            <MudText Typo="Typo.caption" Class="mt-3 text-grey-darken-2 mb-2">
+                Cierra automáticamente en 10 segundos
+            </MudText>
+
+            <MudButton OnClick="CerrarDialogo" Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small">
+                Entendido
+            </MudButton>
+        </MudContainer>
     </DialogContent>
 </MudDialog>
