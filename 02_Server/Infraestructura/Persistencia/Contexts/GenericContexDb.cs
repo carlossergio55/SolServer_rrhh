@@ -1,5 +1,6 @@
 ﻿using Dominio.Entities;
 using Dominio.Entities.Asistencia;
+using Dominio.Entities.Horario;
 using Dominio.Entities.Persona;
 using Dominio.Entities.Seguridad;
 using Dominio.Entities.Vistas;
@@ -24,7 +25,8 @@ namespace Persistencia.Contexts
         public DbSet<SVistaAsistencias> SVistaAsistencias { get; set; }
         public DbSet<RrhPersona> RrhPersona { get; set; }
         public DbSet<VwMarcacionBiometrico> VwMarcacionBiometrico { get; set; }
-
+        public DbSet<RrhhTurnodia> RrhhTurnodia { get; set; }
+        public DbSet<RrhhTurnotolerancia> RrhhTurnotolerancia { get; set; }
         #endregion
 
     }

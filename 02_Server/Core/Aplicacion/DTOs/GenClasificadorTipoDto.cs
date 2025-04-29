@@ -11,6 +11,7 @@ namespace Aplicacion.DTOs.Clasificador
         public int IdgenClasificadortipo { get; set; }
         public string Descripcion { get; set; }
         public string Valor1 { get; set; }
+        public string Abreviatura { get; set; }
 
     }
 }

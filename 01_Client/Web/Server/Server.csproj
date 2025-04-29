@@ -87,6 +87,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Pages\Pages\Clasificador\" />
     <Folder Include="Resources\Aplicacion\" />
     <Folder Include="wwwroot\Documentos\" />
     <Folder Include="wwwroot\icons\" />

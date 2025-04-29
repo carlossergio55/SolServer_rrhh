@@ -59,6 +59,13 @@ namespace WebApi.Controllers
         public async Task<IActionResult> GetAllGenClasificadortipo()
         {
             return Ok(await Mediator.Send(new GetAllGenClasificadortipoQuery()));
+        } 
+
+        [HttpGet("Turno")]
+        [Authorize]
+        public async Task<IActionResult> GetTurno()
+        {
+            return Ok(await Mediator.Send(new GetAllTurnosQuery()));
         }
 
 

@@ -1,11 +1,13 @@
 ﻿using Aplicacion.DTOs.Asistencia;
 using Aplicacion.DTOs.Clasificador;
+using Aplicacion.DTOs.Horario;
 using Aplicacion.DTOs.Persona;
 using Aplicacion.DTOs.Segurity;
 using Aplicacion.DTOs.Vistas;
 using AutoMapper;
 using Dominio.Entities;
 using Dominio.Entities.Asistencia;
+using Dominio.Entities.Horario;
 using Dominio.Entities.Persona;
 using Dominio.Entities.Seguridad;
 using Dominio.Entities.Vistas;
@@ -30,6 +32,8 @@ namespace Aplicacion.Mappings
             CreateMap<SVistaAsistencias, SVistaAsistenciasDto>();
             CreateMap<RrhPersona, RrhPersonaDto>();
             CreateMap<VwMarcacionBiometrico, VwMarcacionBiometricoDto>();
+            CreateMap<RrhhTurnodia, RrhhTurnodiaDto>();
+            CreateMap<RrhhTurnotolerancia, RrhhTurnotoleranciaDto>();
 
 
             #endregion
@@ -41,7 +45,8 @@ namespace Aplicacion.Mappings
             CreateMap<GenClasificadortipoDto, GenClasificadortipo>();
             CreateMap<SAsistenciaDto, SAsistencia>();
             CreateMap<RrhPersonaDto, RrhPersona>();
-
+            CreateMap<RrhhTurnodiaDto, RrhhTurnodia>();
+            CreateMap<RrhhTurnotoleranciaDto, RrhhTurnotolerancia>();
             #endregion
         }
     }

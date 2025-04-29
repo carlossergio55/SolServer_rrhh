@@ -1,0 +1,188 @@
+﻿@page "/tipo"
+@using Infraestructura.Models.Biometrico
+@using Infraestructura.Models.Clasificador
+@using Microsoft.AspNetCore.Components
+@using Syncfusion.Blazor.Grids
+@using System.Globalization
+@using Server.Pages.Pages.Biometrico
+@using MudBlazor
+@using Syncfusion.Blazor.Buttons
+@inherits MainBaseComponent
+@layout MainLayout
+@inject NavigationManager Navigation
+@inject NavigationManager Nav
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
+
+
+<MudCard>
+    <!-- Panel de formulario -->
+    <MudExpansionPanels MultiExpansion="false">
+        <MudExpansionPanel @bind-IsExpanded="expande" HideIcon="true">
+            <TitleContent>
+                <MudContainer MaxWidth="MaxWidth.Small" Class="mb-4">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="@(expande ? Color.Error : Color.Success)"
+                               OnClick="@ToggleExpand">
+                        @(expande ? "CERRAR" : "AGREGAR")
+                    </MudButton>
+                </MudContainer>
+            </TitleContent>
+            <ChildContent>
+                <MudCard>
+                    <EditForm Model="@_Item" OnValidSubmit="OnValidSubmit">
+                        <DataAnnotationsValidator />
+                        <MudCardContent>
+                            <MudGrid>
+                                <!-- Descripción -->
+                                <MudItem xs="12" sm="4">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Item.Descripcion"
+                                                  Label="DESCRIPCIÓN:"
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  Required="true"
+                                                  MaxLength="100" />
+                                </MudItem>
+                                <!-- Valor1 -->
+                                <MudItem xs="12" sm="4">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Item.Valor1"
+                                                  Label="ABREVIATURA:"
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="100" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton ButtonType="ButtonType.Submit"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       Class="ml-auto">
+                                GUARDAR
+                            </MudButton>
+                            <MudButton ButtonType="ButtonType.Button"
+                                       Variant="Variant.Outlined"
+                                       OnClick="@ResetForm"
+                                       Color="Color.Default">
+                                LIMPIAR
+                            </MudButton>
+                        </MudCardActions>
+                    </EditForm>
+                </MudCard>
+            </ChildContent>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+
+    <MudDivider Class="my-4" />
+    <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Secondary">
+        <b>LISTA DE TURNOS</b>
+    </MudText>
+    <MudDivider Class="mb-2" />
+
+<MudTable Items="@_List" 
+          Filterable="true" 
+          Sortable="true" 
+          Hover="true"
+          Striped="true"
+          Elevation="25"
+          Dense="false"
+          RowsPerPage="10"
+          Class="rounded-lg overflow-hidden glassmorphism-effect"
+          Style="backdrop-filter: blur(10px); background-color: rgba(255,255,255,0.9);">
+    
+    <!-- Header con diseño moderno -->
+    <HeaderContent>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<GenClasificadorTipoDto, object>(x=>x.IdgenClasificadortipo)"
+                               IconColor="Color.Secondary"
+                               Color="Color.Primary">
+                <MudText Typo="Typo.subtitle2" Color="Color.Primary">CÓDIGO</MudText>
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudTableSortLabel SortBy="new Func<GenClasificadorTipoDto, object>(x=>x.Descripcion)">
+                <MudText Typo="Typo.subtitle2" Color="Color.Primary">DESCRIPCIÓN</MudText>
+            </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+             <MudTableSortLabel SortBy="new Func<GenClasificadorTipoDto, object>(x=>x.Abreviatura)">
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary">ABREVIATURA</MudText>
+                </MudTableSortLabel>
+        </MudTh>
+        <MudTh>
+            <MudText Typo="Typo.subtitle2" Color="Color.Primary">ACCIONES</MudText>
+        </MudTh>
+    </HeaderContent>
+
+    <!-- Filas con diseño fluido -->
+        <RowTemplate Context="context">
+            <MudTd>
+                <MudIconButton Icon="@(_expandedItems.GetValueOrDefault(context.IdgenClasificadortipo) ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)"
+                               OnClick="@(() => ToggleDetails(context.IdgenClasificadortipo))"
+                               Color="Color.Primary" />
+            </MudTd>
+
+        
+        <MudTd DataLabel="DESCRIPCIÓN" Class="text-truncate" Style="max-width: 250px;">
+            @context.Descripcion
+        </MudTd>
+            <MudTd DataLabel="ABREVIATURA" Class="text-truncate" Style="max-width: 250px;">
+                @context.Abreviatura
+        </MudTd>
+
+        
+        <MudTd DataLabel="ACCIONES">
+                <MudTooltip Text="EDITAR" Placement="Placement.Top">
+                    <MudIconButton Icon="@Icons.Material.Outlined.EditNote"
+                                   Color="Color.Primary"
+                                   Variant="Variant.Outlined"
+                                   Size="Size.Small"
+                                   OnClick="@(() => EditItem(context))" />
+                </MudTooltip>
+                <MudTooltip Text="ELIMINAR" Placement="Placement.Top">
+                    <MudIconButton Icon="@Icons.Material.Filled.AutoDelete"
+                                   Color="Color.Error"
+                                   Variant="Variant.Outlined"
+                                   Size="Size.Small"
+                                   OnClick="@(() => DeleteItem(context.IdgenClasificadortipo))" />
+                </MudTooltip>
+        </MudTd>
+    </RowTemplate>
+        <ChildRowContent Context="childContext">
+        @if (_expandedItems.GetValueOrDefault(childContext.IdgenClasificadortipo))
+        {
+            <MudTr Style="background-color: #f8f9fa;">
+                <MudTd colspan="4">
+                    @if (_turnosCache.ContainsKey(childContext.IdgenClasificadortipo))
+                    {
+                        <MudTable Items="@_turnosCache[childContext.IdgenClasificadortipo]" 
+                                  Context="turnoContext" 
+                                  Dense="true">
+                            <HeaderContent>
+                                <MudTh>Día</MudTh>
+                                <MudTh>Entrada</MudTh>
+                                <MudTh>Salida</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd>@turnoContext.DiaSemana</MudTd>
+                                <MudTd>@turnoContext.HoraEntrada.ToString("hh\\:mm")</MudTd>
+                                <MudTd>@turnoContext.HoraSalida.ToString("hh\\:mm")</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
+                </MudTd>
+            </MudTr>
+        }
+    </ChildRowContent>
+    <!-- Paginación mejorada -->
+    <PagerContent>
+        <MudTablePager RowsPerPageText="Registros por página:" 
+                     InfoFormat="{first_item}-{last_item} de {all_items}"
+                     Class="py-4 border-top"/>
+    </PagerContent>
+
+</MudTable>
+</MudCard>
