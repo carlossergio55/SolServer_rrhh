@@ -1,5 +1,4 @@
 ﻿using Ardalis.Specification;
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -13,8 +12,8 @@ namespace Aplicacion.Interfaces
         /// <param name="nameFunction">Nombre de la funcion</param>
         /// <param name="param">Parametros deben estar en el orden de la misma consulta</param>
         /// <returns>Listado de objecto T resultado de la operación</returns>
-        Task<List<T>> CallFunctionReFCursor(string nameFunction,  params object[] param);
-        Task<IEnumerable<object>> GetAllAsync(Func<object, bool> value);
+        Task<List<T>> CallFunctionReFCursor(string nameFunction, params object[] param);
+
     }
 
     public interface IReadRepositoryAsync<T> : IReadRepositoryBase<T> where T : class

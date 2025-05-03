@@ -14,7 +14,7 @@ namespace Aplicacion.DTOs.Horario
         public string DiaSemana { get; set; }
         public TimeSpan HoraEntrada { get; set; }
         public TimeSpan HoraSalida { get; set; }
-        public TimeSpan TiempoExtra { get; set; }
+        public TimeSpan? TiempoExtra { get; set; }
 
         public GenClasificadortipoDto GenClasificadortipo { get; set; }
     }

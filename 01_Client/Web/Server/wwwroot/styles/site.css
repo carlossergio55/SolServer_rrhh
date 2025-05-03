@@ -19,6 +19,23 @@
     width: 100vw;
     overflow: auto; /* Si quieres que sea scrollable */
 }
+.popover-custom .mud-paper {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+}
+
+.popover-custom .close-btn {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    color: rgba(0,0,0,0.54);
+}
+
+.popover-custom .mud-text.h6 {
+    font-weight: 600;
+}
+
 
 /*Rounded Corners*/
 /*top-left rounded Corners*/

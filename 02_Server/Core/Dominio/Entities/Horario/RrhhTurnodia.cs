@@ -21,7 +21,7 @@ namespace Dominio.Entities.Horario
         public string DiaSemana { get; set; }
         public TimeSpan HoraEntrada { get; set; }
         public TimeSpan HoraSalida { get; set; }
-        public TimeSpan TiempoExtra { get; set; } = TimeSpan.Zero;
+        public TimeSpan? TiempoExtra { get; set; } = TimeSpan.Zero;
 
         public virtual GenClasificadortipo GenClasificadortipo { get; set; }
     }

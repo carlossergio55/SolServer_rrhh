@@ -14,8 +14,14 @@ namespace WebApi.Controllers.v1.Horario
     {
         [HttpGet("GetAll")]
         [Authorize]
-        public async Task<IActionResult> GetAll()
-       => Ok(await Mediator.Send(new GetAllRrhhTurnotoleranciaQuery()));
+        public async Task<IActionResult> GetAll(int idgenClasificadortipo) // Parámetro agregado
+        {
+            var query = new GetAllRrhhTurnotoleranciaQuery
+            {
+                IdgenClasificadortipo = idgenClasificadortipo
+            };
+            return Ok(await Mediator.Send(query));
+        }
 
         [HttpPost]
         [Authorize]

@@ -31,7 +31,6 @@ namespace Persistencia
             //TODO: Agregar aqui Repositorios especificos elaborados Ej.: services.AddTransient<ILibroRepository, LibroRepository>();
             //services.AddTransient<IProgramacionAnualRepository, ProgramacionAnualRepository>();
             //services.AddTransient<IProgSeguimientoRepository, ProgSeguimientoRepository>();
-            //services.AddTransient<IPacFormularioRepository, PacFormularioRepository>();
             services.AddTransient<IClienteRepository, ClienteRepository>();
         }
 

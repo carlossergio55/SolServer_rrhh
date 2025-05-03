@@ -1,6 +1,7 @@
 ﻿using Aplicacion.Features.Aplicacion.Clasificador.Queries;
 using Aplicacion.Features.Clasificador;
 using Aplicacion.Features.Clasificador.Commands;
+using Aplicacion.Features.Horario.Commands;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -23,6 +24,10 @@ namespace WebApi.Controllers
         {
             return Ok(await Mediator.Send(command));
         }
+        [HttpPost("completo")]
+        [Authorize]
+        public async Task<IActionResult> Upsert([FromBody] UpsertHorarioCompletoCommand cmd)
+         => Ok(await Mediator.Send(cmd));
 
 
         [HttpPut("{id}")]

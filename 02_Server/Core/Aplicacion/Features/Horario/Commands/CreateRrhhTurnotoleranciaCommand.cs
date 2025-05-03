@@ -1,4 +1,5 @@
-﻿using Aplicacion.Interfaces;
+﻿using Aplicacion.DTOs.Horario;
+using Aplicacion.Interfaces;
 using Aplicacion.Wrappers;
 using AutoMapper;
 using Dominio.Entities.Horario;
@@ -14,14 +15,7 @@ namespace Aplicacion.Features.Horario.Commands
 {
     public class CreateRrhhTurnotoleranciaCommand : IRequest<Response<int>>
     {
-        public int IdgenClasificadortipo { get; set; }
-        public int ToleranciaAtraso { get; set; }
-        public int ToleranciaFalta { get; set; }
-        public int ToleranciaSalida { get; set; }
-        public int SalidaAdelantada { get; set; }
-        public int Puntualidad { get; set; }
-        public string Prioridad { get; set; }
-
+        public RrhhTurnotoleranciaDto _RrhhTurnotolerancia { get; set; }
         public class Handler : IRequestHandler<CreateRrhhTurnotoleranciaCommand, Response<int>>
         {
             private readonly IRepositoryAsync<RrhhTurnotolerancia> _repo;
@@ -35,7 +29,7 @@ namespace Aplicacion.Features.Horario.Commands
 
             public async Task<Response<int>> Handle(CreateRrhhTurnotoleranciaCommand request, CancellationToken cancellationToken)
             {
-                var entity = _mapper.Map<RrhhTurnotolerancia>(request);
+                var entity = _mapper.Map<RrhhTurnotolerancia>(request._RrhhTurnotolerancia);
                 var created = await _repo.AddAsync(entity);
                 return new Response<int>(created.IdrrhhTurnotolerancia);
             }

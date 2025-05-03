@@ -1,4 +1,5 @@
 ﻿using Dominio.Common;
+using Dominio.Entities.Horario;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -18,5 +19,7 @@ namespace Dominio.Entities
         public string Descripcion { get; set; }
         public string Valor1 { get; set; }
         public string Abreviatura { get; set; }
+        public virtual ICollection<RrhhTurnotolerancia> Tolerancias { get; set; }
+        public virtual ICollection<RrhhTurnodia> Turnos { get; set; }
     }
 }

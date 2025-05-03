@@ -15,174 +15,407 @@
 @inject IJSRuntime JSRuntime
 @inject IDialogService DialogService
 
-
-<MudCard>
-    <!-- Panel de formulario -->
+<MudCard Elevation="2" Class="mb-6">
     <MudExpansionPanels MultiExpansion="false">
-        <MudExpansionPanel @bind-IsExpanded="expande" HideIcon="true">
+        <MudExpansionPanel Class="pa-2" @bind-IsExpanded="expande">
+
+            <!-- BOTÓN FLOTANTE -->
             <TitleContent>
-                <MudContainer MaxWidth="MaxWidth.Small" Class="mb-4">
-                    <MudButton Variant="Variant.Outlined"
-                               Color="@(expande ? Color.Error : Color.Success)"
-                               OnClick="@ToggleExpand">
-                        @(expande ? "CERRAR" : "AGREGAR")
-                    </MudButton>
-                </MudContainer>
+                <MudButton Variant="Variant.Filled" FullWidth="true"
+                           Color="@(expande ? Color.Error : Color.Primary)"
+                           EndIcon="@(expande ? Icons.Material.Filled.ArrowDropUp : Icons.Material.Filled.Add)"
+                           Class="my-2"
+                           OnClick="ToggleExpand">
+                    @(expande ? "CERRAR FORMULARIO" : "NUEVO HORARIO")
+                </MudButton>
             </TitleContent>
+
             <ChildContent>
-                <MudCard>
-                    <EditForm Model="@_Item" OnValidSubmit="OnValidSubmit">
-                        <DataAnnotationsValidator />
-                        <MudCardContent>
-                            <MudGrid>
-                                <!-- Descripción -->
-                                <MudItem xs="12" sm="4">
-                                    <MudTextField T="string"
-                                                  @bind-Value="_Item.Descripcion"
-                                                  Label="DESCRIPCIÓN:"
-                                                  Variant="Variant.Outlined"
-                                                  Margin="Margin.Dense"
-                                                  Required="true"
-                                                  MaxLength="100" />
-                                </MudItem>
-                                <!-- Valor1 -->
-                                <MudItem xs="12" sm="4">
-                                    <MudTextField T="string"
-                                                  @bind-Value="_Item.Valor1"
-                                                  Label="ABREVIATURA:"
-                                                  Variant="Variant.Outlined"
-                                                  Margin="Margin.Dense"
-                                                  MaxLength="100" />
-                                </MudItem>
-                            </MudGrid>
-                        </MudCardContent>
-                        <MudCardActions>
-                            <MudButton ButtonType="ButtonType.Submit"
-                                       Variant="Variant.Filled"
+                <MudForm Model="_tipo" Class="pa-4">
+
+                    <!-- GRID PRINCIPAL: Dos columnas en md+; 1 columna en xs/sm -->
+                    <MudGrid Spacing="3">
+
+                        <!-- Columna 1: Datos principales + Tolerancias -->
+                        <MudItem xs="12" md="6">
+
+                            <!-- DATOS PRINCIPALES -->
+                            <MudPaper Elevation="0" Class="pa-4 mb-4" Style="background-color:#f8f9fa;">
+                                <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-3">
+                                    📅 Datos principales
+                                </MudText>
+                                <MudGrid Spacing="2">
+                                    <!-- Descripción -->
+                                    <MudItem xs="12" sm="8">
+                                        <MudTextField T="string"
+                                                      Label="Nombre de Turno"
+                                                      Variant="Variant.Outlined"
+                                                      Immediate="true"
+                                                      Value="_tipo.Descripcion"
+                                                      ValueChanged="DescripcionChanged"
+                                                      ValueExpression="() => _tipo.Descripcion" />
+                                    </MudItem>
+
+                                    <!-- Abreviatura -->
+                                    <MudItem xs="12" sm="4">
+                                        <MudTextField T="string"
+                                                      Label="Abreviatura"
+                                                      Variant="Variant.Outlined"
+                                                      Immediate="true"
+                                                      Class="text-uppercase"
+                                                      Value="_tipo.Abreviatura"
+                                                      ValueChanged="AbreviaturaChanged"
+                                                      ValueExpression="() => _tipo.Abreviatura" />
+                                    </MudItem>
+                                </MudGrid>
+
+                            </MudPaper>
+
+                            <!-- TOLERANCIAS -->
+                            <MudPaper Elevation="0" Class="pa-4" Style="background-color:#f8f9fa;">
+                                <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-3">
+                                    ⏱️ Tolerancias
+                                </MudText>
+                                <MudGrid Spacing="2">
+                                    <MudItem xs="6">
+                                        <MudNumericField T="int" Label="Tolerancia en Atraso (min)"
+                                                         @bind-Value="_tolerancia.ToleranciaAtraso" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudNumericField T="int" Label="Tolerancia en Falta (min)"
+                                                         @bind-Value="_tolerancia.ToleranciaFalta" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudNumericField T="int" Label="Tolerancia en Salida (min)"
+                                                         @bind-Value="_tolerancia.ToleranciaSalida" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudNumericField T="int" Label="Salida Adelantada (min)"
+                                                         @bind-Value="_tolerancia.SalidaAdelantada" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudNumericField T="int" Label="Puntualidad (min)"
+                                                         @bind-Value="_tolerancia.Puntualidad" />
+                                    </MudItem>
+                                    <MudItem xs="6">
+                                        <MudSelect T="string" Label="Prioridad"
+                                                   @bind-Value="_tolerancia.Prioridad">
+                                            @foreach (var p in prioridades)
+                                            {
+                                                <MudSelectItem Value="@p">@p</MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </MudItem>
+                                </MudGrid>
+                            </MudPaper>
+
+                        </MudItem>
+
+                        <!-- Columna 2: Días asignados -->
+                        <MudItem xs="12" md="6">
+
+                            <MudPaper Elevation="0" Class="pa-4" Style="background-color:#f8f9fa;">
+                                <MudText Typo="Typo.h6" Color="Color.Primary" Class="mb-3">
+                                    🗓️ Días asignados
+                                </MudText>
+                                <MudTable Items="_turnos"
+                                          Dense="true"
+                                          Hover="true"
+                                          Class="elevation-1">
+                                    <HeaderContent>
+                                        <MudTh>Día</MudTh>
+                                        <MudTh>Entrada</MudTh>
+                                        <MudTh>Salida</MudTh>
+                                        <MudTh style="width:40px;"></MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate Context="row">
+                                        <MudTd Class="font-weight-bold">@row.DiaSemana</MudTd>
+                                        <MudTd>
+                                            <MudTimePicker Dense="true" AmPm="false"
+                                                           Time="@GetEntrada(row)"
+                                                           TimeChanged="@(t => SetEntrada(row, t))" />
+                                        </MudTd>
+                                        <MudTd>
+                                            <MudTimePicker Dense="true" AmPm="false"
+                                                           Time="@GetSalida(row)"
+                                                           TimeChanged="@(t => SetSalida(row, t))" />
+                                        </MudTd>
+                                        <MudTd>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                                           Color="Color.Error"
+                                                           Size="Size.Small"
+                                                           OnClick="@(() => QuitarDia(row))" />
+                                        </MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                            </MudPaper>
+
+                        </MudItem>
+                    </MudGrid>
+
+                    <!-- BOTONES FINALES -->
+                    <MudCardActions Class="mt-4 px-0">
+                        <div class="d-flex gap-2 justify-end w-100">
+                            <MudButton Variant="Variant.Outlined"
+                                       Color="Color.Secondary"
+                                       OnClick="LimpiarTodo">
+                                Limpiar
+                            </MudButton>
+                            <MudButton Variant="Variant.Filled"
                                        Color="Color.Primary"
-                                       Class="ml-auto">
-                                GUARDAR
+                                       EndIcon="@Icons.Material.Filled.Save"
+                                       OnClick="GuardarHorarioCompleto">
+                                Guardar Horario
                             </MudButton>
-                            <MudButton ButtonType="ButtonType.Button"
-                                       Variant="Variant.Outlined"
-                                       OnClick="@ResetForm"
-                                       Color="Color.Default">
-                                LIMPIAR
-                            </MudButton>
-                        </MudCardActions>
-                    </EditForm>
-                </MudCard>
+                        </div>
+                    </MudCardActions>
+                </MudForm>
+
             </ChildContent>
         </MudExpansionPanel>
     </MudExpansionPanels>
+</MudCard>
 
-    <MudDivider Class="my-4" />
-    <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Secondary">
-        <b>LISTA DE TURNOS</b>
-    </MudText>
-    <MudDivider Class="mb-2" />
 
-<MudTable Items="@_List" 
-          Filterable="true" 
-          Sortable="true" 
-          Hover="true"
-          Striped="true"
-          Elevation="25"
-          Dense="false"
-          RowsPerPage="10"
-          Class="rounded-lg overflow-hidden glassmorphism-effect"
-          Style="backdrop-filter: blur(10px); background-color: rgba(255,255,255,0.9);">
-    
-    <!-- Header con diseño moderno -->
+<MudTable Items="@_listaTipos" Hover="true" Striped="true" Bordered="true" Elevation="1" Class="rounded-lg">
     <HeaderContent>
-        <MudTh>
-            <MudTableSortLabel SortBy="new Func<GenClasificadorTipoDto, object>(x=>x.IdgenClasificadortipo)"
-                               IconColor="Color.Secondary"
-                               Color="Color.Primary">
-                <MudText Typo="Typo.subtitle2" Color="Color.Primary">CÓDIGO</MudText>
-            </MudTableSortLabel>
-        </MudTh>
-        <MudTh>
-            <MudTableSortLabel SortBy="new Func<GenClasificadorTipoDto, object>(x=>x.Descripcion)">
-                <MudText Typo="Typo.subtitle2" Color="Color.Primary">DESCRIPCIÓN</MudText>
-            </MudTableSortLabel>
-        </MudTh>
-        <MudTh>
-             <MudTableSortLabel SortBy="new Func<GenClasificadorTipoDto, object>(x=>x.Abreviatura)">
-            <MudText Typo="Typo.subtitle2" Color="Color.Primary">ABREVIATURA</MudText>
-                </MudTableSortLabel>
-        </MudTh>
-        <MudTh>
-            <MudText Typo="Typo.subtitle2" Color="Color.Primary">ACCIONES</MudText>
-        </MudTh>
+        <MudTh><MudText Typo="Typo.subtitle2" Color="Color.Primary">CÓD.</MudText></MudTh>
+        <MudTh><MudText Typo="Typo.subtitle2" Color="Color.Primary">DESCRIPCIÓN</MudText></MudTh>
+        <MudTh><MudText Typo="Typo.subtitle2" Color="Color.Primary">ABREV.</MudText></MudTh>
+        <MudTh><MudText Typo="Typo.subtitle2" Color="Color.Primary">ACCIONES</MudText></MudTh>
     </HeaderContent>
 
-    <!-- Filas con diseño fluido -->
-        <RowTemplate Context="context">
-            <MudTd>
-                <MudIconButton Icon="@(_expandedItems.GetValueOrDefault(context.IdgenClasificadortipo) ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)"
-                               OnClick="@(() => ToggleDetails(context.IdgenClasificadortipo))"
-                               Color="Color.Primary" />
-            </MudTd>
+    <RowTemplate Context="tipo">
+        <MudTd DataLabel="CÓD."><MudText Color="Color.Secondary">@tipo.IdgenClasificadortipo</MudText></MudTd>
+        <MudTd DataLabel="DESCRIPCIÓN">@tipo.Descripcion</MudTd>
+        <MudTd DataLabel="ABREV."><MudChip Color="Color.Info" Variant="Variant.Outlined">@tipo.Abreviatura</MudChip></MudTd>
 
-        
-        <MudTd DataLabel="DESCRIPCIÓN" Class="text-truncate" Style="max-width: 250px;">
-            @context.Descripcion
-        </MudTd>
-            <MudTd DataLabel="ABREVIATURA" Class="text-truncate" Style="max-width: 250px;">
-                @context.Abreviatura
-        </MudTd>
+        <MudTd>
+            <MudButton @onclick="@(() => ShowDetails(tipo.IdgenClasificadortipo))"
+                       Variant="Variant.Outlined"
+                       Color="Color.Primary"
+                       EndIcon="@Icons.Material.Filled.Schedule"
+                       Class="glow-on-hover"
+                       Style="position: relative; transition: all 0.3s ease;"
+                       Title="Ver detalles completos">
+                <MudText Class="mr-2" Typo="Typo.caption">Horarios</MudText>
+                <MudBadge Color="Color.Secondary" Class="badge-notification">!</MudBadge>
+            </MudButton>
 
-        
-        <MudTd DataLabel="ACCIONES">
-                <MudTooltip Text="EDITAR" Placement="Placement.Top">
-                    <MudIconButton Icon="@Icons.Material.Outlined.EditNote"
-                                   Color="Color.Primary"
-                                   Variant="Variant.Outlined"
-                                   Size="Size.Small"
-                                   OnClick="@(() => EditItem(context))" />
-                </MudTooltip>
-                <MudTooltip Text="ELIMINAR" Placement="Placement.Top">
-                    <MudIconButton Icon="@Icons.Material.Filled.AutoDelete"
-                                   Color="Color.Error"
-                                   Variant="Variant.Outlined"
-                                   Size="Size.Small"
-                                   OnClick="@(() => DeleteItem(context.IdgenClasificadortipo))" />
-                </MudTooltip>
-        </MudTd>
-    </RowTemplate>
-        <ChildRowContent Context="childContext">
-        @if (_expandedItems.GetValueOrDefault(childContext.IdgenClasificadortipo))
-        {
-            <MudTr Style="background-color: #f8f9fa;">
-                <MudTd colspan="4">
-                    @if (_turnosCache.ContainsKey(childContext.IdgenClasificadortipo))
+            <MudPopover Open="@IsPopoverOpen(tipo.IdgenClasificadortipo)"
+                        OpenChanged="@((bool v) => _popoverStates[tipo.IdgenClasificadortipo] = v)"
+                        AnchorOrigin="Origin.CenterLeft"
+                        TransformOrigin="Origin.BottomRight"
+                        Elevation="24"
+                        Class="popover-custom glossy-effect"
+                        Style="min-width:500px; border-radius:15px; border:1px solid #e0e0e0; backdrop-filter: blur(5px);"
+                        Animation="AnimationType.Slide">
+
+    <ChildContent>
+        <MudPaper Class="pa-4 position-relative" Style="background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);">
+            <!-- Botón cerrar -->
+            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                         Size="Size.Small"
+                         Color="Color.Error"
+                         Class="close-btn floating-close"
+                         OnClick="@(() => _popoverStates[tipo.IdgenClasificadortipo] = false)" />
+
+            <!-- Encabezado -->
+            <div class="d-flex align-center mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.Schedule" Color="Color.Primary" Class="mr-2" />
+                <MudText Typo="Typo.h6" Color="Color.Primary">@tipo.Descripcion</MudText>
+            </div>
+
+            <!-- Contenedor principal de columnas -->
+            <MudGrid Spacing="3" Class="mt-2">
+                <!-- Columna Horarios -->
+                <MudItem xs="12" sm="6" Class="pr-sm-3">
+                    <div class="d-flex align-center mb-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Schedule" Color="Color.Primary" Class="mr-2" />
+                        <MudText Typo="Typo.subtitle1" Color="Color.Primary">Horarios</MudText>
+                    </div>
+
+                    @if (!_turnosCache.ContainsKey(tipo.IdgenClasificadortipo))
                     {
-                        <MudTable Items="@_turnosCache[childContext.IdgenClasificadortipo]" 
-                                  Context="turnoContext" 
-                                  Dense="true">
+                        <div class="d-flex justify-center align-center my-4">
+                            <MudProgressCircular Color="Color.Primary"
+                                                Indeterminate="true"
+                                                Size="@Size.Small"
+                                                Style="width: 24px; height: 24px;" />
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="ml-2">Cargando horarios...</MudText>
+                        </div>
+                    }
+                    else if (!_turnosCache[tipo.IdgenClasificadortipo].Any())
+                    {
+                        <MudAlert Severity="Severity.Info" Elevation="0" Class="mb-3">
+                            <MudAlertTitle>Sin horarios</MudAlertTitle>
+                            No se encontraron registros de horarios
+                        </MudAlert>
+                    }
+                    else
+                    {
+                        <MudTable Items="@_turnosCache[tipo.IdgenClasificadortipo]"
+                                Dense="true"
+                                Hover="true"
+                                Striped="true"
+                                Elevation="1"
+                                Class="rounded-lg">
                             <HeaderContent>
-                                <MudTh>Día</MudTh>
-                                <MudTh>Entrada</MudTh>
-                                <MudTh>Salida</MudTh>
+                                <MudTh>
+                                    <MudText Typo="Typo.overline">DÍA</MudText>
+                                </MudTh>
+                                <MudTh>
+                                    <div class="d-flex align-center">
+                                        <MudIcon Icon="@Icons.Material.Filled.Login" Color="Color.Success" Size="Size.Small" Class="mr-1" />
+                                        <MudText Typo="Typo.overline">ENTRADA</MudText>
+                                    </div>
+                                </MudTh>
+                                <MudTh>
+                                    <div class="d-flex align-center">
+                                        <MudIcon Icon="@Icons.Material.Filled.Logout" Color="Color.Error" Size="Size.Small" Class="mr-1" />
+                                        <MudText Typo="Typo.overline">SALIDA</MudText>
+                                    </div>
+                                </MudTh>
                             </HeaderContent>
-                            <RowTemplate>
-                                <MudTd>@turnoContext.DiaSemana</MudTd>
-                                <MudTd>@turnoContext.HoraEntrada.ToString("hh\\:mm")</MudTd>
-                                <MudTd>@turnoContext.HoraSalida.ToString("hh\\:mm")</MudTd>
+                            <RowTemplate Context="t">
+                                <MudTd><MudChip Color="Color.Info" Variant="Variant.Filled" Size="Size.Small">@t.DiaSemana</MudChip></MudTd>
+                                <MudTd>@t.HoraEntrada.ToString(@"hh\:mm")</MudTd>
+                                <MudTd>@t.HoraSalida.ToString(@"hh\:mm")</MudTd>
                             </RowTemplate>
                         </MudTable>
                     }
-                </MudTd>
-            </MudTr>
-        }
-    </ChildRowContent>
-    <!-- Paginación mejorada -->
-    <PagerContent>
-        <MudTablePager RowsPerPageText="Registros por página:" 
-                     InfoFormat="{first_item}-{last_item} de {all_items}"
-                     Class="py-4 border-top"/>
-    </PagerContent>
+                </MudItem>
 
+                <!-- Columna Tolerancias -->
+                <MudItem xs="12" sm="6" Class="pl-sm-3 mt-4 mt-sm-0">
+                    <div class="d-flex align-center mb-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Timer" Color="Color.Primary" Class="mr-2" />
+                        <MudText Typo="Typo.subtitle1" Color="Color.Primary">Tolerancias</MudText>
+                    </div>
+
+                    @if (!_toleranciaCache.ContainsKey(tipo.IdgenClasificadortipo))
+                    {
+                        <div class="d-flex justify-center align-center my-4">
+                            <MudProgressCircular Color="Color.Primary"
+                                               Indeterminate="true"
+                                               Size="@Size.Small"
+                                               Style="width: 24px; height: 24px;" />
+                            <MudText Typo="Typo.body2" Color="Color.Secondary" Class="ml-2">Cargando tolerancias...</MudText>
+                        </div>
+                    }
+                    else if (!_toleranciaCache[tipo.IdgenClasificadortipo].Any())
+                    {
+                        <MudAlert Severity="Severity.Info" Elevation="0" Class="mb-3">
+                            <MudAlertTitle>Sin tolerancias</MudAlertTitle>
+                            No se encontraron registros de tolerancias
+                        </MudAlert>
+                    }
+                    else
+                    {
+                        <MudTable Items="@_toleranciaCache[tipo.IdgenClasificadortipo]"
+                                Dense="true"
+                                Hover="true"
+                                Striped="true"
+                                Elevation="1"
+                                Class="rounded-lg">
+                            <HeaderContent>
+                                <MudTh><MudText Typo="Typo.overline">Atraso (min)</MudText></MudTh>
+                                <MudTh><MudText Typo="Typo.overline">Falta (min)</MudText></MudTh>
+                                <MudTh><MudText Typo="Typo.overline">Salida (min)</MudText></MudTh>
+                                <MudTh><MudText Typo="Typo.overline">Puntualidad (min)</MudText></MudTh>
+                                <MudTh><MudText Typo="Typo.overline">PRIORIDAD</MudText></MudTh>
+                            </HeaderContent>
+                            <RowTemplate Context="tol">
+                                <MudTd>@tol.ToleranciaAtraso</MudTd>
+                                <MudTd>@tol.ToleranciaFalta</MudTd>
+                                <MudTd>@tol.SalidaAdelantada</MudTd>
+                                <MudTd>@tol.Puntualidad</MudTd>
+                                <MudTd>
+                                    <MudChip Color="@GetPriorityColor(tol.Prioridad)"
+                                           Variant="Variant.Filled"
+                                           Size="Size.Small"
+                                           Class="text-uppercase">
+                                        @tol.Prioridad
+                                    </MudChip>
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    }
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    </ChildContent>
+</MudPopover>
+          
+        </MudTd>
+    </RowTemplate>
 </MudTable>
-</MudCard>
+
+<style>
+    .popover-custom {
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s ease;
+    }
+
+    .glossy-effect {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(8px);
+    }
+
+    .floating-close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        transition: transform 0.2s ease;
+    }
+
+        .floating-close:hover {
+            transform: scale(1.1);
+        }
+
+    .popover-custom .mud-table {
+        --mud-palette-table-striped: #f8f9fa;
+        --mud-palette-table-hover: #f1f3f5;
+    }
+
+    .mud-badge {
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+
+    .glow-on-hover:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px var(--mud-palette-primary);
+    }
+
+    .badge-notification {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        font-size: 0.7rem;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: ping 1.5s infinite;
+    }
+
+    @@keyframes ping {
+        75%, 100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    }
+
+    .popover-custom {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glossy-effect {
+        background: rgba(255,255,255,0.95) !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+    }
+</style>

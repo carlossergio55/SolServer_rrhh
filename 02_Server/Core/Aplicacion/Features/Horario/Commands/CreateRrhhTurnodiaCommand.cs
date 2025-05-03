@@ -1,4 +1,5 @@
-﻿using Aplicacion.Interfaces;
+﻿using Aplicacion.DTOs.Horario;
+using Aplicacion.Interfaces;
 using Aplicacion.Wrappers;
 using AutoMapper;
 using Dominio.Entities.Horario;
@@ -14,11 +15,7 @@ namespace Aplicacion.Features.Horario.Commands
 {
     public class CreateRrhhTurnodiaCommand : IRequest<Response<int>>
     {
-        public int IdgenClasificadortipo { get; set; }
-        public string DiaSemana { get; set; }
-        public TimeSpan HoraEntrada { get; set; }
-        public TimeSpan HoraSalida { get; set; }
-        public TimeSpan TiempoExtra { get; set; }
+        public RrhhTurnodiaDto _RrhhTurnodia { get; set; }
 
         public class Handler : IRequestHandler<CreateRrhhTurnodiaCommand, Response<int>>
         {
@@ -33,7 +30,7 @@ namespace Aplicacion.Features.Horario.Commands
 
             public async Task<Response<int>> Handle(CreateRrhhTurnodiaCommand request, CancellationToken cancellationToken)
             {
-                var entity = _mapper.Map<RrhhTurnodia>(request);
+                var entity = _mapper.Map<RrhhTurnodia>(request._RrhhTurnodia);
                 var created = await _repo.AddAsync(entity);
                 return new Response<int>(created.IdrrhhTurnodia);
             }
