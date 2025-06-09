@@ -27,6 +27,7 @@ namespace Persistencia.Contexts
         public DbSet<VwMarcacionBiometrico> VwMarcacionBiometrico { get; set; }
         public DbSet<RrhhTurnodia> RrhhTurnodia { get; set; }
         public DbSet<RrhhTurnotolerancia> RrhhTurnotolerancia { get; set; }
+        public DbSet<RrhDiaevento> RrhDiaevento { get; set; }
         #endregion
 
     }

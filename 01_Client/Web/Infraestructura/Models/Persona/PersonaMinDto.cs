@@ -4,16 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Aplicacion.DTOs.Persona
+namespace Infraestructura.Models.Persona
 {
-    public class RrhPersonaDto
+    public class PersonaMinDto
     {
         public int IdrrhPersona { get; set; }
-        public int? IdgengrupoTrabajo { get; set; }
         public string NombreApellido { get; set; } = string.Empty;
-        public string Ci { get; set; }
-        public string Exp { get; set; }
-        public string Celular { get; set; }
     }
-
 }

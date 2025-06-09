@@ -1,0 +1,238 @@
+﻿@page "/personaturno"
+@using Infraestructura.Models.Biometrico
+@using Infraestructura.Models.Clasificador
+@using Infraestructura.Models.Persona
+@using Microsoft.AspNetCore.Components
+@using Syncfusion.Blazor.Grids
+@using System.Globalization
+@using Server.Pages.Pages.Biometrico
+@using MudBlazor
+@using Syncfusion.Blazor.Buttons
+@inherits MainBaseComponent
+@layout MainLayout
+@inject NavigationManager Navigation
+@inject NavigationManager Nav
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
+
+
+<MudCard>
+    <!-- Panel de formulario -->
+    <MudExpansionPanels MultiExpansion="false">
+        <MudExpansionPanel @bind-IsExpanded="expande" HideIcon="true">
+            <TitleContent>
+                <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mb-5">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="@(expande ? Color.Error : Color.Success)"
+                               OnClick="@ToggleExpand">
+                        @(expande ? "CERRAR" : "AGREGAR")
+                    </MudButton>
+                </MudContainer>
+            </TitleContent>
+            <ChildContent>
+                <MudCard>
+                    <MudTabs>
+                        <!-- Pestaña para registro individual -->
+                        <!-- Pestaña para registro individual -->
+                        <MudTab Text="Registro Individual">
+                            <EditForm Model="@_DiaEvento" OnValidSubmit="OnValidDiaEvento">
+                                <DataAnnotationsValidator />
+                                <MudCardContent>
+                                    <MudGrid>
+                                        <!-- Campos existentes -->
+                                        <MudItem xs="12">
+                                            <MudAutocomplete T="PersonaMinDto"
+                                                             Value="_personaSeleccionada"
+                                                             ValueChanged="OnPersonaChanged"
+                                                             ValueExpression="() => _personaSeleccionada"
+                                                             ToStringFunc="p => p?.NombreApellido ?? string.Empty"
+                                                             SearchFunc="SearchPersonas"
+                                                             Label="Nombre del funcionario"
+                                                             Placeholder="Ej: Juan Pérez"
+                                                             HelperText="Busque por nombre completo"
+                                                             Required="true"
+                                                             Variant="Variant.Outlined"
+                                                             Margin="Margin.Dense"
+                                                             AdornmentIcon="@Icons.Material.Filled.PersonSearch"
+                                                             MinCharacters="3"
+                                                             DebounceInterval="500" />
+                                        </MudItem>
+
+                                    </MudGrid>
+                                </MudCardContent>
+
+                            </EditForm>
+                        </MudTab>
+
+                        <!-- Pestaña para asignación masiva -->
+                        <MudTab Text="Asignación Masiva">
+                            <MudGrid Class="mt-4">
+                                <MudItem xs="12" sm="6">
+                                    <MudDatePicker Label="Fecha Inicio" @bind-Date="_FechaInicio"
+                                                   Variant="Variant.Outlined" Required />
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudDatePicker Label="Fecha Fin" @bind-Date="_FechaFin"
+                                                   Variant="Variant.Outlined" Required />
+                                </MudItem>
+
+                                <MudItem xs="12" Class="text-center">
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                               OnClick="GenerarDiasLaborables"
+                                               Disabled="@(_FechaInicio == null || _FechaFin == null)"
+                                               Class="mt-3">
+                                        GENERAR DÍAS
+                                    </MudButton>
+                                </MudItem>
+                            </MudGrid>
+                            @if (_MostrarAsignacionMasiva)
+                            {
+                                <MudPaper Elevation="3" Class="pa-4">
+                                    <div class="d-flex align-center mb-3">
+                                        <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Class="mr-2" Color="Color.Primary" />
+                                        <MudText Typo="Typo.h6">Días Generados: @_DiasCache.Count</MudText>
+                                    </div>
+
+                                    <MudGrid Spacing="1">
+                                        @foreach (var dia in _DiasCache)
+                                        {
+                                            <MudItem xs="4" sm="3" md="2" lg="1">
+                                                <MudPaper Class="pa-1 day-cell" Elevation="1" Outlined="true">
+                                                    <div class="day-number">
+                                                        @dia.Fecha?.Day-@dia.Fecha?.ToString("ddd", new System.Globalization.CultureInfo("es-ES"))[0..3]
+                                                    </div>
+
+                                                    <MudSelect T="int" @bind-Value="dia.IdgenClasificadortipo"
+                                                               Variant="Variant.Outlined" Dense Immediate
+                                                               Class="turno-select" Margin="Margin.None">
+                                                        <MudSelectItem Value="48">M</MudSelectItem>
+                                                        <MudSelectItem Value="49">T</MudSelectItem>
+                                                        <MudSelectItem Value="50">N</MudSelectItem>
+                                                    </MudSelect>
+                                                </MudPaper>
+                                            </MudItem>
+                                        }
+                                    </MudGrid>
+
+                                    <div class="text-right mt-2">
+                                        <MudButton OnClick="@(() => SaveDiaEvento(_DiasCache))"
+                                                   Color="Color.Primary"
+                                                   Variant="Variant.Filled"
+                                                   Size="Size.Small">
+                                            <MudIcon Icon="@Icons.Material.Filled.Save" Size="Size.Small" Class="mr-1" />
+                                            Guardar
+                                        </MudButton>
+                                    </div>
+                                </MudPaper>
+                            }
+
+
+                        </MudTab>
+                    </MudTabs>
+                </MudCard>
+            </ChildContent>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+</MudCard>
+
+<MudDivider />
+<MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Success">
+    <b>LISTA DE DÍAS DE EVENTO</b>
+</MudText>
+<MudDivider />
+
+<MudPaper Elevation="3" Class="pa-4">
+    <div class="d-flex align-center mb-3">
+        <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Class="mr-2" Color="Color.Primary" />
+        <MudText Typo="Typo.h6">@DateTime.Now.ToString("MMMM yyyy")</MudText>
+    </div>
+
+    <MudTable Items="@_personas" Dense="true" Bordered="true" Hover="true">
+        <HeaderContent>
+            <MudTh>PERSONA</MudTh>
+            @foreach (var dia in _diasDelMes)
+            {
+                <MudTh Class="text-center" Style="min-width: 30px; padding: 4px;">
+                    @dia.ToString("dd")<br />
+                    <small>@dia.ToString("ddd", new System.Globalization.CultureInfo("es-ES"))</small>
+                </MudTh>
+            }
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd>@context.NombreApellido</MudTd>
+            @foreach (var dia in _diasDelMes)
+            {
+                var evento = _dias.FirstOrDefault(d => d.RrhPersona?.IdrrhPersona == context.IdrrhPersona &&
+                d.Fecha?.Date == dia.Date);
+                <MudTd Class="text-center" Style="padding: 2px;">
+                    @if (evento != null)
+                    {
+                        <MudPaper Class="pa-0" Elevation="0" Style="@($"height: 24px; width: 24px; line-height: 24px; background-color: {GetColorForEventType(evento.IdgenClasificadortipo)}; border-radius: 4px; margin: 0 auto;")">
+                            @GetShortEventType(evento.IdgenClasificadortipo)
+                        </MudPaper>
+                    }
+                </MudTd>
+            }
+        </RowTemplate>
+    </MudTable>
+</MudPaper>
+
+<style>
+    .day-cell {
+        position: relative;
+        min-height: 80px;
+        padding: 4px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+        .day-cell:hover {
+            transform: scale(1.02);
+            z-index: 100;
+        }
+
+    .day-number {
+        font-size: 0.85rem; /* Reducir un poco más el tamaño */
+        font-weight: 500;
+        color: #444;
+        margin-bottom: 2px;
+        line-height: 1.2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+        .day-number::after {
+            content: attr(data-day);
+            font-size: 0.65rem;
+            color: #666;
+            margin-top: -2px;
+        }
+
+    .turno-select .mud-input-control {
+        padding: 0 !important;
+    }
+
+    .turno-select .mud-select-input {
+        min-height: 28px !important;
+        height: 28px !important;
+        font-size: 0.8rem;
+        padding: 0 8px !important;
+    }
+
+    /* Colores de turnos compactos */
+    .mud-select-item[data-value="48"] {
+        background: #c8e6c9;
+    }
+
+    .mud-select-item[data-value="49"] {
+        background: #fff9c4;
+    }
+
+    .mud-select-item[data-value="50"] {
+        background: #ffcdd2;
+    }
+</style>
+
+

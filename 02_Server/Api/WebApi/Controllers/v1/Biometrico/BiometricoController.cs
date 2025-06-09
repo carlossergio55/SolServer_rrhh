@@ -6,6 +6,7 @@ using Webapi.Controllers.v1;
 using Aplicacion.Features.Asistencia;
 using Microsoft.AspNetCore.Authorization;
 using Aplicacion.Features.Asistencia.Queries;
+using Aplicacion.Features.Persona.Queries;
 
 namespace WebApi.Controllers.v1.Biometrico
 {
@@ -65,5 +66,17 @@ namespace WebApi.Controllers.v1.Biometrico
 
             return Ok(result);
         }
+        [HttpGet("SuggestPersonas")]
+        [Authorize]
+        public async Task<IActionResult> SuggestPersonas(string searchText)
+        {
+            var result = await Mediator.Send(new GetSugerenciasPersonasQuery
+            {
+                SearchText = searchText
+            });
+
+            return Ok(result);
+        }
+
     }
 }

@@ -11,6 +11,13 @@ namespace WebApi.Controllers.v1.Persona
     [ApiController]
     public class RrhPersona : BaseApiController
     {
+        [HttpGet("FiltroDto")]
+        [Authorize]
+        public async Task<IActionResult> GetPersonasFiltroDto([FromQuery] string busqueda)
+        {
+            var result = await Mediator.Send(new GetAllRrhPersonaFiltroDtoQuery { Busqueda = busqueda });
+            return Ok(result.Data);          // devolvemos directamente la lista de DTO
+        }
         [HttpGet("GetAll")]
         [Authorize]
         public async Task<IActionResult> GetAll()

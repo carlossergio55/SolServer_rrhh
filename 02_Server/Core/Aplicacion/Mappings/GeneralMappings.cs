@@ -38,7 +38,8 @@ namespace Aplicacion.Mappings
             CreateMap<RrhhTurnotolerancia, ToleranciaDto>();
             CreateMap<RrhhTurnodia, TurnoDiaDto>();
             CreateMap<GenClasificadortipo, HorarioCompletoDto>();
-
+            CreateMap<RrhDiaevento, RrhDiaeventoDto>();
+            CreateMap<RrhPersona, PersonaMinDto>();
 
             #endregion
             //TODO: Agregar aqui el registro de mapeo para ejecucion de comandos  direccion  ModeloDto --> EntidadDominio Ej. : CreateMap<ProductoDto, CapProducto>();
@@ -55,6 +56,7 @@ namespace Aplicacion.Mappings
             CreateMap<ToleranciaDto, RrhhTurnotolerancia>();
             CreateMap<TurnoDiaDto, RrhhTurnodia>();
             CreateMap<HorarioCompletoDto, GenClasificadortipo>();
+            CreateMap<RrhDiaeventoDto, RrhDiaevento>();
             #endregion
         }
     }

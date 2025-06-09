@@ -14,10 +14,12 @@ namespace Dominio.Entities.Persona
     {
         [Key]
         public int IdrrhPersona { get; set; }
+        public int? IdgengrupoTrabajo { get; set; }
         public string NombreApellido { get; set; }
         public string Ci { get; set; }
         public string Exp { get; set; }
         public string Celular { get; set; }
+       
     }
 
 }
