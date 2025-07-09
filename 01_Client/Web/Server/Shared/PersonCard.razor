@@ -1,14 +1,25 @@
-﻿<MudCard Elevation="0" Square="true" Class="@Class" Style="@Style">
+﻿@using Infraestructura.Models.Authentication
+
+<MudCard Elevation="0" Square="true" Class="@Class" Style="@Style">
     <MudCardHeader>
         <CardHeaderAvatar>
-            <MudAvatar Image="images/user.png" />
+            @*<MudAvatar Image="images/avatar_jonny.jpg" />*@
         </CardHeaderAvatar>
         <CardHeaderContent>
-            <MudText Typo="Typo.body2">ADMIN_RRHH</MudText>
-            <MudText Typo="Typo.caption">ENVIBOL</MudText>
+            <MudText Typo="Typo.body2">@_user.nombreCompleto</MudText>
+            @* <MudText Typo="Typo.caption">IT Consultant</MudText> *@
         </CardHeaderContent>
     </MudCardHeader>
 </MudCard>
 
-@code { [Parameter] public string Class { get; set; }
-            [Parameter] public string Style { get; set; } }
+@code {
+    [Parameter] public string Class { get; set; }
+    [Parameter] public string Style { get; set; }
+
+    public ObjectEntity _user = new ObjectEntity();
+    protected override async void OnInitialized()
+    {
+        _user = await _Storage.DatosUsuario();
+        StateHasChanged();
+    }
+}

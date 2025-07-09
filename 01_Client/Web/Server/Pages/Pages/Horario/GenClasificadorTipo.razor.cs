@@ -24,11 +24,15 @@ namespace Server.Pages.Pages.Horario
 
         private readonly List<string> prioridades = new() { "BAJA", "NORMAL", "ALTA" };
         private List<GenClasificadorTipoDto> _listaTipos = new();
+        private List<GenGrupoturnoDto> _listagrupo = new();
+
         /* ────────────  INICIALIZACIÓN  ──────────── */
 
         protected override async Task OnInitializedAsync()
         {
             await CargarTipos();
+            await ObtenerLista();
+            await ObtenerGrupo();
             InicializarDias();
         }
 
@@ -254,8 +258,8 @@ namespace Server.Pages.Pages.Horario
 
             if (result.State == State.Success)
             {
-                _toleranciaCache[idgenClasificadortipo] = result.Data; // ✅ Guarda en el caché
-                StateHasChanged(); // Forzar actualización
+                _toleranciaCache[idgenClasificadortipo] = result.Data;
+                StateHasChanged();
             }
             else
                 _MessageShow($"Error: {result.Message}", State.Warning);
@@ -286,6 +290,113 @@ namespace Server.Pages.Pages.Horario
                 _ => Color.Default
             };
         }
+
+
+
+
+
+        private bool _panelDetalle = false;
+
+        public GenGrupoturnoDetalleDto _Detalle = new GenGrupoturnoDetalleDto();
+
+        // Lista de registros
+        public List<GenGrupoturnoDetalleDto> _lista = new();
+
+
+        // ----- CRUD -----
+
+        private async Task ObtenerLista()
+        {
+            var res = await _Rest.GetAsync<List<GenGrupoturnoDetalleDto>>("GenGrupoturnoDetalle/GetAll");
+            if (res.State == State.Success)
+                _lista = res.Data;
+            else
+                _MessageShow("Error: " + res.Message, State.Warning);
+        }
+        private async Task ObtenerGrupo()
+        {
+            var res = await _Rest.GetAsync<List<GenGrupoturnoDto>>("GenGrupoturno/GetAll");
+            if (res.State == State.Success)
+                _listagrupo = res.Data;
+            else
+                _MessageShow("Error: " + res.Message, State.Warning);
+        }
+
+        private async Task Guardar(GenGrupoturnoDetalleDto dto)
+        {
+            try
+            {
+                _Loading.Show();
+                var resp = await _Rest.PostAsync<int?>("GenGrupoturnoDetalle", dto);
+                _Loading.Hide();
+                _MessageShow(resp.Message, resp.State);
+                if (resp.State != State.Success)
+                    resp.Errors.ForEach(x => _MessageShow(x, State.Warning));
+            }
+            catch (Exception e)
+            {
+                _Loading.Hide();
+                _MessageShow(e.Message, State.Error);
+            }
+        }
+
+        private async Task Actualizar(GenGrupoturnoDetalleDto dto)
+        {
+            try
+            {
+                _Loading.Show();
+                var resp = await _Rest.PutAsync<int>("GenGrupoturnoDetalle", dto, dto.IdgenGrupoturnoDetalle);
+                _Loading.Hide();
+                _MessageShow(resp.Message, resp.State);
+            }
+            catch (Exception e)
+            {
+                _Loading.Hide();
+                _MessageShow(e.Message, State.Error);
+            }
+        }
+
+        private async Task Eliminar(int id)
+        {
+            await _MessageConfirm("¿Eliminar registro?", async () =>
+            {
+                var resp = await _Rest.DeleteAsync<int>("GenGrupoturnoDetalle", id);
+                if (!resp.Succeeded)
+                    _MessageShow(resp.Message, State.Error);
+                else
+                {
+                    _MessageShow(resp.Message, resp.State);
+                    await ObtenerLista();
+                    StateHasChanged();
+                }
+            });
+        }
+
+        // ----- Eventos de formulario -----
+
+        private async Task OnValidDetalle(EditContext _)
+        {
+            if (_Detalle.IdgenGrupoturnoDetalle > 0)
+                await Actualizar(_Detalle);
+            else
+                await Guardar(_Detalle);
+
+            _Detalle = new GenGrupoturnoDetalleDto();
+            await ObtenerLista();
+            ToggleExpand();
+            StateHasChanged();
+        }
+
+        private void FormEditar(GenGrupoturnoDetalleDto dto)
+        {
+            _Detalle = dto;
+            _panelDetalle = true;  // Fuerza que el formulario se expanda
+        }
+
+        private void ResetDetalle() => _Detalle = new GenGrupoturnoDetalleDto();
+
+        // ----- Utilidades -----
+
 
     }
 }

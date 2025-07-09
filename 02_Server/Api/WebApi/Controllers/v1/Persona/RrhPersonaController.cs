@@ -1,4 +1,5 @@
-﻿using Aplicacion.Features.Persona.Commands;
+﻿using Aplicacion.DTOs.Persona;
+using Aplicacion.Features.Persona.Commands;
 using Aplicacion.Features.Persona.Queries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,12 @@ namespace WebApi.Controllers.v1.Persona
     [ApiController]
     public class RrhPersona : BaseApiController
     {
+        [HttpGet("GetCumpleaniosDelMes")]
+        [Authorize]
+        public async Task<IActionResult> GetCumpleaniosDelMes()
+    => Ok(await Mediator.Send(new GetCumpleaniosDelMesSimpleQuery()));
+
+
         [HttpGet("FiltroDto")]
         [Authorize]
         public async Task<IActionResult> GetPersonasFiltroDto([FromQuery] string busqueda)
@@ -25,8 +32,11 @@ namespace WebApi.Controllers.v1.Persona
 
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> Post(CreateRrhPersonaCommand cmd)
-            => Ok(await Mediator.Send(cmd));
+        public async Task<IActionResult> Post(RrhPersonaDto dto)
+        {
+            var cmd = new CreateRrhPersonaCommand { _RrhPersonapost = dto };
+            return Ok(await Mediator.Send(cmd));
+        }
 
         [HttpPut("{id}")]
         [Authorize]

@@ -1,5 +1,6 @@
 ﻿using Aplicacion.DTOs.Asistencia;
 using Aplicacion.DTOs.Clasificador;
+using Aplicacion.DTOs.Contrato;
 using Aplicacion.DTOs.Horario;
 using Aplicacion.DTOs.Persona;
 using Aplicacion.DTOs.Segurity;
@@ -7,6 +8,7 @@ using Aplicacion.DTOs.Vistas;
 using AutoMapper;
 using Dominio.Entities;
 using Dominio.Entities.Asistencia;
+using Dominio.Entities.Contrato;
 using Dominio.Entities.Horario;
 using Dominio.Entities.Persona;
 using Dominio.Entities.Seguridad;
@@ -40,6 +42,10 @@ namespace Aplicacion.Mappings
             CreateMap<GenClasificadortipo, HorarioCompletoDto>();
             CreateMap<RrhDiaevento, RrhDiaeventoDto>();
             CreateMap<RrhPersona, PersonaMinDto>();
+            CreateMap<RrhPersona, RrhPersonaCumpleanieroDto>();
+            CreateMap<GenGrupoturno, GenGrupoturnoDto>();
+            CreateMap<GenGrupoturnoDetalle, GenGrupoturnoDetalleDto>();
+            CreateMap<RrhContrato, RrhContratoDto>();
 
             #endregion
             //TODO: Agregar aqui el registro de mapeo para ejecucion de comandos  direccion  ModeloDto --> EntidadDominio Ej. : CreateMap<ProductoDto, CapProducto>();
@@ -57,6 +63,9 @@ namespace Aplicacion.Mappings
             CreateMap<TurnoDiaDto, RrhhTurnodia>();
             CreateMap<HorarioCompletoDto, GenClasificadortipo>();
             CreateMap<RrhDiaeventoDto, RrhDiaevento>();
+            CreateMap<GenGrupoturnoDto, GenGrupoturno>();
+            CreateMap<GenGrupoturnoDetalleDto, GenGrupoturnoDetalle>();
+            CreateMap<RrhContratoDto, RrhContrato>();
             #endregion
         }
     }

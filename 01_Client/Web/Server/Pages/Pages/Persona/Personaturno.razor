@@ -41,7 +41,8 @@
                                 <MudCardContent>
                                     <MudGrid>
                                         <!-- Campos existentes -->
-                                        <MudItem xs="12">
+                                        <MudItem xs="12" sm="6">
+                                            
                                             <MudAutocomplete T="PersonaMinDto"
                                                              Value="_personaSeleccionada"
                                                              ValueChanged="OnPersonaChanged"
@@ -59,6 +60,14 @@
                                                              DebounceInterval="500" />
                                         </MudItem>
 
+                                        <MudItem xs="12" sm="6">
+                                            <MudTextField T="string"
+                                                          Value="@(_personaSeleccionada?.IdgengrupoTrabajo?.ToString() ?? string.Empty)"
+                                                          Label="ID Grupo de Trabajo"
+                                                          ReadOnly="true" 
+                                                          Variant="Variant.Outlined"
+                                                          Margin="Margin.Dense" />
+                                        </MudItem>
                                     </MudGrid>
                                 </MudCardContent>
 
@@ -76,6 +85,27 @@
                                     <MudDatePicker Label="Fecha Fin" @bind-Date="_FechaFin"
                                                    Variant="Variant.Outlined" Required />
                                 </MudItem>
+                                @if (_personaSeleccionada?.IdgengrupoTrabajo is 165 or 166)
+                                {
+                                    <MudItem xs="12" sm="6">
+                                        <MudSelect T="int?" Label="Turno inicial"
+                                                   @bind-Value="_TurnoInicialId"
+                                                   Variant="Variant.Outlined" Required>
+                                            @if (_personaSeleccionada.IdgengrupoTrabajo == 165)
+                                            {
+                                                <!-- Convierte cada valor a int? -->
+                                                <MudSelectItem Value="@((int?)48)">Mañana</MudSelectItem>
+                                                <MudSelectItem Value="@((int?)49)">Noche</MudSelectItem>
+                                                <MudSelectItem Value="@((int?)52)">Tarde</MudSelectItem>
+                                            }
+                                            else
+                                            {
+                                                <MudSelectItem Value="@((int?)50)">Día</MudSelectItem>
+                                                <MudSelectItem Value="@((int?)51)">Noche</MudSelectItem>
+                                            }
+                                        </MudSelect>
+                                    </MudItem>
+                                }
 
                                 <MudItem xs="12" Class="text-center">
                                     <MudButton Variant="Variant.Outlined" Color="Color.Primary"
@@ -107,8 +137,11 @@
                                                                Variant="Variant.Outlined" Dense Immediate
                                                                Class="turno-select" Margin="Margin.None">
                                                         <MudSelectItem Value="48">M</MudSelectItem>
-                                                        <MudSelectItem Value="49">T</MudSelectItem>
-                                                        <MudSelectItem Value="50">N</MudSelectItem>
+                                                        <MudSelectItem Value="49">N</MudSelectItem>
+                                                        <MudSelectItem Value="50">D</MudSelectItem>
+                                                        <MudSelectItem Value="51">N*</MudSelectItem>
+                                                        <MudSelectItem Value="52">T</MudSelectItem>
+
                                                     </MudSelect>
                                                 </MudPaper>
                                             </MudItem>

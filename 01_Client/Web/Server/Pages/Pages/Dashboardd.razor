@@ -1,0 +1,204 @@
+﻿@* @page "/personal/dashboard"
+@using MudBlazor
+
+
+<MudPaper Elevation="3" Class="pa-4">
+            <!-- Tarjetas de resumen -->
+    <MudGrid GutterSize="GutterSize.Small" Spacing="1">
+        <MudItem xs="6" sm="3">
+            <MudCard Class="h-100">
+                <MudCardContent>
+                    <div class="d-flex align-center">
+                        <MudAvatar Size="Size.Large" Color="Color.Primary" Class="mr-3">
+                            <MudIcon Icon="@Icons.Material.Filled.People" Size="Size.Medium" />
+                        </MudAvatar>
+                        <div>
+                            <MudText Typo="Typo.h5">248</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Empleados</MudText>
+                        </div>
+                    </div>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Primary"
+                               EndIcon="@Icons.Material.Filled.ArrowForward"
+                               Size="Size.Small"
+                               Class="px-2 py-1">
+                        Ver detalles
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="6" sm="3">
+            <MudCard Class="h-100">
+                <MudCardContent>
+                    <div class="d-flex align-center">
+                        <MudAvatar Size="Size.Large" Color="Color.Info" Class="mr-3">
+                            <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Size="Size.Medium" />
+                        </MudAvatar>
+                        <div>
+                            <MudText Typo="Typo.h5">12</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Nuevos contratados</MudText>
+                        </div>
+                    </div>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Primary"
+                               EndIcon="@Icons.Material.Filled.ArrowForward"
+                               Size="Size.Small"
+                               Class="px-2 py-1">
+                        Ver detalles
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="6" sm="3">
+            <MudCard Class="h-100">
+                <MudCardContent>
+                    <div class="d-flex align-center">
+                        <MudAvatar Size="Size.Large" Color="Color.Warning" Class="mr-3">
+                            <MudIcon Icon="@Icons.Material.Filled.PendingActions" Size="Size.Medium" />
+                        </MudAvatar>
+                        <div>
+                            <MudText Typo="Typo.h5">8</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Solicitudes pendientes</MudText>
+                        </div>
+                    </div>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Primary"
+                               EndIcon="@Icons.Material.Filled.ArrowForward"
+                               Size="Size.Small"
+                               Class="px-2 py-1">
+                        Revisar
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+
+        <MudItem xs="6" sm="3">
+            <MudCard Class="h-100">
+                <MudCardContent>
+                    <div class="d-flex align-center">
+                        <MudAvatar Size="Size.Large" Color="Color.Success" Class="mr-3">
+                            <MudIcon Icon="@Icons.Material.Filled.Celebration" Size="Size.Medium" />
+                        </MudAvatar>
+                        <div>
+                            <MudText Typo="Typo.h5">5</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">Cumpleaños próximos</MudText>
+                        </div>
+                    </div>
+                </MudCardContent>
+                <MudCardActions>
+                    <MudButton Variant="Variant.Text"
+                               Color="Color.Primary"
+                               EndIcon="@Icons.Material.Filled.ArrowForward"
+                               Size="Size.Small"
+                               Class="px-2 py-1">
+                        Ver todos
+                    </MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudItem>
+    </MudGrid>
+
+            
+            <!-- Gráfico y eventos -->
+            <MudGrid Class="mb-4">
+                <MudItem xs="12" md="8">
+                    <MudCard Class="h-100">
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6" Class="mb-3">Distribución de empleados por departamento</MudText>
+                            <MudChart Height="300px" ChartType="ChartType.Pie"
+                                      OptionsObject="@chartOptions"
+                                      InputData="@pieData" InputLabels="@pieLabels" />
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+            
+            <!-- Tabla de cambios recientes -->
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudCard>
+                        <MudCardContent>
+                            <div class="d-flex justify-space-between align-center mb-3">
+                                <MudText Typo="Typo.h6">Últimos cambios en personal</MudText>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Primary" EndIcon="@Icons.Material.Filled.Refresh">
+                                    Actualizar
+                                </MudButton>
+                            </div>
+                    <MudTable Items="@recentChanges" Dense="true" Bordered="true" Hover="true">
+                                <HeaderContent>
+                                    <MudTh>Nombre</MudTh>
+                                    <MudTh>Departamento</MudTh>
+                                    <MudTh>Cambio</MudTh>
+                                    <MudTh>Fecha</MudTh>
+                                </HeaderContent>
+                                <RowTemplate>
+                                    <MudTd DataLabel="Nombre">
+                                        <div class="d-flex align-center">
+                                            <MudAvatar Size="Size.Small" Image="@context.Avatar" Class="mr-2" />
+                                            <span>@context.Name</span>
+                                        </div>
+                                    </MudTd>
+                                    <MudTd DataLabel="Departamento">@context.Department</MudTd>
+                                    <MudTd DataLabel="Cambio">
+                                        <MudChip Color="@GetChipColor(context.ChangeType)" Variant="Variant.Filled" Size="Size.Small">
+                                            @context.ChangeType
+                                        </MudChip>
+                                    </MudTd>
+                                    <MudTd DataLabel="Fecha">@context.Date.ToString("dd MMM yyyy")</MudTd>
+                                </RowTemplate>
+                            </MudTable>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+   </MudPaper>
+
+@code {
+    private ChartOptions chartOptions = new ChartOptions
+    {
+        ChartPalette = new string[] { "#3f51b5", "#00bcd4", "#4caf50", "#ff9800", "#9c27b0" }
+    };
+
+    private double[] pieData = new double[] { 75, 45, 38, 25, 65 };
+    private string[] pieLabels = new string[] { "Ventas", "TI", "Finanzas", "RH", "Operaciones" };
+
+    private List<ChangeRecord> recentChanges = new List<ChangeRecord>
+    {
+        new ChangeRecord { Name = "María Rodríguez", Department = "Ventas", ChangeType = "Contratación", Date = DateTime.Now.AddDays(-1), Avatar = "https://i.pravatar.cc/150?img=1" },
+        new ChangeRecord { Name = "Carlos Jiménez", Department = "TI", ChangeType = "Promoción", Date = DateTime.Now.AddDays(-2), Avatar = "https://i.pravatar.cc/150?img=2" },
+        new ChangeRecord { Name = "Ana López", Department = "Finanzas", ChangeType = "Cambio de departamento", Date = DateTime.Now.AddDays(-3), Avatar = "https://i.pravatar.cc/150?img=3" },
+        new ChangeRecord { Name = "Pedro Sánchez", Department = "Operaciones", ChangeType = "Renuncia", Date = DateTime.Now.AddDays(-4), Avatar = "https://i.pravatar.cc/150?img=4" },
+        new ChangeRecord { Name = "Luisa Martínez", Department = "RH", ChangeType = "Nuevo puesto", Date = DateTime.Now.AddDays(-5), Avatar = "https://i.pravatar.cc/150?img=5" }
+    };
+
+    private Color GetChipColor(string changeType)
+    {
+        return changeType switch
+        {
+            "Contratación" => Color.Success,
+            "Promoción" => Color.Info,
+            "Cambio de departamento" => Color.Warning,
+            "Renuncia" => Color.Error,
+            "Nuevo puesto" => Color.Primary,
+            _ => Color.Default
+        };
+    }
+
+    private class ChangeRecord
+    {
+        public string Name { get; set; }
+        public string Department { get; set; }
+        public string ChangeType { get; set; }
+        public DateTime Date { get; set; }
+        public string Avatar { get; set; }
+    }
+}
+ *@

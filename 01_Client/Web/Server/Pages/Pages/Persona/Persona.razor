@@ -1,0 +1,712 @@
+﻿@page "/Persona"
+@using Infraestructura.Models.Persona
+@using Infraestructura.Models.Clasificador
+@using Microsoft.AspNetCore.Components
+@using Syncfusion.Blazor.Grids
+@using System.Globalization
+@using Server.Pages.Pages.Biometrico
+@using MudBlazor
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Charts
+@using Aplicacion.DTOs.Charts
+
+@inherits MainBaseComponent
+@layout MainLayout
+@inject NavigationManager Navigation
+@inject NavigationManager Nav
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
+
+<MudCard>
+    <!-- Panel de formulario -->
+    <MudExpansionPanels MultiExpansion="false">
+        <MudExpansionPanel @bind-IsExpanded="expande" HideIcon="true">
+            <TitleContent>
+                <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mb-5 d-flex justify-center align-center">
+                    <MudButton Variant="Variant.Outlined"
+                               Style="@(expande ? "background-color: #A09B9B; color: white;" : "background-color: #4CAF50; color: white;")"
+                               OnClick="@ToggleExpand">
+                        @(expande ? "CERRAR" : "AGREGAR")
+                    </MudButton>
+                </MudContainer>
+            </TitleContent>
+            <ChildContent>
+                <MudCard>
+                    <EditForm Model="@_Persona" OnValidSubmit="OnValidPerfil">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+                        <MudCardContent>
+                            <MudGrid>
+                                <!--Nombre-->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.Nombre"
+                                                  Label="NOMBRE: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="100" />
+                                </MudItem>
+
+                                <!--Apellido Paterno-->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.ApellidoPaterno"
+                                                  Label="Apellido Paterno: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="100" />
+                                </MudItem>
+
+                                <!--Apellido Materno-->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.ApellidoMaterno"
+                                                  Label="Apellido Materno: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="100" />
+                                </MudItem>
+
+                                <!-- Cédula de Identidad -->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.Ci"
+                                                  Label="CÉDULA DE IDENTIDAD: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="20" />
+                                </MudItem>
+
+                                <!-- Extension CI -->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.Extension"
+                                                  Label="EXTENSION: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="20" />
+                                </MudItem>
+
+                                <!-- Exp -->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.Exp"
+                                                  Label="EXP: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="5" />
+                                </MudItem>
+
+                                <!-- Celular -->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.Celular"
+                                                  Label="CELULAR: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="15" />
+                                </MudItem>
+
+                                <!-- Contraseña -->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.Contrasena"
+                                                  Label="Contraseña: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="20" />
+                                </MudItem>
+
+                                <!-- Fecha de Nacimiento -->
+                                <MudItem xs="12" sm="6">
+                                    <MudDatePicker T="DateTime?"
+                                                   @bind-Date="_Persona.FechaNacimiento"
+                                                   Label="FECHA DE NACIMIENTO: "
+                                                   Variant="Variant.Outlined"
+                                                   Margin="Margin.Dense" />
+                                </MudItem>
+
+                                <!-- Edad -->
+                                <MudItem xs="12" sm="6">
+                                    <MudNumericField T="int?"
+                                                     @bind-Value="_Persona.Edad"
+                                                     Label="EDAD: "
+                                                     Variant="Variant.Outlined"
+                                                     Margin="Margin.Dense"
+                                                     Min="0"
+                                                     Max="120" />
+                                </MudItem>
+
+                                <!-- Domicilio -->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.Domicilio"
+                                                  Label="DOMICILIO: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="100" />
+                                </MudItem>
+
+                                <!-- Residencia -->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.Residencia"
+                                                  Label="RESIDENCIA: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="100" />
+                                </MudItem>
+
+                                <!-- Inicio Contrato -->
+                                <MudItem xs="12" sm="6">
+                                    <MudDatePicker T="DateTime?"
+                                                   @bind-Date="_Persona.InicioContrato"
+                                                   Label="INICIO DE CONTRATO: "
+                                                   Variant="Variant.Outlined"
+                                                   Margin="Margin.Dense" />
+                                </MudItem>
+
+                                <!-- Correo -->
+                                <MudItem xs="12" sm="6">
+                                    <MudTextField T="string"
+                                                  @bind-Value="_Persona.Correo"
+                                                  Label="CORREO: "
+                                                  Variant="Variant.Outlined"
+                                                  Margin="Margin.Dense"
+                                                  MaxLength="100" />
+                                </MudItem>
+
+                                <!-- Profesión-->
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudSelect T="int?"
+                                               Label="PROFESION: "
+                                               @bind-Value="_Persona.IdgenProfesion"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense">
+                                        @if (_ListaPrfesion is not null)
+                                        {
+                                            @foreach (var proveedor in _ListaPrfesion)
+                                            {
+                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
+                                                    @proveedor.Descripcion
+                                                </MudSelectItem>
+                                            }
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+                                <!--Nivel Salarial-->
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudSelect T="int?"
+                                               Label="NIVEL SALARIAL: "
+                                               @bind-Value="_Persona.IdgenNivelsalarial"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense">
+                                        @if (_ListaSalario is not null)
+                                        {
+                                            @foreach (var proveedor in _ListaSalario)
+                                            {
+                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
+                                                    @proveedor.Descripcion
+                                                </MudSelectItem>
+                                            }
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+                                <!--Puesto Denominación-->
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudSelect T="int?"
+                                               Label="PUESTO DENOMINACION: "
+                                               @bind-Value="_Persona.IdgenPuestodenominacion"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense">
+                                        @if (_ListaPuestoDenominacion is not null)
+                                        {
+                                            @foreach (var proveedor in _ListaPuestoDenominacion)
+                                            {
+                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
+                                                    @proveedor.Descripcion
+                                                </MudSelectItem>
+                                            }
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+
+                                <!--Grupo Trabajo-->
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudSelect T="int?"
+                                               Label="GRUPO TRABAJO: "
+                                               @bind-Value="_Persona.IdgengrupoTrabajo"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense">
+                                        @if (_ListaGrupoTrabajo is not null)
+                                        {
+                                            @foreach (var proveedor in _ListaGrupoTrabajo)
+                                            {
+                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
+                                                    @proveedor.Descripcion
+                                                </MudSelectItem>
+                                            }
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+                                <!--Grupo Descripcion-->
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudSelect T="int?"
+                                               Label="DESCRIPCION PUESTO: "
+                                               @bind-Value="_Persona.IdgenPuestodescripcion"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense">
+                                        @if (_ListaPuestoDescripcion is not null)
+                                        {
+                                            @foreach (var proveedor in _ListaPuestoDescripcion)
+                                            {
+                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
+                                                    @proveedor.Descripcion
+                                                </MudSelectItem>
+                                            }
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+                                <!--Grupo Categoria-->
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudSelect T="int?"
+                                               Label="CATEGORIA: "
+                                               @bind-Value="_Persona.IdgenCategoria"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense">
+                                        @if (_ListaCategoria is not null)
+                                        {
+                                            @foreach (var proveedor in _ListaCategoria)
+                                            {
+                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
+                                                    @proveedor.Descripcion
+                                                </MudSelectItem>
+                                            }
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+                                <!--Grupo Clase-->
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudSelect T="int?"
+                                               Label="CLASE: "
+                                               @bind-Value="_Persona.IdgenClase"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense">
+                                        @if (_ListaClase is not null)
+                                        {
+                                            @foreach (var proveedor in _ListaClase)
+                                            {
+                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
+                                                    @proveedor.Descripcion
+                                                </MudSelectItem>
+                                            }
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+
+                                <!-- Sexo -->
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudSelect T="string"
+                                               Label="SEXO: "
+                                               @bind-Value="_Persona.Sexo"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense">
+                                        <MudSelectItem Value="@( "M" )">Masculino</MudSelectItem>
+                                        <MudSelectItem Value="@( "F" )">Femenino</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+
+                                <!-- Unidad Organizacional -->
+                                <MudItem xs="12" sm="6" md="4">
+                                    <MudSelect T="int?"
+                                               Label="UNIDAD ORGANIZACIONAL: "
+                                               @bind-Value="_Persona.IdgenUnidad"
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense">
+                                        @if (_ListaUnidad is not null)
+                                        {
+                                            @foreach (var proveedor in _ListaUnidad)
+                                            {
+                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
+                                                    @proveedor.Descripcion
+                                                </MudSelectItem>
+                                            }
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                            </MudGrid>
+                        </MudCardContent>
+
+                        
+                        <MudCardActions>
+                            <MudButton ButtonType="MudBlazor.ButtonType.Submit" 
+                                       Variant="Variant.Outlined"
+                                       Color="Color.Success"
+                                       Class="ml-auto">
+                                GUARDAR
+                            </MudButton>
+                            <MudButton ButtonType="MudBlazor.ButtonType.Button" 
+                                       Variant="Variant.Outlined"
+                                       OnClick="@ResetPerfil"
+                                       Color="Color.Default">
+                                LIMPIAR FORMULARIO
+                            </MudButton>
+                        </MudCardActions>
+                    </EditForm>
+
+                </MudCard>
+            </ChildContent>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+</MudCard>
+
+<!--/////////////////////////////////////////////////////////////////////////////////-->
+
+<div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
+    <div style="width: 100%; max-width: 100%;">
+        <MudPaper Class="pa-4 mt-4" Elevation="5" Outlined="true">
+
+            <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Success" Class="my-2">
+                <b>LISTA DEL PERSONAL DE ENVIBOL</b>
+            </MudText>
+
+            <!-- Contenedor de tabla con scroll horizontal -->
+            <div style="overflow-x: auto; width: 100%;">
+                <div style="width: 100%;">
+                    <MudTable Items="@Tablapersona"
+                              Hover="true"
+                              Bordered="true"
+                              Striped="true"
+                              Dense="true"
+                              Filter="new Func<RrhPersonaDto,bool>(FilterFunc1)">
+
+                        <ToolBarContent>
+                            <MudTextField @bind-Value="searchString"
+                                          Placeholder="Buscar"
+                                          Adornment="Adornment.Start"
+                                          AdornmentIcon="@Icons.Material.Filled.Search"
+                                          Immediate="true"
+                                          DebounceInterval="300"
+                                          Class="mt-4 mb-2" />
+                        </ToolBarContent>
+
+
+                        <HeaderContent>
+                            <MudTh Style="text-align: left;">OPCIONES</MudTh> 
+                            <MudTh Style="text-align: left;">ID PERSONA</MudTh>
+                            <MudTh Style="text-align: left;">NOMBRE</MudTh>
+                            <MudTh Style="text-align: left;">APELLIDO PATERNO</MudTh>
+                            <MudTh Style="text-align: left;">APELLIDO MATERNO</MudTh>
+                            <MudTh Style="text-align: left;">CI</MudTh>
+                            <MudTh Style="text-align: left;">EXT</MudTh>
+                            <MudTh Style="text-align: left;">EXP</MudTh>
+                            <MudTh Style="text-align: left;">CELULAR</MudTh>
+                            <MudTh Style="text-align: left;">CONTRASEÑA</MudTh>
+                            <MudTh Style="text-align: left;">UNIDAD ORGANIZACIONAL</MudTh>
+                            <MudTh Style="text-align: left;">CATEGORIA</MudTh>
+                            <MudTh Style="text-align: left;">CLASE</MudTh>
+                            <MudTh Style="text-align: left;">N. SALARIAL</MudTh>
+                            <MudTh Style="text-align: left;">PUESTO DENOMINACION</MudTh>
+                            <MudTh Style="text-align: left;">PROFESION</MudTh>
+                            <MudTh Style="text-align: left;">GRUPO TRABAJO</MudTh>
+                            <MudTh Style="text-align: left;">PUESTO DESCRIPCION</MudTh>
+                            <MudTh Style="text-align: left;">SEXO</MudTh>
+                            <MudTh Style="text-align: left;">FECHA NACIMIENTO</MudTh>
+                            <MudTh Style="text-align: left;">DOMICILIO</MudTh>
+                            <MudTh Style="text-align: left;">RESIDENCIA</MudTh>
+                            <MudTh Style="text-align: left;">EDAD</MudTh>
+                            <MudTh Style="text-align: left;">INICIO CONTRATO</MudTh>
+                            <MudTh Style="text-align: left;">CORREO</MudTh>                    
+                        </HeaderContent>
+
+                        <RowTemplate>
+                            <MudTd>
+                                    <MudTooltip Text="EDITAR REGISTRO" Placement="Placement.Top">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => FormEditarPersona(context))"
+                                                       Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small" />
+                                    </MudTooltip>
+
+                                    <MudTooltip Text="ELIMINAR REGISTRO" Placement="Placement.Top">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => EliminarPersona(context.IdrrhPersona))"
+                                                       Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" />
+                                    </MudTooltip>
+                                    <MudIconButton Icon="@(context.Estado == '1' ? Icons.Material.Filled.ToggleOn : Icons.Material.Filled.ToggleOff)"
+                                                   Variant="Variant.Outlined"
+                                                   Color="@(context.Estado == '1' ? Color.Success : Color.Secondary)"
+                                                   Size="Size.Small"
+                                                   OnClick="@(() => CambiarEstado(context))" />
+
+                                    <MudTooltip Text="Mostrar contrato" Placement="Placement.Top">
+                                        <MudIconButton Icon="@Icons.Material.Filled.GridView" OnClick="@(() => ShowPopu(context.IdrrhPersona))"
+                                                       Variant="Variant.Outlined" Color="Color.Info" Size="Size.Small" />
+                                    </MudTooltip>
+                            </MudTd>
+                  
+                            <MudTd Class="text-center">@context.IdrrhPersona</MudTd>
+                            <MudTd Class="text-center">@context.Nombre</MudTd>
+                            <MudTd Class="text-center">@context.ApellidoPaterno</MudTd>
+                            <MudTd Class="text-center">@context.ApellidoMaterno</MudTd>
+                            <MudTd Class="text-center">@context.Ci</MudTd>
+                            <MudTd Class="text-center">@context.Extension</MudTd>
+                            <MudTd Class="text-center">@context.Exp</MudTd>
+                            <MudTd Class="text-center">@context.Celular</MudTd>
+                            <MudTd Class="text-center">@context.Contrasena</MudTd>
+                            <MudTd Class="text-center">@GetUnidadDescripcion(context.IdgenUnidad)</MudTd>
+                            <MudTd Class="text-center">@GetCategoriaDescripcion(context.IdgenCategoria)</MudTd>
+                            <MudTd Class="text-center">@context.IdgenClase</MudTd>
+                            <MudTd Class="text-center">@context.IdgenNivelsalarial</MudTd>
+                            <MudTd Class="text-center">@GetPuestoDenominacionDescripcion(context.IdgenPuestodenominacion)</MudTd>
+                            <MudTd Class="text-center">@GetProfesionDescripcion(context.IdgenProfesion)</MudTd>
+                            <MudTd Class="text-center">@GetGrupoTrabajoDescripcion(context.IdgengrupoTrabajo)</MudTd>
+                            <MudTd Class="text-center">@GetPuestoDescripcion(context.IdgenPuestodescripcion)</MudTd>
+                            <MudTd Class="text-center">@context.Sexo</MudTd>
+                            <MudTd Class="text-center">@(context.FechaNacimiento.HasValue ? context.FechaNacimiento.Value.ToString("dd/MM/yyyy") : "")</MudTd>
+                            <MudTd Class="text-center">@context.Domicilio</MudTd>
+                            <MudTd Class="text-center">@context.Residencia</MudTd>
+                            <MudTd Class="text-center">@context.Edad</MudTd>
+                            <MudTd Class="text-center">@(context.InicioContrato.HasValue ?context.InicioContrato.Value.ToString("dd/MM/yyyy") : "")</MudTd>
+                            <MudTd Class="text-center">@context.Correo</MudTd>                 
+
+                        </RowTemplate>
+                        <PagerContent>
+                            <MudTablePager /> <!--Rows per page ...-->
+                        </PagerContent>
+                    </MudTable> 
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: center; gap: 0px; flex-wrap: wrap; margin-top: 2rem; width: 100%; max-width: 1200px;">
+                <div style="flex: 1 1 25%; min-width: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px;">
+                    <h3 style="margin-bottom: 0.5rem;">PERSONAL TOTAL</h3>
+                    <SfAccumulationChart>
+                        <AccumulationChartLegendSettings Visible="false" />
+                        <AccumulationChartSeriesCollection>
+                            <AccumulationChartSeries DataSource="@DonutDataTotalPersonal"
+                                                     XName="Category"
+                                                     YName="Value"
+                                                     Radius="80%"
+                                                     InnerRadius="40%"
+                                                     PointColorMapping="Color"
+                                                     Explode="false">
+                                <AccumulationDataLabelSettings Visible="true"
+                                                               Name="Category"
+                                                               Position="AccumulationLabelPosition.Inside">
+                                    <AccumulationChartDataLabelFont Size="15px" FontWeight="600" />
+                                </AccumulationDataLabelSettings>
+                            </AccumulationChartSeries>
+                        </AccumulationChartSeriesCollection>
+                    </SfAccumulationChart>
+                </div>
+
+                <div style="flex: 1 1 25%; min-width: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px;">
+                    <h3 style="margin-bottom: 0.5rem;">PERSONAL ADMINISTRATIVO</h3>
+                    <SfAccumulationChart>
+                        <AccumulationChartLegendSettings Visible="false" />
+                        <AccumulationChartSeriesCollection>
+                            <AccumulationChartSeries DataSource="@DonutAdministrativo"
+                                                     XName="Category"
+                                                     YName="Value"
+                                                     Radius="80%"
+                                                     InnerRadius="40%"
+                                                     PointColorMapping="Color"
+                                                     Explode="false">
+                                <AccumulationDataLabelSettings Visible="true"
+                                                               Name="Category"
+                                                               Position="AccumulationLabelPosition.Inside">
+                                    <AccumulationChartDataLabelFont Size="15px" FontWeight="600" />
+                                </AccumulationDataLabelSettings>
+                            </AccumulationChartSeries>
+                        </AccumulationChartSeriesCollection>
+                    </SfAccumulationChart>
+                </div>
+
+                <div style="flex: 1 1 25%; min-width: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px;">
+                    <h3 style="margin-bottom: 0.5rem;">PERSONAL OPERATIVO</h3>
+                    <SfAccumulationChart>
+                        <AccumulationChartLegendSettings Visible="false" />
+                        <AccumulationChartSeriesCollection>
+                            <AccumulationChartSeries DataSource="@DonutOperativo"
+                                                     XName="Category"
+                                                     YName="Value"
+                                                     Radius="80%"
+                                                     InnerRadius="40%"
+                                                     PointColorMapping="Color"
+                                                     Explode="false">
+                                <AccumulationDataLabelSettings Visible="true"
+                                                               Name="Category"
+                                                               Position="AccumulationLabelPosition.Inside">
+                                    <AccumulationChartDataLabelFont Size="15px" FontWeight="600" />
+                                </AccumulationDataLabelSettings>
+                            </AccumulationChartSeries>
+                        </AccumulationChartSeriesCollection>
+                    </SfAccumulationChart>
+                </div>
+            </div>
+
+            <!--THE BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART-->
+            <div style="display: flex; justify-content: center; gap: 0px; flex-wrap: wrap; margin-top: 2rem; width: 100%; max-width: 1600px;">
+                <!-- Chart 1 -->
+                <div style="flex: 1 1 40%; min-width: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px;">
+                    <h3 style="text-align: center;">PERSONAL DE DIFERENTES DEPARTAMENTOS</h3>
+                    <SfChart>
+                        <ChartPrimaryXAxis 
+                            ValueType="Syncfusion.Blazor.Charts.ValueType.Category"
+                            LabelIntersectAction="LabelIntersectAction.Wrap"
+                                           LabelPlacement="LabelPlacement.BetweenTicks" 
+                                           PlotOffset="0" />
+
+                        <ChartPrimaryYAxis Minimum="0"
+                                           Interval="20" />
+
+                        <ChartSeriesCollection>
+                            <ChartSeries DataSource="@DonutDepartamento"
+                                         XName="Category"
+                                         YName="Value"
+                                         Type="ChartSeriesType.Column"
+                                         TooltipMappingName="FullName"
+                                         PointColorMapping="Color"
+                                         ColumnSpacing="0.2">
+                            </ChartSeries>
+
+                            <ChartTooltipSettings Enable="true" />
+                        </ChartSeriesCollection>
+                    </SfChart>
+                </div>
+
+                <!-- Chart 2 -->
+                <div style="flex: 1 1 20%; min-width: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px;">
+                    <h3 style="text-align: center;">PROCEDENCIA PERSONAL CHUQUISACA</h3>
+                    <SfChart>
+                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"
+                                           LabelIntersectAction="LabelIntersectAction.Wrap"
+                                           LabelPlacement="LabelPlacement.BetweenTicks"
+                                           PlotOffset="0" />
+
+                        <ChartPrimaryYAxis Minimum="0"
+                                           Interval="20" />
+
+                        <ChartSeriesCollection>
+                            <ChartSeries DataSource="@BarDataChuquisaca"
+                                         XName="Category"
+                                         YName="Value"
+                                         Type="ChartSeriesType.Column"
+                                         TooltipMappingName="FullName"
+                                         PointColorMapping="Color"
+                                         ColumnSpacing="0.2">
+                            </ChartSeries>
+
+                            <ChartTooltipSettings Enable="true" />
+                        </ChartSeriesCollection>
+                    </SfChart>
+                </div>
+            </div>
+
+            <!--THE BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART-->
+            <div style="display: flex; justify-content: center; gap: 0px; flex-wrap: wrap; margin-top: 2rem; width: 100%; max-width: 1600px;">
+                <!-- CHART 1 -->
+                <div style="flex: 1 1 40%; min-width: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px;">
+                    <h3 style="text-align: center;">EDAD DE LOS TRABAJADORES</h3>
+                    <SfChart>
+                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"
+                                           LabelIntersectAction="LabelIntersectAction.Wrap"
+                                           LabelPlacement="LabelPlacement.BetweenTicks"
+                                           PlotOffset="0" />
+
+                        <ChartPrimaryYAxis Minimum="0"
+                                           Interval="20" />
+
+                        <ChartSeriesCollection>
+                            <ChartSeries DataSource="@BarDataEdad"
+                                         XName="Category"
+                                         YName="Value"
+                                         Type="ChartSeriesType.Column"
+                                         TooltipMappingName="FullName"
+                                         PointColorMapping="Color"
+                                         ColumnSpacing="0.2">
+                            </ChartSeries>
+
+                            <ChartTooltipSettings Enable="true" />
+                        </ChartSeriesCollection>
+                    </SfChart>
+                </div>
+
+                <!-- CHART 2 -->
+                <div style="flex: 1 1 40%; min-width: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px;">
+                    <h3 style="text-align: center;">PROFESION PERSONAL BOLIVIA</h3>
+                    <SfChart>
+                        <ChartPrimaryXAxis ValueType="Syncfusion.Blazor.Charts.ValueType.Category"
+                                           LabelIntersectAction="LabelIntersectAction.Wrap"
+                                           LabelPlacement="LabelPlacement.BetweenTicks"
+                                           PlotOffset="0" />
+
+                        <ChartPrimaryYAxis Minimum="0"
+                                           Interval="20" />
+
+                        <ChartSeriesCollection>
+                            <ChartSeries DataSource="@BarDataEducacion"
+                                         XName="Category"
+                                         YName="Value"
+                                         Type="ChartSeriesType.Column"
+                                         TooltipMappingName="FullName"
+                                         PointColorMapping="Color"
+                                         ColumnSpacing="0.2">
+                            </ChartSeries>
+
+                            <ChartTooltipSettings Enable="true" />
+                        </ChartSeriesCollection>
+                    </SfChart>
+                </div>
+
+
+            </div>
+
+        </MudPaper>
+    </div>
+</div>
+
+
+
+
+<!--The content for "CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS"-->
+<SfDialog Target="#target" ZIndex="999" Width="60%" Height="90%" AllowDragging="true" IsModal="true" style="min-height: 90%" CloseOnEscape="false" @bind-Visible="@popupAdmView">
+    <DialogTemplates>
+        <Header><strong>CONTRATO DE PERSONA</strong> <strong>nombre de persona</strong></Header>
+        <Content>
+            <MudCardContent>
+                <div>
+
+                    <MudCard>
+                        <MudTable Items="@TablaContratoPersona" Hover="true" Bordered="true" Striped="true" Dense="true">
+                            <HeaderContent>
+                                <!--<MudTh Style="text-align: left;">ID CONTRATO</MudTh>-->
+                                <MudTh Style="text-align: left;">ID PERSONA</MudTh>
+                                <MudTh Style="text-align: left;">INICIO CONTRATO</MudTh>
+                                <MudTh Style="text-align: left;">FIN CONTRATO</MudTh>
+                                <MudTh Style="text-align: left;">NUMERO DE CONTRATO</MudTh>
+                                <MudTh Style="text-align: left;">TIPO DE CONTRATO</MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <!--<MudTd Class="text-center">@context.IdrrhhContrato</MudTd>-->
+                                <MudTd Class="text-center">@context.IdrrhhPersona</MudTd>
+                                <MudTd Class="text-center">@context.InicioContrato.Value.ToString("dd/MM/yyyy")</MudTd>
+                                <MudTd Class="text-center">@context.FinContrato.Value.ToString("dd/MM/yyyy")</MudTd>
+                                <MudTd Class="text-center">@context.NumeroContrato</MudTd>
+                                <MudTd Class="text-center">@context.TipoContrato</MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudCard>
+                </div>
+            </MudCardContent>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="CERRAR" OnClick="@btnCancelPop" />
+    </DialogButtons>
+</SfDialog>

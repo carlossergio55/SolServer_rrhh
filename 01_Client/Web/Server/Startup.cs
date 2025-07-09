@@ -56,7 +56,6 @@ namespace Server
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddSyncfusionBlazor();
             services.AddSingleton(typeof(ISyncfusionStringLocalizer), typeof(SyncfusionLocalizer));
-            services.AddScoped<Radzen.TooltipService>();
             services.AddScoped<GitHubService>();
 
 

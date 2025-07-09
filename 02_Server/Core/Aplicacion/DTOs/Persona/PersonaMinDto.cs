@@ -9,6 +9,7 @@ namespace Aplicacion.DTOs.Persona
     public class PersonaMinDto
     {
         public int IdrrhPersona { get; set; }
+        public int? IdgengrupoTrabajo { get; set; }
         public string NombreApellido { get; set; } = string.Empty;
     }
 }

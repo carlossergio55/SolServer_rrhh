@@ -2,8 +2,8 @@
 @attribute [Authorize]
 @using Infraestructura.Abstract
 @using System.Globalization
-@inject IJSRuntime JSRuntime
-@inject NavigationManager _navMgr
+@using Infraestructura.Models.Authentication
+@* @using System.IdentityModel.Tokens.Jwt *@
 
 <MudThemeProvider Theme="_themeManager.Theme" />
 <MudDialogProvider FullWidth="true"
@@ -17,30 +17,33 @@
 <AuthorizeView>
     <Authorized>
         <MudLayout>
-            <MudAppBar Color="Color.Primary" Dense="true">
-               
-                    <img src="images/icono(1).png" alt="Logo" @onclick="DrawerToggle" style="cursor: pointer;" />
-             
-               
+            <MudAppBar Style="background-color:#006266; " Dense="true">
+                <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                    <img src="svg/icovectorsedem.svg" alt="Sedem" />
+                </MudHidden>
+                <MudHidden Breakpoint="Breakpoint.MdAndUp">
+                    <MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+                </MudHidden>
                 <MudHidden Breakpoint="Breakpoint.Xs">
-                    <MudText Typo="Typo.h5" Class="ml-1">ENVIBOL-RRHH </MudText>
+                    <MudText Typo="Typo.h5" Class="ml-1">ENVIBOL</MudText>
                 </MudHidden>
                 <MudHidden Breakpoint="Breakpoint.Xs" Invert="true">
-                    <MudText Typo="Typo.h5">RRHH</MudText>
+                    <MudText Typo="Typo.h5">ENVIBOL</MudText>
                 </MudHidden>
 
                 <MudSpacer />
+
                 <MudMenu AnchorOrigin="Origin.TopLeft" TransformOrigin="Origin.TopRight" Dense="true" Class="mt-1 ml-4">
                     <ActivatorContent>
-                        <MudIconButton Icon="@Icons.Material.Outlined.AccountCircle"
-                                       Size="Size.Medium"
-                                       Style="color: #FFFFFF;" />
+
+                        <MudIcon Size="Size.Medium" Icon="@Icons.Material.Filled.PersonPin" Color="Color.Surface" />
+
                     </ActivatorContent>
                     <ChildContent>
                         <PersonCard Class="mt-n2" />
                         <MudDivider Class="mb-2" />
-                        <MudListItem Text="Account" Icon="@Icons.Material.Outlined.Person" Href="/personal/account" />
-                        <MudListItem Text="Logout" Icon="@Icons.Material.Outlined.Login" Href="/pages/authentication/login" />
+                        <MudListItem Text="Cuenta" Icon="@Icons.Material.Outlined.Person" Href="/personal/account" />
+                        <MudListItem Text="Cerrar Sesión" Icon="@Icons.Material.Outlined.Login" Href="/pages/authentication/login" />
                     </ChildContent>
                 </MudMenu>
             </MudAppBar>
@@ -48,18 +51,20 @@
             <MudDrawer @bind-Open="_drawerOpen"
                        Elevation="_themeManager.DrawerElevation"
                        ClipMode="_themeManager.DrawerClipMode"
-                       Variant="DrawerVariant.Responsive"
-                       Breakpoint="Breakpoint.SmAndDown"
-                       PreserveOpenState="false"
-                       Style="@_drawerStyle">
-                <NavMenu IsMobile="_isMobile" /> <!-- Así se pasa el parámetro -->
+                       Variant="@DrawerVariant.Mini"
+                       OpenMiniOnHover="true"
+                       PreserveOpenState="true">
+                <NavMenu />
             </MudDrawer>
 
-
             <MudMainContent>
-                <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge">
-                    <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                    </MudHidden>
+                <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" style="font-family: 'Roboto';">
+                    @* <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                        <MudToolBar DisableGutters="true">
+                            <MudIconButton Icon="@Icons.Material.Outlined.Menu" Color="Color.Inherit" OnClick="@((e) => DrawerToggle())" Class="ml-3" />
+                            <CBreadCrumCustom/>
+                        </MudToolBar>
+                    </MudHidden> *@
                     @Body
                 </MudContainer>
             </MudMainContent>
@@ -81,7 +86,7 @@
     }
 
     .mud-breadcrumb-item.mud-disabled > a {
-        color: #2261a1;
+        color: #006266;
     }
 
     .mud-appbar.mud-appbar-dense .mud-toolbar-appbar {
@@ -101,7 +106,7 @@
     }
 
     .mud-input-control > .mud-input-control-input-container > .mud-input-label-outlined.mud-input-label-inputcontrol {
-        line-height: 0px;
+        line-height: 15px;
     }
 
     /* Chrome, Safari, Edge, Opera */
@@ -117,22 +122,30 @@
     }
 
     .mud-shrink ~ label.mud-input-label.mud-input-label-inputcontrol.mud-input-label-outlined, .mud-input:focus-within ~ label.mud-input-label.mud-input-label-inputcontrol.mud-input-label-outlined {
-        transform: translate(14px,-10px) scale(.75);
+        @* transform: translate(14px,-10px) scale(.75); *@
         font-weight: 600;
     }
 
     .mud-alert-message {
-        line-height: 25px
+        @* line-height: 0px *@
     }
 
     .mud-input.mud-disabled {
-        color: #02524c;
+        color: #006266;
         cursor: default;
     }
 
 
     .e-date-wrapper, .e-date-container, .e-input-group, .e-control-container, .e-control-wrapper {
         top: 6px !important;
+    }
+
+    .mud-input.mud-input-outlined .mud-input-outlined-border {
+        border-radius: 1px;
+    }
+
+    .mud-button-filled-primary {
+        background-color: #056f8c !important;
     }
 </style>
 
@@ -141,21 +154,18 @@
     [CascadingParameter]
     public Task<AuthenticationState> authenticationState { get; set; }
     private ThemeManagerTheme _themeManager = new ThemeManagerTheme
-        {
-            Theme = new MudBlazorAdminDashboard(),
-            DrawerClipMode = DrawerClipMode.Always,
-            FontFamily = "Montserrat",
-            DefaultBorderRadius = 6,
-            AppBarElevation = 1,
-            DrawerElevation = 1
-        };
-
-    private bool _isMobile = false;
-    private string _drawerStyle => _drawerOpen ? "" : "transform: translateX(-100%); transition: transform 0.3s ease;";
+    {
+        Theme = new MudBlazorAdminDashboard(),
+        DrawerClipMode = DrawerClipMode.Always,
+        FontFamily = "Montserrat",
+        DefaultBorderRadius = 6,
+        AppBarElevation = 1,
+        DrawerElevation = 1
+    };
 
     public bool _drawerOpen = true;
     public bool _themeManagerOpen = false;
-
+    public ObjectEntity _user = new ObjectEntity();
     void DrawerToggle()
     {
         _drawerOpen = !_drawerOpen;
@@ -171,40 +181,34 @@
         _themeManager = value;
         StateHasChanged();
     }
-   protected override async Task OnInitializedAsync()
-    {       
-       // Cierra el drawer por defecto en móviles
-        if (_isMobile)
-        {
-            _drawerOpen = false;
-        }
 
-        // Mantén tu configuración de tema actual
-        _themeManager.Theme.Palette.Primary = "#0f6751";
-        _themeManager.Theme.Palette.AppbarBackground = "#007BFF";
-        _themeManager.Theme.Palette.DrawerBackground = "#FFFFFF";
-        _themeManager.Theme.Palette.DrawerText = "#212121";
-        _themeManager.Theme.Palette.DrawerIcon = "#212121";
-        _themeManager.Theme.Palette.Background = "#F5F5F5";
-        _themeManager.Theme.Palette.Success = "#28A745";
-        _themeManager.Theme.Palette.Warning = "#FD7E14";
-    }
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
+        @* _user = await _Storage.DatosUsuario();
+        var handler = new JwtSecurityTokenHandler();
+        var jwtSecurityToken = handler.ReadJwtToken(_user.jwToken);
+        var expClaim = jwtSecurityToken.Claims.FirstOrDefault(claim => claim.Type == "exp");
+        if (expClaim != null)
         {
-            _isMobile = await JSRuntime.InvokeAsync<bool>("deviceHelper.isMobile");
-            if (_isMobile)
+            var expTime = DateTimeOffset.FromUnixTimeSeconds(long.Parse(expClaim.Value)).UtcDateTime;
+            if (expTime < DateTime.UtcNow)
             {
-                _drawerOpen = false;
+                Console.WriteLine("El token ha expirado."); *@
+        @* Snackbar.Add("Su sesión ha expirado", Severity.Warning); *@
+        @* _navMgr.NavigateTo("/");
                 StateHasChanged();
             }
         }
-
-        // Asegúrate que _BreadList está definido/inyectado
-        _BreadList?.Update(_navMgr.Uri.ToString().Replace(_navMgr.BaseUri, ""));
-
-        await base.OnAfterRenderAsync(firstRender);
+        else
+        {
+            Console.WriteLine("No se encontró la claims de expiración en el token.");
+        }
+        _Loading.Hide();
+        StateHasChanged(); *@
     }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        _BreadList.Update(_navMgr.Uri.ToString().Replace(_navMgr.BaseUri, ""));
+    }
 }

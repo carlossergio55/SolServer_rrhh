@@ -1,5 +1,6 @@
 ﻿using Dominio.Entities;
 using Dominio.Entities.Asistencia;
+using Dominio.Entities.Contrato;
 using Dominio.Entities.Horario;
 using Dominio.Entities.Persona;
 using Dominio.Entities.Seguridad;
@@ -28,6 +29,9 @@ namespace Persistencia.Contexts
         public DbSet<RrhhTurnodia> RrhhTurnodia { get; set; }
         public DbSet<RrhhTurnotolerancia> RrhhTurnotolerancia { get; set; }
         public DbSet<RrhDiaevento> RrhDiaevento { get; set; }
+        public DbSet<GenGrupoturno> GenGrupoturno { get; set; }
+        public DbSet<GenGrupoturnoDetalle> GenGrupoturnoDetalle { get; set; }
+        public DbSet<RrhContrato> RrhContrato { get; set; }
         #endregion
 
     }

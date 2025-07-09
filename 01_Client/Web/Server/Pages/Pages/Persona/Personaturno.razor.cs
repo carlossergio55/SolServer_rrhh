@@ -15,12 +15,14 @@ namespace Server.Pages.Pages.Persona
         private RrhDiaeventoDto _DiaEvento = new RrhDiaeventoDto();
         private List<RrhDiaeventoDto> _DiasCache = new();
         private bool _MostrarAsignacionMasiva = false;
-        private List<RrhDiaeventoDto> _dias = new List<RrhDiaeventoDto>();
+        private List<RrhDiaeventoDto> _dias = new List<RrhDiaeventoDto>(); 
         private List<DateTime> _diasDelMes = new List<DateTime>();
         private List<RrhPersonaDto> _personas = new List<RrhPersonaDto>();
         private DateTime? _FechaInicio;
         private DateTime? _FechaFin;
         private PersonaMinDto? _personaSeleccionada;
+        private int? _TurnoInicialId;                 // Selección del usuario
+        private readonly int[] _secuencia165 = { 48, 49, 52 };
         // Generar días laborables
         protected string BusquedaNombre { get; set; } = string.Empty;
         // Método para el autocomplete (ahora devuelve strings)
@@ -49,22 +51,78 @@ namespace Server.Pages.Pages.Persona
         private void GenerarDiasLaborables()
         {
             _DiasCache.Clear();
-            if (_FechaInicio == null || _FechaFin == null) return;
+            if (_FechaInicio is null || _FechaFin is null || _personaSeleccionada is null) return;
 
-            for (var fecha = _FechaInicio.Value.Date; fecha <= _FechaFin.Value.Date; fecha = fecha.AddDays(1))
+            switch (_personaSeleccionada.IdgengrupoTrabajo)
             {
-                if (fecha.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday) continue;
-
-                _DiasCache.Add(new RrhDiaeventoDto
-                {
-                    IdrrhPersona = _DiaEvento.IdrrhPersona,
-                    IdgenClasificadortipo = 48,
-                    Fecha = fecha,
-                    Motivo = "Turno asignado"
-                });
+                case 167: GenerarAdministrativos(); break;
+                case 165: GenerarTurnos165(); break;
+                case 166: GenerarEspeciales166(); break;
+                default: return;                   // grupo no contemplado
             }
             _MostrarAsignacionMasiva = _DiasCache.Any();
         }
+
+
+        // === ADMINISTRATIVOS (167) ===
+        private void GenerarAdministrativos()
+        {
+            for (var fecha = _FechaInicio!.Value.Date; fecha <= _FechaFin!.Value.Date; fecha = fecha.AddDays(1))
+            {
+                if (fecha.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday) continue;
+
+                _DiasCache.Add(NuevoDia(fecha, 48)); // día fijo
+            }
+        }
+
+        // === TURNOS (165): 6x2 con rotación M-N-T ===
+        private void GenerarTurnos165()
+        {
+            if (_TurnoInicialId is null) return;
+
+            var idx = Array.IndexOf(_secuencia165, _TurnoInicialId.Value);
+            for (var fecha = _FechaInicio!.Value.Date; fecha <= _FechaFin!.Value.Date;)
+            {
+                // 6 días laborables
+                for (int i = 0; i < 6 && fecha <= _FechaFin; i++, fecha = fecha.AddDays(1))
+                    _DiasCache.Add(NuevoDia(fecha, _secuencia165[idx]));
+
+                // 2 días de descanso
+                fecha = fecha.AddDays(2);
+                // Siguiente turno de la secuencia
+                idx = (idx + 1) % _secuencia165.Length;
+            }
+        }
+
+        // === ESPECIALES (166): 7x7 Día/Noche alterno ===
+        private void GenerarEspeciales166()
+        {
+            if (_TurnoInicialId is null) return;
+
+            var turno = _TurnoInicialId.Value;          // 50 o 51
+            for (var fecha = _FechaInicio!.Value.Date; fecha <= _FechaFin!.Value.Date;)
+            {
+                // 7 días laborables
+                for (int i = 0; i < 7 && fecha <= _FechaFin; i++, fecha = fecha.AddDays(1))
+                    _DiasCache.Add(NuevoDia(fecha, turno));
+
+                // 7 días de descanso
+                fecha = fecha.AddDays(7);
+                // Cambia de Día ↔ Noche
+                turno = (turno == 50) ? 51 : 50;
+            }
+        }
+
+        // Factor común para crear el DTO
+        private RrhDiaeventoDto NuevoDia(DateTime fecha, int idTurno)
+            => new()
+            {
+                IdrrhPersona = _DiaEvento.IdrrhPersona,
+                IdgenClasificadortipo = idTurno,
+                Fecha = fecha,
+                Motivo = "Turno asignado"
+            };
+
         private async Task SaveDiaEvento(List<RrhDiaeventoDto> dias)
         {
             try
@@ -75,9 +133,10 @@ namespace Server.Pages.Pages.Persona
                 if (response.Succeeded)
                 {
                     _DiasCache.Clear();
-                    await GetDiaEventos();
+                   
                     _MessageShow($"¡{dias.Count} días guardados!", State.Success);
                 }
+                await GetDiaEventos();
             }
             catch (Exception ex)
             {
@@ -134,6 +193,8 @@ namespace Server.Pages.Pages.Persona
                 48 => "#c8e6c9", // Mañana
                 49 => "#fff9c4", // Tarde
                 50 => "#ffcdd2", // Noche
+                51 => "#d1c4e9", // Noche Especial
+                52 => "#b3e5fc", // Tarde Extra
                 _ => "transparent"
             };
         }
@@ -142,12 +203,15 @@ namespace Server.Pages.Pages.Persona
         {
             return eventType switch
             {
-                48 => "M",
-                49 => "T",
-                50 => "N",
+                48 => "M",   // Mañana
+                49 => "T",   // Tarde
+                50 => "N",   // Noche
+                51 => "N*",  // Noche Especial
+                52 => "N",  // Tarde Extra
                 _ => ""
             };
         }
+
 
         private async Task GetDiaEventos()
         {
@@ -169,7 +233,6 @@ namespace Server.Pages.Pages.Persona
         }
         private async Task UpdateDiaEvento()
         { }
-
         private void ToggleExpand() => expande = !expande;
 
     }

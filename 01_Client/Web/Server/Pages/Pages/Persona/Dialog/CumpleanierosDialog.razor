@@ -1,0 +1,68 @@
+﻿@using Infraestructura.Models.Persona
+@using MudBlazor
+
+@inherits ComponentBase
+
+<MudDialog>
+    <DialogContent>
+        <div style="overflow-x: auto; max-width: 100%;">
+            <MudTable Items="@Cumpleanieros" Dense="true" Hover="true"
+                      HorizontalScrollbar="true"
+                      Breakpoint="Breakpoint.None">
+                <HeaderContent>
+                    <MudTh>Nombre</MudTh>
+                    <MudTh>Edad</MudTh>
+                    <MudTh>Fecha</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>
+                        <div class="d-flex align-center">
+                            <MudAvatar Size="Size.Small"
+                                       Image="@GetAvatar(context.Sexo)"
+                                       Color="@GetAvatarColor(context.Sexo)"
+                                       Class="mr-2" />
+                            <span>@context.NombreApellido</span>
+                        </div>
+                    </MudTd>
+                    <MudTd>@context.EdadQueCumple</MudTd>
+                    <MudTd>@context.FechaCumpleFormateada</MudTd>
+                </RowTemplate>
+            </MudTable>
+        </div>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Color="Color.Primary" OnClick="Cerrar">Cerrar</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; }
+
+    [Parameter] public List<RrhPersonaCumpleanieroDto> Cumpleanieros { get; set; }
+
+    void Cerrar() => MudDialog?.Close();
+
+    private string GetAvatar(string sexo)
+    {
+        return sexo?.ToUpper() switch
+        {
+            "F" => "https://i.pravatar.cc/150?img=47", 
+            "M" => "https://i.pravatar.cc/150?img=12",
+            _ => "https://i.pravatar.cc/150?img=3"    
+        };
+    }
+
+    private Color GetAvatarColor(string sexo)
+    {
+        return sexo?.ToUpper() switch
+        {
+            "F" => Color.Info,
+            "M" => Color.Primary,
+            _ => Color.Default
+        };
+    }
+}
+
+
