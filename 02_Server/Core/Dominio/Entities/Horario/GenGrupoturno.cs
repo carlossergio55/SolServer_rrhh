@@ -19,6 +19,7 @@ namespace Dominio.Entities.Horario
         public string ModoGeneracion { get; set; } // fijo, rotativo, alternado
         public int DiasLaborables { get; set; }
         public int DiasDescanso { get; set; }
+        public bool? ExcluirFinesSemana { get; set; }
     }
 
 }

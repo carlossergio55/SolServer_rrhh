@@ -127,7 +127,7 @@ namespace Server.Pages.Pages.Horario
             _turnos.Remove(dia);
             if (!_turnos.Any())
             {
-                _propagarPrimerDia = false;  
+                _propagarPrimerDia = false;
             }
 
             StateHasChanged();
@@ -327,7 +327,7 @@ namespace Server.Pages.Pages.Horario
             try
             {
                 _Loading.Show();
-                var resp = await _Rest.PostAsync<int?>("GenGrupoturnoDetalle", dto);
+                var resp = await _Rest.PostAsync<int?>("GenGrupoturnoDetalle", new { _GenGrupoturnoDetalle = dto });
                 _Loading.Hide();
                 _MessageShow(resp.Message, resp.State);
                 if (resp.State != State.Success)
@@ -339,6 +339,7 @@ namespace Server.Pages.Pages.Horario
                 _MessageShow(e.Message, State.Error);
             }
         }
+
 
         private async Task Actualizar(GenGrupoturnoDetalleDto dto)
         {
@@ -396,6 +397,18 @@ namespace Server.Pages.Pages.Horario
         private void ResetDetalle() => _Detalle = new GenGrupoturnoDetalleDto();
 
         // ----- Utilidades -----
+        private bool popupAdmView { get; set; } = false;
+        string _TituloPopup; string _TituloPopup1; int _TituloPopup2;
+        private bool expandeMov = false;
+        protected async Task btnCancelPop()
+        {
+            this.popupAdmView = false;
+        }
+        private void AbrirDialogo()
+        {
+            popupAdmView = true;
+            expandeMov = false;
+        }
 
 
     }

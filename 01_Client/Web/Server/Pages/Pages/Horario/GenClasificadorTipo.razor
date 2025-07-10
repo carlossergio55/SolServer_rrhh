@@ -8,6 +8,7 @@
 @using Server.Pages.Pages.Biometrico
 @using MudBlazor
 @using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.Popups
 @inherits MainBaseComponent
 @layout MainLayout
 @inject NavigationManager Navigation
@@ -366,7 +367,7 @@
                     <TitleContent>
                         <MudButton Variant="Variant.Filled"
                                    FullWidth="true"
-                                   Color="@( _panelDetalle ? Color.Secondary : Color.Primary )"
+                                   Color="@( _panelDetalle ? Color.Primary : Color.Primary )"
                                    EndIcon="@( _panelDetalle ? Icons.Material.Filled.ArrowDropUp
                                                                                 : Icons.Material.Filled.Add )"
                                    Class="my-2"
@@ -394,7 +395,13 @@
                                                 }
                                             </MudSelect>
                                         </MudItem>
-
+                                        <MudItem xs="12" sm="6" md="1">
+                                            <MudTooltip Text="NUEVO GRUPO:">
+                                                <MudIconButton Icon="@Icons.Material.Filled.PersonAddAlt1"
+                                                               Color="Color.Primary"
+                                                               onclick="AbrirDialogo" />
+                                            </MudTooltip>
+                                        </MudItem>
                                         <MudItem xs="12" sm="4">
                                             <MudSelect T="int?"
                                                        Label="TURNO:"
@@ -420,13 +427,13 @@
                                 </MudCardContent>
 
                                 <MudCardActions>
-                                    <MudButton ButtonType="ButtonType.Submit"
+                                    <MudButton ButtonType="MudBlazor.ButtonType.Submit"
                                                Variant="Variant.Outlined"
-                                               Color="Color.Success"
+                                               Color="Color.Primary"
                                                Class="ml-auto">
                                         GUARDAR
                                     </MudButton>
-                                    <MudButton ButtonType="ButtonType.Button"
+                                    <MudButton ButtonType="MudBlazor.ButtonType.Button"
                                                Variant="Variant.Outlined"
                                                Color="Color.Default"
                                                OnClick="@ResetDetalle">
@@ -508,6 +515,122 @@
 
     </MudTabPanel>
 </MudTabs>
+
+<SfDialog Target="#target" ZIndex="999" Width="60%" Height="90%" AllowDragging="true" IsModal="true" style="min-height: 90%" CloseOnEscape="false" @bind-Visible="@popupAdmView">
+    <DialogTemplates>
+        <Content>
+            @* Panel para “NUEVO MOVIMIENTO” *@
+            <MudExpansionPanels MultiExpansion="false">
+                <MudExpansionPanel Class="pa-2" @bind-IsExpanded="expandeMov">
+
+                    <!-- Botón que abre / cierra -->
+                    <TitleContent>
+                        <MudButton Variant="Variant.Filled"
+                                   FullWidth="true"
+                                   Color="@(expandeMov ? Color.Primary : Color.Primary)"
+                                   EndIcon="@(expandeMov ? Icons.Material.Filled.ArrowDropUp
+                                                                                : Icons.Material.Filled.Add)"
+                                   Class="my-2"
+                                   OnClick="() => expandeMov = !expandeMov">
+                            @(expandeMov ? "CERRAR FORMULARIO" : "NUEVO GRUPO ")
+                        </MudButton>
+                    </TitleContent>
+                    <ChildContent>
+                        @* <MudCard>
+                            <EditForm Model="@_Turno" OnValidSubmit="OnValidTurno">
+                                <DataAnnotationsValidator />
+                                <MudCardContent>
+                                    <MudGrid>
+                                        <MudItem xs="12" sm="6" md="4">
+                                            <MudTextField T="string" @bind-Value="_Turno.Nombre"
+                                                          Label="NOMBRE:" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                          Required="true" MaxLength="100" />
+                                        </MudItem>
+
+                                        <MudItem xs="12" sm="6" md="4">
+                                            <MudTextField T="string" @bind-Value="_Turno.ModoGeneracion"
+                                                          Label="MODO GENERACIÓN:" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                          Required="true" MaxLength="50" />
+                                        </MudItem>
+
+                                        <MudItem xs="12" sm="6" md="2">
+                                            <MudNumericField T="int" @bind-Value="_Turno.DiasLaborables"
+                                                             Label="DÍAS LABORABLES:" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                             Required="true" />
+                                        </MudItem>
+
+                                        <MudItem xs="12" sm="6" md="2">
+                                            <MudNumericField T="int" @bind-Value="_Turno.DiasDescanso"
+                                                             Label="DÍAS DESCANSO:" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                                             Required="true" />
+                                        </MudItem>
+
+                                        <MudItem xs="12">
+                                            <MudCheckBox @bind-Checked="_Turno.ExcluirFinesSemana"
+                                                         Label="EXCLUIR FINES DE SEMANA" />
+                                        </MudItem>
+                                    </MudGrid>
+                                </MudCardContent>
+
+                                <MudCardActions>
+                                    <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Outlined"
+                                               Color="Color.Success" Class="ml-auto">GUARDAR</MudButton>
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Default"
+                                               OnClick="@ResetTurno">LIMPIAR</MudButton>
+                                </MudCardActions>
+                            </EditForm>
+                        </MudCard> *@
+                    </ChildContent>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+            <MudDivider />
+            <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Success"><b>LISTA DE GRUPOS DE TURNO</b></MudText>
+            <MudDivider />
+            <MudTable T="GenGrupoturnoDto"
+                      Items="@_listagrupo"
+                      Dense="true"
+                      Hover="true"
+                      Sortable="true"
+                      Filterable="true"
+                      RowsPerPage="25"
+                      RowsPerPageOptions="new int[]{10,25,50,100}">
+@* 
+                <HeaderContent>
+
+                    <MudTh><MudTableSortLabel SortBy="x => x.Nombre">NOMBRE</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="x => x.ModoGeneracion">MODO</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="x => x.DiasLaborables">LAB.</MudTableSortLabel></MudTh>
+                    <MudTh><MudTableSortLabel SortBy="x => x.DiasDescanso">DESC.</MudTableSortLabel></MudTh>
+                    <MudTh>FDS</MudTh>
+                    <MudTh>Opciones</MudTh>
+                </HeaderContent> *@
+
+                <RowTemplate>
+                    <MudTd>@context.IdgenGrupoturno</MudTd>
+                    <MudTd>@context.Nombre</MudTd>
+                    <MudTd>@context.ModoGeneracion</MudTd>
+                    <MudTd>@context.DiasLaborables</MudTd>
+                    <MudTd>@context.DiasDescanso</MudTd>
+                    <MudTd>@(context.ExcluirFinesSemana == true ? "Sí" : "No")</MudTd>
+@*                     <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                       Color="Color.Warning" Variant="Variant.Outlined"
+                                       OnClick="@(() => FormEditar(context))" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                       Color="Color.Error" Variant="Variant.Outlined"
+                                       OnClick="@(() => Eliminar(context.IdgenGrupoturno))" />
+                    </MudTd> *@
+                </RowTemplate>
+
+                <PagerContent><MudTablePager /></PagerContent>
+            </MudTable>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="CERRAR" OnClick="@btnCancelPop" />
+    </DialogButtons>
+</SfDialog>
+
 <style>
     .popover-custom {
         box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
