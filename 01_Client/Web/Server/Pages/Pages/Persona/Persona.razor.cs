@@ -154,8 +154,8 @@ namespace Server.Pages.Pages.Persona
         {
             return GetDescripcionById(_ListaPrfesion, id);
         }
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////
-        //Crear/api/{version}/RrhPersona
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //Crear/api/{version}/RrhPersona, RrhPersona, RrhPersona ...
         private async Task SavePersona(RrhPersonaDto persona)
         {
             try
@@ -178,6 +178,49 @@ namespace Server.Pages.Pages.Persona
                 _Loading.Hide();
                 _MessageShow(ex.Message, State.Error);
                 await GetPersonaTurnos();
+            }
+        }
+
+        //Crear/api/{version}/RrhContrato, RrhContrato, RrhContrato ...
+        private async Task SaveContrato(RrhContratoDto contrato)
+        {
+            try
+            {
+                _Loading.Show();
+
+                //var response = await _Rest.PostAsync<int?>("RrhPersona", new { _RrhPersonapost = persona });
+                _MessageShow("Contenido enviado: " + JsonSerializer.Serialize(contrato), State.Warning);
+
+                var response = await _Rest.PostAsync<int?>("RrhContrato", contrato);
+                _Loading.Hide();
+
+                _MessageShow(response.Message, response.State);
+
+                if (response.Errors != null)
+                    response.Errors.ForEach(e => _MessageShow(e, State.Warning));
+            }
+            catch (Exception ex)
+            {
+                _Loading.Hide();
+                _MessageShow(ex.Message, State.Error);
+                await GetPersonaTurnos();
+            }
+        }
+
+        // Actualizar Contrato de Empleado de la Persona ...
+        private async Task UpdateContrato(RrhContratoDto contrato)
+        {
+            try
+            {
+                _Loading.Show();
+                var response = await _Rest.PutAsync<int>("RrhContrato", contrato, contrato.IdrrhhContrato);
+                _Loading.Hide();
+                _MessageShow(response.Message, response.State);
+            }
+            catch (Exception ex)
+            {
+                _Loading.Hide();
+                _MessageShow(ex.Message, State.Error);
             }
         }
 
@@ -235,32 +278,18 @@ namespace Server.Pages.Pages.Persona
         }
 
         //Validar y guardar/actualizar ...
-        private async Task GuardarContrato(EditContext ctx)
+        private async Task OnValidContrato(EditContext ctx)
         {
-            try
+            if (_Contrato.IdrrhhContrato > 0)
             {
-                if (_Contrato.IdrrhhPersona == 0)
-                {
-                    _MessageShow("Seleccione una persona primero.", State.Warning);
-                    return;
-                }
-
-                var response = await _Rest.PostAsync<int?>("RrhContrato", _Contrato);
-                _MessageShow(response.Message, response.State);
-
-                if (response.Succeeded)
-                {
-                    await GetPersonaContrato(); // Recargar todos los contratos
-                    TablaContratoPersona = TablaContrato.Where(x => x.IdrrhhPersona == _Contrato.IdrrhhPersona).ToList();
-                    _Contrato = new(); // limpiar formulario
-                }
-
-                StateHasChanged();
+                await UpdateContrato(_Contrato);
             }
-            catch (Exception ex)
+            else
             {
-                _MessageShow("Error al guardar contrato: " + ex.Message, State.Error);
+                await SaveContrato(_Contrato);
             }
+            ToggleExpand();
+            StateHasChanged();
         }
 
         /* ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
@@ -311,6 +340,7 @@ namespace Server.Pages.Pages.Persona
             await UpdatePersona(persona);
             await GetPersonaTurnos(); //Opcional si necesitas refrescar la lista
         }
+
 
 
         // Cargar para editar la informacion ...
