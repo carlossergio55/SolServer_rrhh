@@ -672,12 +672,10 @@
 </div>
 
 
-
-
 <!--The content for "CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS"-->
 <SfDialog Target="#target" ZIndex="999" Width="60%" Height="90%" AllowDragging="true" IsModal="true" style="min-height: 90%" CloseOnEscape="false" @bind-Visible="@popupAdmView">
     <DialogTemplates>
-        <Header><strong>CONTRATO DE PERSONA</strong> <strong>nombre de persona</strong></Header>
+        <Header><strong>CONTRATO DE PERSONA</strong> <strong></strong></Header>
         <Content>
             <MudCardContent>
                 <div>
@@ -701,6 +699,34 @@
                                 <MudTd Class="text-center">@context.TipoContrato</MudTd>
                             </RowTemplate>
                         </MudTable>
+
+                        <div class="mt-4">
+                            <EditForm Model="@_Contrato" OnValidSubmit="GuardarContrato">
+                                <DataAnnotationsValidator />
+                                <MudPaper Class="p-4" Style="max-width:250px;">
+                                    <MudText>AGREGAR CONTRATO</MudText>
+
+                                    <MudDatePicker @bind-Date="_Contrato.InicioContrato" Label="Inicio Contrato" />
+                                    <MudDatePicker @bind-Date="_Contrato.FinContrato" Label="Fin Contrato" />
+                                    <MudNumericField T="int"
+                                                     @bind-Value="_Contrato.NumeroContrato"
+                                                     Label="Número de Contrato"
+                                                     Step="1"
+                                                     Min="1"
+                                                     Max="9999"
+                                                     Immediate="true" />
+
+                                    <MudSelect T="string" Label="Tipo de Contrato" @bind-Value="_Contrato.TipoContrato">
+                                        <MudSelectItem Value="@("CONTRATO")"> CONTRATO </MudSelectItem>
+                                        <MudSelectItem Value="@("ADENDA")">   ADENDA </MudSelectItem>
+                                    </MudSelect>
+
+                                    <MudButton Color="Color.Success" Variant="Variant.Filled" Type="Submit">GUARDAR</MudButton>
+
+                                    <MudButton Color="Color.Secondary" OnClick="@(() => formVisible = false)">CANCELAR</MudButton>
+                                </MudPaper>
+                            </EditForm>
+                        </div>
                     </MudCard>
                 </div>
             </MudCardContent>

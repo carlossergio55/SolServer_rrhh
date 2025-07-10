@@ -22,6 +22,7 @@ using Syncfusion.Blazor.Inputs;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Diagnostics;
+using static System.Net.WebRequestMethods;
 
 namespace Server.Pages.Pages.Persona
 {
@@ -31,33 +32,37 @@ namespace Server.Pages.Pages.Persona
         public bool popupAdmView = false;
         private string searchString = "";  //added recently ...
         private string TotalText;
+        private bool formVisible = true; // para mostrar/ocultar el formulario
 
-        protected List<RrhPersonaDto> Tablapersona { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaPrfesion { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaSalario { get; set; } = new();
+
+        protected List<RrhPersonaDto>       Tablapersona            { get; set; } = new();
+        protected List<GenClasificadorDto> _ListaPrfesion           { get; set; } = new();
+        protected List<GenClasificadorDto> _ListaSalario            { get; set; } = new();
         protected List<GenClasificadorDto> _ListaPuestoDenominacion { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaGrupoTrabajo { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaPuestoDescripcion { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaCategoria { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaClase { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaUnidad { get; set; } = new(); //ListaUnidad
+        protected List<GenClasificadorDto> _ListaGrupoTrabajo       { get; set; } = new();
+        protected List<GenClasificadorDto> _ListaPuestoDescripcion  { get; set; } = new();
+        protected List<GenClasificadorDto> _ListaCategoria          { get; set; } = new();
+        protected List<GenClasificadorDto> _ListaClase              { get; set; } = new();
+        protected List<GenClasificadorDto> _ListaUnidad             { get; set; } = new(); 
 
-        private RrhPersonaDto _Persona = new RrhPersonaDto();
-        private List<RrhPersonaDto> _RrhPersona = new List<RrhPersonaDto>();
+        private RrhPersonaDto _Persona   = new RrhPersonaDto();
+        private RrhContratoDto _Contrato = new RrhContratoDto();
 
-        protected List<RrhContratoDto> TablaContrato = new List<RrhContratoDto>();
+        private   List<RrhPersonaDto> _RrhPersona           = new List<RrhPersonaDto>();
+        protected List<RrhContratoDto> TablaContrato        = new List<RrhContratoDto>();
         protected List<RrhContratoDto> TablaContratoPersona = new List<RrhContratoDto>();
 
         private List<GenClasificadorDto> _AllClasificadores = new();
 
+        //CHARTS, CHARTS, CHARTS, CHARTS, CHARTS ...
         private List<RrhChartsDto> DonutDataTotalPersonal = new();
-        private List<RrhChartsDto> DonutAdministrativo = new();
-        private List<RrhChartsDto> DonutOperativo = new();
+        private List<RrhChartsDto> DonutAdministrativo    = new();
+        private List<RrhChartsDto> DonutOperativo         = new();
 
         private List<RrhChartsDto> DonutDepartamento = new();
         private List<RrhChartsDto> BarDataChuquisaca = new();
-        private List<RrhChartsDto> BarDataEducacion = new();
-        private List<RrhChartsDto> BarDataEdad = new();
+        private List<RrhChartsDto> BarDataEducacion  = new();
+        private List<RrhChartsDto> BarDataEdad       = new();
 
         private async Task LoadClasificadores()
         {
@@ -105,6 +110,7 @@ namespace Server.Pages.Pages.Persona
                 _MessageShow($"ExcepciónAA: {ex.Message}", State.Error);
             }
         }
+
         protected override async Task OnInitializedAsync()
         {
             await GetPersonaTurnos      ();
@@ -228,6 +234,36 @@ namespace Server.Pages.Pages.Persona
             StateHasChanged();
         }
 
+        //Validar y guardar/actualizar ...
+        private async Task GuardarContrato(EditContext ctx)
+        {
+            try
+            {
+                if (_Contrato.IdrrhhPersona == 0)
+                {
+                    _MessageShow("Seleccione una persona primero.", State.Warning);
+                    return;
+                }
+
+                var response = await _Rest.PostAsync<int?>("RrhContrato", _Contrato);
+                _MessageShow(response.Message, response.State);
+
+                if (response.Succeeded)
+                {
+                    await GetPersonaContrato(); // Recargar todos los contratos
+                    TablaContratoPersona = TablaContrato.Where(x => x.IdrrhhPersona == _Contrato.IdrrhhPersona).ToList();
+                    _Contrato = new(); // limpiar formulario
+                }
+
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                _MessageShow("Error al guardar contrato: " + ex.Message, State.Error);
+            }
+        }
+
+        /* ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
         private async Task GetPersonaContrato()
         {
             try
@@ -293,6 +329,8 @@ namespace Server.Pages.Pages.Persona
 
         private bool FilterFunc1(RrhPersonaDto element) => FilterFunc(element, searchString);
 
+
+        /*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
         private bool FilterFunc(RrhPersonaDto element, string searchString)
         {
             if (string.IsNullOrWhiteSpace(searchString))
@@ -497,8 +535,7 @@ namespace Server.Pages.Pages.Persona
             return resultado;
         }
 
-
-        //This is for the BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART ...
+        //THIS IS FOR THE BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART ...
         private List<RrhChartsDto> GenerarDonutDepartamento(IEnumerable<RrhPersonaDto> personas, string grupoLabel, out int totalPersonas)
         {
             var departamentoMap = new Dictionary<string, string>
