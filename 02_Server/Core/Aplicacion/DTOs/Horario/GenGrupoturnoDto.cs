@@ -13,6 +13,7 @@ namespace Aplicacion.DTOs.Horario
         public string ModoGeneracion { get; set; }
         public int DiasLaborables { get; set; }
         public int DiasDescanso { get; set; }
+        public bool? ExcluirFinesSemana { get; set; }
     }
 
 }
