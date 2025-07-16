@@ -159,14 +159,23 @@ namespace Server.Pages.Pages.Persona
         {
             try
             {
+                // Verificar si el CI ya existe en la lista de personas
+                var personaExistente = Tablapersona.FirstOrDefault(p =>
+                    !string.IsNullOrWhiteSpace(p.Ci) &&
+                    p.Ci.Trim().Equals(persona.Ci?.Trim(), StringComparison.OrdinalIgnoreCase));
+
+                if (personaExistente != null)
+                {
+                    _MessageShow($"Ya existe una persona registrada con este CI: {personaExistente.Ci}, Nombre: {personaExistente.NombreApellido}", State.Warning);
+                    _Loading.Hide();
+                    return;
+                }
+
                 _Loading.Show();
 
-                //var response = await _Rest.PostAsync<int?>("RrhPersona", new { _RrhPersonapost = persona });
-                _MessageShow("Contenido enviado: " + JsonSerializer.Serialize(persona), State.Warning);
-
                 var response = await _Rest.PostAsync<int?>("RrhPersona", persona);
-                _Loading.Hide();
 
+                _Loading.Hide();
                 _MessageShow(response.Message, response.State);
 
                 if (response.Errors != null)
@@ -179,6 +188,7 @@ namespace Server.Pages.Pages.Persona
                 await GetPersonaTurnos();
             }
         }
+
 
         //Crear/api/{version}/RrhContrato, RrhContrato, RrhContrato ...
         private async Task SaveContrato(RrhContratoDto contrato)
@@ -311,13 +321,13 @@ namespace Server.Pages.Pages.Persona
                 else
                     _MessageShow($"Error111122: {result.Message}", State.Error);
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
                 _Loading.Hide();
                 _MessageShow($"ExcepciónAA: {ex.Message}", State.Error);
             }
         }
-
+        //_Contrato
         protected async Task ShowPopu(int id)
         {
             try
@@ -326,6 +336,8 @@ namespace Server.Pages.Pages.Persona
                 if (TablaContratoPersona.Any())
                 {
                     popupAdmView = true;
+                    _Contrato.IdrrhhPersona = id;
+
                 }
                 else
                 {
