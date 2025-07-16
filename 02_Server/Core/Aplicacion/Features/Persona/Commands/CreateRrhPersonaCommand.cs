@@ -34,6 +34,7 @@ namespace Aplicacion.Features.Persona.Commands
             {
                 var entity = _mapper.Map<RrhPersona>(request._RrhPersonapost);
                 var created = await _repo.AddAsync(entity, cancellationToke);
+
                 return new Response<int>(created.IdrrhPersona);
 
                 //var entity = _mapper.Map<RrhPersona>(request._RrhPersona);

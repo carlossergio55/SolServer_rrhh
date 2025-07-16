@@ -19,9 +19,9 @@ namespace Dominio.Entities.Contrato
         public int       IdrrhhContrato  { get; set; }
         public DateTime? InicioContrato  { get; set; }
         public DateTime? FinContrato     { get; set; }
-        public int?      NumeroContrato  { get; set; }
+        public int       NumeroContrato  { get; set; }
         public string    TipoContrato    { get; set; }
-        public int?      IdrrhhPersona   { get; set; }
+        public int       IdrrhhPersona   { get; set; }
 
     }
 }

@@ -34,7 +34,6 @@ namespace Server.Pages.Pages.Persona
         private string TotalText;
         private bool formVisible = true; // para mostrar/ocultar el formulario
 
-
         protected List<RrhPersonaDto>       Tablapersona            { get; set; } = new();
         protected List<GenClasificadorDto> _ListaPrfesion           { get; set; } = new();
         protected List<GenClasificadorDto> _ListaSalario            { get; set; } = new();
@@ -154,7 +153,7 @@ namespace Server.Pages.Pages.Persona
         {
             return GetDescripcionById(_ListaPrfesion, id);
         }
-        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+        //////////////////////////////////////////////////////////////////////////////////////////////////////
         //Crear/api/{version}/RrhPersona, RrhPersona, RrhPersona ...
         private async Task SavePersona(RrhPersonaDto persona)
         {
@@ -188,11 +187,14 @@ namespace Server.Pages.Pages.Persona
             {
                 _Loading.Show();
 
-                //var response = await _Rest.PostAsync<int?>("RrhPersona", new { _RrhPersonapost = persona });
-                _MessageShow("Contenido enviado: " + JsonSerializer.Serialize(contrato), State.Warning);
+                _MessageShow("Contenido enviado tercero: " + JsonSerializer.Serialize(contrato), State.Warning);
 
-                var response = await _Rest.PostAsync<int?>("RrhContrato", contrato);
+                var response = await _Rest.PostAsync<int>("RrhContrato", contrato);
+
                 _Loading.Hide();
+
+                _MessageShow("Estado111: " + response.State.ToString(), State.Warning);
+                _MessageShow("Mensaje222: " + (response?.Message ?? "Sin mensaje"), State.Warning);
 
                 _MessageShow(response.Message, response.State);
 
@@ -203,7 +205,6 @@ namespace Server.Pages.Pages.Persona
             {
                 _Loading.Hide();
                 _MessageShow(ex.Message, State.Error);
-                await GetPersonaTurnos();
             }
         }
 
@@ -280,19 +281,24 @@ namespace Server.Pages.Pages.Persona
         //Validar y guardar/actualizar ...
         private async Task OnValidContrato(EditContext ctx)
         {
+
+            _MessageShow("¡Formulario válido primero! ", State.Success);
+
             if (_Contrato.IdrrhhContrato > 0)
             {
+                _MessageShow("¡Update Contrato! ", State.Success);
                 await UpdateContrato(_Contrato);
             }
             else
             {
+                _MessageShow("¡Save Contrato! segundo", State.Success);
                 await SaveContrato(_Contrato);
             }
             ToggleExpand();
             StateHasChanged();
         }
 
-        /* ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
+        /* ///////////////////////////////////////////////////////////////////////////////// */
         private async Task GetPersonaContrato()
         {
             try
@@ -350,6 +356,9 @@ namespace Server.Pages.Pages.Persona
             ToggleExpand();
         }
         private void ResetPerfil() => _Persona = new RrhPersonaDto();
+        private void ResetContrato() => _Contrato = new RrhContratoDto();
+
+
         private void ToggleExpand() => expande = !expande;
 
         private void btnCancelPop()

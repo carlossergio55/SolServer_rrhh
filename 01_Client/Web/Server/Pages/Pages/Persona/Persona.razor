@@ -33,7 +33,7 @@
             </TitleContent>
             <ChildContent>
                 <MudCard>
-                    <EditForm Model="@_Persona" OnValidSubmit="OnValidPerfil">
+                    <EditForm Model="@_Persona" OnValidSubmit="OnValidPerfil" id="formPersona">
                         <DataAnnotationsValidator />
                         <ValidationSummary />
                         <MudCardContent>
@@ -52,7 +52,7 @@
                                 <MudItem xs="12" sm="6">
                                     <MudTextField T="string"
                                                   @bind-Value="_Persona.ApellidoPaterno"
-                                                  Label="Apellido Paterno: "
+                                                  Label="APELLIDO PATERNO: "
                                                   Variant="Variant.Outlined"
                                                   Margin="Margin.Dense"
                                                   MaxLength="100" />
@@ -62,7 +62,7 @@
                                 <MudItem xs="12" sm="6">
                                     <MudTextField T="string"
                                                   @bind-Value="_Persona.ApellidoMaterno"
-                                                  Label="Apellido Materno: "
+                                                  Label="APELLIDO MATERNO: "
                                                   Variant="Variant.Outlined"
                                                   Margin="Margin.Dense"
                                                   MaxLength="100" />
@@ -78,6 +78,24 @@
                                                   MaxLength="20" />
                                 </MudItem>
 
+                                <!-- Expedido -->
+                                <MudItem xs="12" sm="6">
+                                    <MudSelect T="string" 
+                                               Label="EXPEDIDO: " 
+                                               @bind-Value="_Persona.Exp"
+                                               Variant="Variant.Outlined" Margin="Margin.Dense" >
+                                        <MudSelectItem Value="@("LP")">LP - LA PAZ</MudSelectItem>
+                                        <MudSelectItem Value="@("CB")">CB - COCHABAMBA </MudSelectItem>
+                                        <MudSelectItem Value="@("SC")">SC - SANTA CRUZ</MudSelectItem>
+                                        <MudSelectItem Value="@("CH")">CH - CHUQUISACA</MudSelectItem>
+                                        <MudSelectItem Value="@("PT")">PT - POTOSI</MudSelectItem>
+                                        <MudSelectItem Value="@("OR")">OR - ORURO</MudSelectItem>
+                                        <MudSelectItem Value="@("TJ")">TJ - TARIJA</MudSelectItem>
+                                        <MudSelectItem Value="@("BE")">BE - BENI</MudSelectItem>
+                                        <MudSelectItem Value="@("PD")">PD - PANDO</MudSelectItem>
+                                    </MudSelect>
+                                </MudItem>
+
                                 <!-- Extension CI -->
                                 <MudItem xs="12" sm="6">
                                     <MudTextField T="string"
@@ -86,16 +104,6 @@
                                                   Variant="Variant.Outlined"
                                                   Margin="Margin.Dense"
                                                   MaxLength="20" />
-                                </MudItem>
-
-                                <!-- Exp -->
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField T="string"
-                                                  @bind-Value="_Persona.Exp"
-                                                  Label="EXP: "
-                                                  Variant="Variant.Outlined"
-                                                  Margin="Margin.Dense"
-                                                  MaxLength="5" />
                                 </MudItem>
 
                                 <!-- Celular -->
@@ -112,7 +120,7 @@
                                 <MudItem xs="12" sm="6">
                                     <MudTextField T="string"
                                                   @bind-Value="_Persona.Contrasena"
-                                                  Label="Contraseña: "
+                                                  Label="CONTRASEÑA: "
                                                   Variant="Variant.Outlined"
                                                   Margin="Margin.Dense"
                                                   MaxLength="20" />
@@ -314,12 +322,12 @@
                                 <!-- Sexo -->
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudSelect T="string"
-                                               Label="SEXO: "
+                                               Label="GENERO: "
                                                @bind-Value="_Persona.Sexo"
                                                Variant="Variant.Outlined"
                                                Margin="Margin.Dense">
-                                        <MudSelectItem Value="@( "M" )">Masculino</MudSelectItem>
-                                        <MudSelectItem Value="@( "F" )">Femenino</MudSelectItem>
+                                        <MudSelectItem Value="@( "M" )">MASCULINO</MudSelectItem>
+                                        <MudSelectItem Value="@( "F" )">FEMENINO</MudSelectItem>
                                     </MudSelect>
                                 </MudItem>
 
@@ -344,7 +352,6 @@
                             </MudGrid>
                         </MudCardContent>
 
-                        
                         <MudCardActions>
                             <MudButton ButtonType="MudBlazor.ButtonType.Submit" 
                                        Variant="Variant.Outlined"
@@ -672,7 +679,7 @@
 </div>
 
 
-<!--The content for "CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS"-->
+<!-- "CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS" -->
 <SfDialog Target="#target" ZIndex="999" Width="60%" Height="90%" AllowDragging="true" IsModal="true" style="min-height: 90%" CloseOnEscape="false" @bind-Visible="@popupAdmView">
     <DialogTemplates>
         <Header><strong>CONTRATO DE PERSONA</strong> <strong></strong></Header>
@@ -699,34 +706,56 @@
                                 <MudTd Class="text-center">@context.TipoContrato</MudTd>
                             </RowTemplate>
                         </MudTable>
+                    </MudCard>
 
-                        <div class="mt-4">
-                            <EditForm Model="@_Contrato" OnValidSubmit="OnValidContrato">
-                                <DataAnnotationsValidator />
-                                <MudPaper Class="p-4" Style="max-width:250px;">
-                                    <MudText>AGREGAR CONTRATO</MudText>
+                    <MudCard>
+                        <EditForm Model="@_Contrato" OnValidSubmit="OnValidContrato"> 
+                            <DataAnnotationsValidator />
+                            <MudPaper Class="p-4" Style="max-width:250px;">
+                                <MudText>AGREGAR CONTRATO</MudText>
 
-                                    <MudDatePicker @bind-Date="_Contrato.InicioContrato" Label="Inicio Contrato" />
-                                    <MudDatePicker @bind-Date="_Contrato.FinContrato" Label="Fin Contrato" />
-                                    <MudNumericField T="int"
-                                                     @bind-Value="_Contrato.NumeroContrato"
-                                                     Label="Número de Contrato"
-                                                     Step="1"
-                                                     Min="1"
-                                                     Max="9999"
-                                                     Immediate="true" />
+                                <MudDatePicker @bind-Date="_Contrato.InicioContrato" Label="Inicio Contrato" />
+                                <MudDatePicker @bind-Date="_Contrato.FinContrato" Label="Fin Contrato" />
 
-                                    <MudSelect T="string" Label="Tipo de Contrato" @bind-Value="_Contrato.TipoContrato">
-                                        <MudSelectItem Value="@("CONTRATO")"> CONTRATO </MudSelectItem>
-                                        <MudSelectItem Value="@("ADENDA")">   ADENDA </MudSelectItem>
-                                    </MudSelect>
+                                <MudNumericField T="int"
+                                                 @bind-Value="_Contrato.NumeroContrato"
+                                                 Label="Número de Contrato"
+                                                 Step="1"
+                                                 Min="1"
+                                                 Max="9999"
+                                                 Immediate="true" />
 
-                                    <MudButton Color="Color.Success" Variant="Variant.Filled" Type="Submit">GUARDAR</MudButton>
+                                <MudSelect T="string" Label="Tipo de Contrato" @bind-Value="_Contrato.TipoContrato">
+                                    <MudSelectItem Value="@("CONTRATO")"> CONTRATO </MudSelectItem>
+                                    <MudSelectItem Value="@("ADENDA")"> ADENDA </MudSelectItem>
+                                </MudSelect>
 
-                                    <MudButton Color="Color.Secondary" OnClick="@(() => formVisible = false)">CANCELAR</MudButton>
-                                </MudPaper>
-                            </EditForm>
-                        </div>
+                                
+                                <MudNumericField T="int"
+                                                 @bind-Value="_Contrato.IdrrhhPersona"
+                                                 Label="ID CONTRATO"
+                                                 Step="1"
+                                                 Min="1"
+                                                 Max="9999"
+                                                 Immediate="true" />  
+
+                                <!--BUTTONS, BUTTONS, BUTTONS ...-->
+                                <MudCardActions Class="mt-4">
+                                    <MudButton ButtonType="MudBlazor.ButtonType.Submit" 
+                                               Variant="Variant.Outlined"
+                                               Color="Color.Success"
+                                               Class="ml-auto">
+                                        GUARDAR
+                                    </MudButton>
+                                    <MudButton ButtonType="MudBlazor.ButtonType.Button" 
+                                               Variant="Variant.Outlined"
+                                               OnClick="@ResetContrato"
+                                               Color="Color.Default">
+                                        LIMPIAR
+                                    </MudButton>
+                                </MudCardActions>
+                            </MudPaper>
+                        </EditForm>
                     </MudCard>
                 </div>
             </MudCardContent>

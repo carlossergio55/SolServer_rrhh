@@ -13,10 +13,11 @@ using System.Threading.Tasks;
 
 namespace Aplicacion.Features.Contrato.Commands
 {
-    public class CreateRrhContratoCommand : IRequest<Response<int>>
+    public class CreateRrhContratoCommand : RrhContratoDto , IRequest<Response<int>>
     {
         //New added
-        public RrhContratoDto _RrhContratopost {  get; set; }
+        //epublic RrhContratoDto _RrhContratopost {  get; set; }
+
 
         public class Handler : IRequestHandler<CreateRrhContratoCommand, Response<int>>
         {
@@ -27,16 +28,30 @@ namespace Aplicacion.Features.Contrato.Commands
             {
                 _repo = repo;
                 _mapper = mapper;
+
+
             }
 
-            public async Task<Response<int>> Handle(CreateRrhContratoCommand request, CancellationToken cancellationToke)
+            public async Task<Response<int>> Handle(CreateRrhContratoCommand request, CancellationToken cancellationToken)
             {
-                var entity = _mapper.Map<RrhContrato>(request._RrhContratopost);
-                var created = await _repo.AddAsync(entity, cancellationToke);
-                return new Response<int>(created.IdrrhhContrato);
-                //var entity = _mapper.Map<RrhPersona>(request._RrhPersona);
-                //var created = await _repo.AddAsync(entity, cancellationToken);
-                //return new Response<int>(created.IdrrhPersona);
+                try
+                {
+                    var entity = _mapper.Map<RrhContrato>(request);
+                    var created = await _repo.AddAsync(entity, cancellationToken);
+                    return new Response<int>(created.IdrrhhContrato);
+                }
+                catch (Exception ex)
+                {
+                    var innerMessage = ex.InnerException?.Message ?? ex.Message;
+
+                    // Incluir los valores que llegan
+                    var debugInfo = $"Inicio: {request.InicioContrato}, Fin: {request.FinContrato}, Número: {request.NumeroContrato}, Tipo: {request.TipoContrato}, Persona: {request.IdrrhhPersona}";
+
+                    return new Response<int>(0, $"Error al guardar contrato: {innerMessage}. Datos enviados: {debugInfo}");
+
+                    //var innerMessage = ex.InnerException?.Message ?? ex.Message;
+                    //return new Response<int>(0, $"Error: {innerMessage}");
+                }
             }
         }
     }

@@ -16,9 +16,9 @@ namespace Aplicacion.Features.Contrato.Commands
     {
 
         public int        IdrrhhContrato   { get; set; }
-        public DateTime?  InicioContrato   { get; set; }
-        public DateTime?  FinContrato      { get; set; }
-        public int?       NumeroContrato   { get; set; }
+        public DateTime  InicioContrato   { get; set; }
+        public DateTime  FinContrato      { get; set; }
+        public int       NumeroContrato   { get; set; }
         public string     TipoContrato     { get; set; }
 
 
