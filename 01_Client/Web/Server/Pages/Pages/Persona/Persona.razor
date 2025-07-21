@@ -110,10 +110,12 @@
                                 <MudItem xs="12" sm="6">
                                     <MudTextField T="string"
                                                   @bind-Value="_Persona.Celular"
-                                                  Label="CELULAR: "
+                                                  Label="CELULAR:"
                                                   Variant="Variant.Outlined"
                                                   Margin="Margin.Dense"
-                                                  MaxLength="15" />
+                                                  MaxLength="11"
+                                                  Adornment="Adornment.Start"
+                                                  AdornmentText="+591" />
                                 </MudItem>
 
                                 <!-- Contraseña -->
@@ -185,63 +187,38 @@
                                                   MaxLength="100" />
                                 </MudItem>
 
-                                <!-- Profesión-->
+                                <!-- Profesión -->
                                 <MudItem xs="12" sm="6" md="4">
-                                    <MudSelect T="int?"
-                                               Label="PROFESION: "
-                                               @bind-Value="_Persona.IdgenProfesion"
-                                               Variant="Variant.Outlined"
-                                               Margin="Margin.Dense">
-                                        @if (_ListaPrfesion is not null)
-                                        {
-                                            @foreach (var proveedor in _ListaPrfesion)
-                                            {
-                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
-                                                    @proveedor.Descripcion
-                                                </MudSelectItem>
-                                            }
-                                        }
-                                    </MudSelect>
+                                    <AutoSelectClasificador TItem="GenClasificadorDto"
+                                                            Label="PROFESIÓN: "
+                                                            Items="_ListaPrfesion"
+                                                            IdProperty="IdgenClasificador"
+                                                            DescriptionProperty="Descripcion"
+                                                            MaxItems="50"
+                                                            @bind-DataValue="_Persona.IdgenProfesion" />
                                 </MudItem>
 
                                 <!--Nivel Salarial-->
                                 <MudItem xs="12" sm="6" md="4">
-                                    <MudSelect T="int?"
-                                               Label="NIVEL SALARIAL: "
-                                               @bind-Value="_Persona.IdgenNivelsalarial"
-                                               Variant="Variant.Outlined"
-                                               Margin="Margin.Dense">
-                                        @if (_ListaSalario is not null)
-                                        {
-                                            @foreach (var proveedor in _ListaSalario)
-                                            {
-                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
-                                                    @proveedor.Descripcion
-                                                </MudSelectItem>
-                                            }
-                                        }
-                                    </MudSelect>
+                                    <AutoSelectClasificador TItem="GenClasificadorDto"
+                                                            Label="NIVEL SALARIAL"
+                                                            Items="_ListaSalario"
+                                                            IdProperty="IdgenClasificador"
+                                                            DescriptionProperty="Descripcion"
+                                                            MaxItems="50"
+                                                            @bind-DataValue="_Persona.IdgenNivelsalarial" />
                                 </MudItem>
 
                                 <!--Puesto Denominación-->
                                 <MudItem xs="12" sm="6" md="4">
-                                    <MudSelect T="int?"
-                                               Label="PUESTO DENOMINACION: "
-                                               @bind-Value="_Persona.IdgenPuestodenominacion"
-                                               Variant="Variant.Outlined"
-                                               Margin="Margin.Dense">
-                                        @if (_ListaPuestoDenominacion is not null)
-                                        {
-                                            @foreach (var proveedor in _ListaPuestoDenominacion)
-                                            {
-                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
-                                                    @proveedor.Descripcion
-                                                </MudSelectItem>
-                                            }
-                                        }
-                                    </MudSelect>
+                                    <AutoSelectClasificador TItem="GenClasificadorDto"
+                                                            Label="PUESTO DENOMINACION: "
+                                                            Items="_ListaPuestoDenominacion"
+                                                            IdProperty="IdgenClasificador"
+                                                            DescriptionProperty="Descripcion"
+                                                            MaxItems="50"
+                                                            @bind-DataValue="_Persona.IdgenPuestodenominacion" />
                                 </MudItem>
-
 
                                 <!--Grupo Trabajo-->
                                 <MudItem xs="12" sm="6" md="4">
@@ -264,21 +241,12 @@
 
                                 <!--Grupo Descripcion-->
                                 <MudItem xs="12" sm="6" md="4">
-                                    <MudSelect T="int?"
-                                               Label="DESCRIPCION PUESTO: "
-                                               @bind-Value="_Persona.IdgenPuestodescripcion"
-                                               Variant="Variant.Outlined"
-                                               Margin="Margin.Dense">
-                                        @if (_ListaPuestoDescripcion is not null)
-                                        {
-                                            @foreach (var proveedor in _ListaPuestoDescripcion)
-                                            {
-                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
-                                                    @proveedor.Descripcion
-                                                </MudSelectItem>
-                                            }
-                                        }
-                                    </MudSelect>
+                                    <AutoSelectClasificador TItem="GenClasificadorDto"
+                                                            Label="DESCRIPCION PUESTO: "
+                                                            Items="_ListaPuestoDescripcion"
+                                                            IdProperty="IdgenClasificador"
+                                                            DescriptionProperty="Descripcion"
+                                                            @bind-DataValue="_Persona.IdgenPuestodescripcion" />
                                 </MudItem>
 
                                 <!--Grupo Categoria-->
@@ -319,7 +287,7 @@
                                     </MudSelect>
                                 </MudItem>
 
-                                <!-- Sexo -->
+                                <!-- Genero -->
                                 <MudItem xs="12" sm="6" md="4">
                                     <MudSelect T="string"
                                                Label="GENERO: "
@@ -333,21 +301,13 @@
 
                                 <!-- Unidad Organizacional -->
                                 <MudItem xs="12" sm="6" md="4">
-                                    <MudSelect T="int?"
-                                               Label="UNIDAD ORGANIZACIONAL: "
-                                               @bind-Value="_Persona.IdgenUnidad"
-                                               Variant="Variant.Outlined"
-                                               Margin="Margin.Dense">
-                                        @if (_ListaUnidad is not null)
-                                        {
-                                            @foreach (var proveedor in _ListaUnidad)
-                                            {
-                                                <MudSelectItem T="int?" Value="@proveedor.IdgenClasificador">
-                                                    @proveedor.Descripcion
-                                                </MudSelectItem>
-                                            }
-                                        }
-                                    </MudSelect>
+                                    <AutoSelectClasificador TItem="GenClasificadorDto"
+                                                            Label="UNIDAD ORGANIZACIONAL: "
+                                                            Items="_ListaUnidad"
+                                                            IdProperty="IdgenClasificador"
+                                                            DescriptionProperty="Descripcion"
+                                                            MaxItems="50"
+                                                            @bind-DataValue="_Persona.IdgenUnidad" />
                                 </MudItem>
                             </MudGrid>
                         </MudCardContent>
@@ -355,14 +315,13 @@
                         <MudCardActions>
                             <MudButton ButtonType="MudBlazor.ButtonType.Submit" 
                                        Variant="Variant.Outlined"
-                                       Color="Color.Success"
-                                       Class="ml-auto">
+                                       Class="button-save button-spacing">
                                 GUARDAR
                             </MudButton>
                             <MudButton ButtonType="MudBlazor.ButtonType.Button" 
                                        Variant="Variant.Outlined"
                                        OnClick="@ResetPerfil"
-                                       Color="Color.Default">
+                                       Class="button-clean">
                                 LIMPIAR FORMULARIO
                             </MudButton>
                         </MudCardActions>
@@ -374,7 +333,7 @@
     </MudExpansionPanels>
 </MudCard>
 
-<!--/////////////////////////////////////////////////////////////////////////////////-->
+<!--////////////////////////////////////////////////////////////////////////////////////////////////-->
 
 <div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
     <div style="width: 100%; max-width: 100%;">
@@ -444,6 +403,7 @@
                                             <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => EliminarPersona(context.IdrrhPersona))"
                                                        Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" />
                                     </MudTooltip>
+
                                     <MudIconButton Icon="@(context.Estado == '1' ? Icons.Material.Filled.ToggleOn : Icons.Material.Filled.ToggleOff)"
                                                    Variant="Variant.Outlined"
                                                    Color="@(context.Estado == '1' ? Color.Success : Color.Secondary)"
@@ -559,6 +519,7 @@
 
             <!--THE BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART-->
             <div style="display: flex; justify-content: center; gap: 0px; flex-wrap: wrap; margin-top: 2rem; width: 100%; max-width: 1600px;">
+
                 <!-- Chart 1 -->
                 <div style="flex: 1 1 40%; min-width: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 400px;">
                     <h3 style="text-align: center;">PERSONAL DE DIFERENTES DEPARTAMENTOS</h3>
@@ -678,15 +639,13 @@
     </div>
 </div>
 
-
 <!-- "CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS" -->
 <SfDialog Target="#target" ZIndex="999" Width="60%" Height="90%" AllowDragging="true" IsModal="true" style="min-height: 90%" CloseOnEscape="false" @bind-Visible="@popupAdmView">
     <DialogTemplates>
-        <Header><strong>CONTRATO DE PERSONA</strong> <strong></strong></Header>
+        <Header><strong>HISTORIAL</strong> <strong></strong></Header>
         <Content>
             <MudCardContent>
                 <div>
-
                     <MudCard>
                         <MudTable Items="@TablaContratoPersona" Hover="true" Bordered="true" Striped="true" Dense="true">
                             <HeaderContent>
@@ -697,6 +656,7 @@
                                 <MudTh Style="text-align: left;">NUMERO DE CONTRATO</MudTh>
                                 <MudTh Style="text-align: left;">TIPO DE CONTRATO</MudTh>
                             </HeaderContent>
+
                             <RowTemplate>
                                 <!--<MudTd Class="text-center">@context.IdrrhhContrato</MudTd>-->
                                 <MudTd Class="text-center">@context.IdrrhhPersona</MudTd>
@@ -704,11 +664,25 @@
                                 <MudTd Class="text-center">@context.FinContrato.Value.ToString("dd/MM/yyyy")</MudTd>
                                 <MudTd Class="text-center">@context.NumeroContrato</MudTd>
                                 <MudTd Class="text-center">@context.TipoContrato</MudTd>
+
+                                <!--Add Button of "Borrar y Editar"-->
+                                <MudTd>
+                                    <MudTooltip Text="EDITAR CONTRATO" Placement="Placement.Top">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => FormEditarContrato(context))"
+                                                       Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small" />
+                                    </MudTooltip>
+
+                                    <MudTooltip Text="ELIMINAR CONTRATO" Placement="Placement.Top">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => EliminarContrato(context.IdrrhhContrato))"
+                                                       Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" />
+                                    </MudTooltip>
+                                </MudTd>
+
                             </RowTemplate>
                         </MudTable>
                     </MudCard>
-
-                    <MudCard>
+                
+                    <MudCard Class="mt-4">
                         <EditForm Model="@_Contrato" OnValidSubmit="OnValidContrato"> 
                             <DataAnnotationsValidator />
                             <MudPaper Class="p-4" Style="max-width:250px;">
@@ -729,22 +703,21 @@
                                     <MudSelectItem Value="@("CONTRATO")"> CONTRATO </MudSelectItem>
                                     <MudSelectItem Value="@("ADENDA")"> ADENDA </MudSelectItem>
                                 </MudSelect>
-@* 
-                                
-                                <MudNumericField T="int"
+ 
+                                <!-- <MudNumericField T="int"
                                                  @bind-Value="_Contrato.IdrrhhPersona"
                                                  Label="ID CONTRATO"
                                                  Step="1"
                                                  Min="1"
                                                  Max="9999"
-                                                 Immediate="true" />  
- *@
+                                                 Immediate="true" />  -->
                                 <!--BUTTONS, BUTTONS, BUTTONS ...-->
+
                                 <MudCardActions Class="mt-4">
                                     <MudButton ButtonType="MudBlazor.ButtonType.Submit" 
                                                Variant="Variant.Outlined"
                                                Color="Color.Success"
-                                               Class="ml-auto">
+                                               Class="ml-auto button-spacing">
                                         GUARDAR
                                     </MudButton>
                                     <MudButton ButtonType="MudBlazor.ButtonType.Button" 

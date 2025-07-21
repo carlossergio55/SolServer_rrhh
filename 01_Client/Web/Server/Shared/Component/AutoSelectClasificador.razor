@@ -1,0 +1,67 @@
+﻿@typeparam TItem
+@using Server.Models
+
+
+<div>
+    <MudAutocomplete T="int?"
+                 @bind-Value="DataValue"
+                 Label="@Label"
+                 Variant="Variant.Outlined"
+                 Margin="Margin.Dense"
+                 SearchFunc="@SearchItems"
+                 ToStringFunc="@GetDescripcion"
+                 Clearable="true"
+                 ResetValueOnEmptyText="true"
+                 CoerceText="true"
+                 CoerceValue="true"
+                 MaxItems="@MaxItems" />
+</div>
+
+@code {
+
+    [Parameter] public string Label { get; set; }
+    [Parameter] public IEnumerable<TItem> Items { get; set; }
+    [Parameter] public string IdProperty { get; set; } = "IdgenClasificador";
+    [Parameter] public string DescriptionProperty { get; set; } = "Descripcion";
+    [Parameter] public int MaxItems { get; set; } = 20;
+
+    private int? _value;
+    [Parameter]
+    public int? DataValue
+    {
+        get => _value;
+        set
+        {
+            if (_value != value)
+            {
+                _value = value;
+                DataValueChanged.InvokeAsync(value);
+            }
+        }
+    }
+
+    [Parameter] public EventCallback<int?> DataValueChanged { get; set; }
+
+    private async Task<IEnumerable<int?>> SearchItems(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return Items?.Select(x => (int?)GetPropertyValue(x, IdProperty)) ?? Enumerable.Empty<int?>();
+
+        return Items?
+            .Where(x => GetPropertyValue(x, DescriptionProperty)?.ToString()
+            .Contains(value, StringComparison.InvariantCultureIgnoreCase) == true)
+            .Select(x => (int?)GetPropertyValue(x, IdProperty)) ?? Enumerable.Empty<int?>();
+    }
+
+    private string GetDescripcion(int? id)
+    {
+        if (id == null) return string.Empty;
+        var item = Items.FirstOrDefault(x => (int?)GetPropertyValue(x, IdProperty) == id);
+        return item != null ? GetPropertyValue(item, DescriptionProperty)?.ToString() : string.Empty;
+    }
+
+    private object GetPropertyValue(object obj, string propertyName)
+    {
+        return obj?.GetType()?.GetProperty(propertyName)?.GetValue(obj, null);
+    }
+}

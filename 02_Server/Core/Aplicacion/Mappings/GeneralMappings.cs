@@ -15,12 +15,10 @@ using Dominio.Entities.Persona;
 using Dominio.Entities.Seguridad;
 using Dominio.Entities.Vistas;
 
-
 namespace Aplicacion.Mappings
 {
     public class GeneralMappings : Profile
     {
-
         public GeneralMappings()
         {
             //TODO: Agregar aqui el registro de mapeo para obtenion de consultas  direccion  EntidadDominio --> ModeloDto

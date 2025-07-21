@@ -1,0 +1,49 @@
+﻿/* Save button */
+.button-save {
+    background-color: #4CAF50;
+    color: white;
+    font-weight: bold;
+    padding: 8px;
+    border: none;
+}
+
+.button-save:hover,
+.button-save:focus,
+.button-save:active {
+    background-color: #4CAF50 !important;
+    color: white;
+    box-shadow: none;
+    outline: none;
+    }
+
+/* Clean button */
+.button-clean {
+    background-color: #A09B9B;
+    color: white;
+    font-weight: bold;
+    padding: 8px;
+    border: none;
+}
+
+.button-clean:hover,
+.button-clean:focus,
+.button-clean:active {
+    background-color: #A09B9B !important;
+    color: white;
+    box-shadow: none;
+    outline: none;
+    }
+
+/* Optional: spacing between buttons */
+.button-spacing {
+    margin-right: 10px;
+}
+
+
+
+
+
+
+
+
+

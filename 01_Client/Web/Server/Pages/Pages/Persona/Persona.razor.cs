@@ -34,7 +34,10 @@ namespace Server.Pages.Pages.Persona
         private string TotalText;
         private bool formVisible = true; // para mostrar/ocultar el formulario
 
-        protected List<RrhPersonaDto>       Tablapersona            { get; set; } = new();
+        protected List<RrhPersonaDto>       Tablapersona            { get; set; } = new(); //Each employee is represented by a DTO object of type RrhPersonaDto like Nombre, Celular, Sexo, Edad
+        protected List<RrhContratoDto>      TablaContrato            { get; set; } = new();
+
+
         protected List<GenClasificadorDto> _ListaPrfesion           { get; set; } = new();
         protected List<GenClasificadorDto> _ListaSalario            { get; set; } = new();
         protected List<GenClasificadorDto> _ListaPuestoDenominacion { get; set; } = new();
@@ -44,11 +47,9 @@ namespace Server.Pages.Pages.Persona
         protected List<GenClasificadorDto> _ListaClase              { get; set; } = new();
         protected List<GenClasificadorDto> _ListaUnidad             { get; set; } = new(); 
 
-        private RrhPersonaDto _Persona   = new RrhPersonaDto();
-        private RrhContratoDto _Contrato = new RrhContratoDto();
-
-        private   List<RrhPersonaDto> _RrhPersona           = new List<RrhPersonaDto>();
-        protected List<RrhContratoDto> TablaContrato        = new List<RrhContratoDto>();
+        private RrhPersonaDto  _Persona   = new RrhPersonaDto();
+        private RrhContratoDto _Contrato  = new RrhContratoDto();
+        
         protected List<RrhContratoDto> TablaContratoPersona = new List<RrhContratoDto>();
 
         private List<GenClasificadorDto> _AllClasificadores = new();
@@ -82,14 +83,14 @@ namespace Server.Pages.Pages.Persona
             {
                 _MessageShow("Error al cargar clasificadores: " + result.Message, State.Warning);
             }
-
         }
+
         private List<GenClasificadorDto> FilterClasificadorByTipo(params int[] tipos)
         {
             return _AllClasificadores.Where(x => tipos.Contains(x.IdgenClasificadortipo)).ToList();
         }
 
-        //The Principal ...
+        //The Principal Persona ...
         private async Task GetPersonaTurnos()
         {
             try
@@ -101,12 +102,32 @@ namespace Server.Pages.Pages.Persona
                     //Tablapersona = result.Data;
                     Tablapersona = result.Data.OrderByDescending(p => p.IdrrhPersona).ToList(); // <-- sorting added here
                 else
-                    _MessageShow($"Error111122: {result.Message}", State.Error);
+                    _MessageShow($"Error_Persona: {result.Message}", State.Error);
             }
             catch (Exception ex)
             {
                 _Loading.Hide();
-                _MessageShow($"ExcepciónAA: {ex.Message}", State.Error);
+                _MessageShow($"Excepción_Persona: {ex.Message}", State.Error);
+            }
+        }
+
+        //The Principal Contrato ...
+        private async Task GetPersonaContrato()
+        {
+            try
+            {
+                _Loading.Show();
+                var result = await _Rest.GetAsync<List<RrhContratoDto>>("RrhContrato/GetAll");
+                _Loading.Hide();
+                if (result.State == State.Success)
+                    TablaContrato = result.Data.OrderBy(p => p.NumeroContrato).ToList(); // <-- sorting added here
+                else
+                    _MessageShow($"Error_Contrato: {result.Message}", State.Error);
+            }
+            catch (Exception ex)
+            {
+                _Loading.Hide();
+                _MessageShow($"Excepción_Contrato: {ex.Message}", State.Error);
             }
         }
 
@@ -115,7 +136,9 @@ namespace Server.Pages.Pages.Persona
             await GetPersonaTurnos      ();
             await LoadClasificadores    ();
             await GetPersonaContrato    ();
-            LoadDonutCharts             ();
+
+           
+            LoadDonutCharts();
         }
 
         ////////////////////////////////UNIDADES////////////////////////////////////////////////////////////    
@@ -164,6 +187,15 @@ namespace Server.Pages.Pages.Persona
                     !string.IsNullOrWhiteSpace(p.Ci) &&
                     p.Ci.Trim().Equals(persona.Ci?.Trim(), StringComparison.OrdinalIgnoreCase));
 
+                if (!string.IsNullOrWhiteSpace(_Persona.Celular))
+                {
+                    // Si ya tiene 591, no hagas nada
+                    if (!_Persona.Celular.StartsWith("591"))
+                    {
+                        _Persona.Celular = "591" + _Persona.Celular.Trim();
+                    }
+                }
+
                 if (personaExistente != null)
                 {
                     _MessageShow($"Ya existe una persona registrada con este CI: {personaExistente.Ci}, Nombre: {personaExistente.NombreApellido}", State.Warning);
@@ -197,16 +229,15 @@ namespace Server.Pages.Pages.Persona
             {
                 _Loading.Show();
 
-                _MessageShow("Contenido enviado tercero: " + JsonSerializer.Serialize(contrato), State.Warning);
+                //_MessageShow("Contenido enviado tercero: " + JsonSerializer.Serialize(contrato), State.Warning);
 
-                var response = await _Rest.PostAsync<int>("RrhContrato", contrato);
+                var response = await _Rest.PostAsync<int?>("RrhContrato", contrato);
 
                 _Loading.Hide();
-
-                _MessageShow("Estado111: " + response.State.ToString(), State.Warning);
-                _MessageShow("Mensaje222: " + (response?.Message ?? "Sin mensaje"), State.Warning);
-
                 _MessageShow(response.Message, response.State);
+
+                //_MessageShow("Estado111: " + response.State.ToString(), State.Warning);
+                //_MessageShow("Mensaje222: " + (response?.Message ?? "Sin mensaje"), State.Warning);
 
                 if (response.Errors != null)
                     response.Errors.ForEach(e => _MessageShow(e, State.Warning));
@@ -215,6 +246,7 @@ namespace Server.Pages.Pages.Persona
             {
                 _Loading.Hide();
                 _MessageShow(ex.Message, State.Error);
+                await GetPersonaContrato();
             }
         }
 
@@ -271,6 +303,30 @@ namespace Server.Pages.Pages.Persona
            // });
         }
 
+
+        protected async Task EliminarContrato(int id)
+        {
+           //await _MessageConfirm("¿Seguro de eliminar el registro de esta persona?", async () => {
+
+                var response = await _Rest.DeleteAsync<int>("RrhContrato", id);
+                if (!response.Succeeded)
+                {
+                    _MessageShow(response.Message, State.Error);
+                }
+                else
+                {
+                    _MessageShow(response.Message, response.State);
+                    await GetPersonaTurnos();
+                    StateHasChanged();
+                }
+
+            await GetPersonaContrato();
+            TablaContratoPersona = TablaContrato.Where(x => x.IdrrhhPersona == _Contrato.IdrrhhPersona).ToList();
+            StateHasChanged();
+            //});
+        }
+
+
         //Validar y guardar/actualizar el formulario
         private async Task OnValidPerfil(EditContext ctx)
         {
@@ -291,12 +347,12 @@ namespace Server.Pages.Pages.Persona
         //Validar y guardar/actualizar ...
         private async Task OnValidContrato(EditContext ctx)
         {
-
-            _MessageShow("¡Formulario válido primero! ", State.Success);
+            //_MessageShow("¡Formulario válido primero! ", State.Success);
+            //_MessageShow($"¡Formulario válido! ID del contrato: {_Contrato.IdrrhhContrato}", State.Success);
 
             if (_Contrato.IdrrhhContrato > 0)
             {
-                _MessageShow("¡Update Contrato! ", State.Success);
+                _MessageShow("¡Update Contrato! primero", State.Success);
                 await UpdateContrato(_Contrato);
             }
             else
@@ -304,35 +360,37 @@ namespace Server.Pages.Pages.Persona
                 _MessageShow("¡Save Contrato! segundo", State.Success);
                 await SaveContrato(_Contrato);
             }
-            ToggleExpand();
-            StateHasChanged();
+            await GetPersonaContrato(); // 🔄 Vuelve a cargar todos los contratos o al menos los del empleado actual
+
+            //"TablaContratoPersona" guarda en una nueva lista ...
+            TablaContratoPersona = TablaContrato.Where(x => x.IdrrhhPersona == _Contrato.IdrrhhPersona).ToList();  //.ToList() Lo convierte en una nueva tabla ...
+
+            //_MessageShow($"_Contrato.IdrrhhContrato ==> {_Contrato.IdrrhhContrato}", State.Success);
+            //_MessageShow($"_Contrato.InicioContrato ==> {_Contrato.InicioContrato}", State.Success);
+            //_MessageShow($"_Contrato.FinContrato    ==> {_Contrato.FinContrato}", State.Success);
+            //_MessageShow($"_Contrato.NumeroContrato ==> {_Contrato.NumeroContrato}", State.Success);
+            //_MessageShow($"_Contrato.TipoContrato   ==> {_Contrato.TipoContrato}", State.Success);
+            //_MessageShow($"_Contrato.IdrrhhPersona  ==> {_Contrato.IdrrhhPersona}", State.Success);
+
+            //_Contrato = new RrhContratoDto();  // 🧹 Limpia el formulario si quieres
+
+            _Contrato.InicioContrato = null;
+            _Contrato.FinContrato = null;
+            _Contrato.NumeroContrato = 0;
+            _Contrato.TipoContrato = null;
+
+
+
+            StateHasChanged();  // 🔃 Forzar el renderizado de la vista actualizada
         }
 
         /* ///////////////////////////////////////////////////////////////////////////////// */
-        private async Task GetPersonaContrato()
-        {
-            try
-            {
-                _Loading.Show();
-                var result = await _Rest.GetAsync<List<RrhContratoDto>>("RrhContrato/GetAll");
-                _Loading.Hide();
-                if (result.State == State.Success)
-                    TablaContrato = result.Data;
-                else
-                    _MessageShow($"Error111122: {result.Message}", State.Error);
-            }
-            catch (Exception ex) 
-            {
-                _Loading.Hide();
-                _MessageShow($"ExcepciónAA: {ex.Message}", State.Error);
-            }
-        }
-        //_Contrato
         protected async Task ShowPopu(int id)
         {
             try
             {
                 TablaContratoPersona = TablaContrato.Where(x => x.IdrrhhPersona == id).ToList();
+
                 if (TablaContratoPersona.Any())
                 {
                     popupAdmView = true;
@@ -341,13 +399,15 @@ namespace Server.Pages.Pages.Persona
                 }
                 else
                 {
-                    popupAdmView = false;
-                    _MessageShow("No hay contrato parav la paersona", State.Warning);
+                    popupAdmView = true;
+                    _Contrato.IdrrhhPersona = id;
+                    //popupAdmView = false;
+                    //_MessageShow("No hay contrato para la persona", State.Warning);
 
                 }
             }
             catch (Exception ex) {
-                _MessageShow("Error al filtrar datos de contrato"+ex,State.Error);
+                _MessageShow("Error al filtrar datos de contrato" + ex, State.Error);
             }
         }
 
@@ -359,14 +419,18 @@ namespace Server.Pages.Pages.Persona
             await GetPersonaTurnos(); //Opcional si necesitas refrescar la lista
         }
 
-
-
         // Cargar para editar la informacion ...
         private void FormEditarPersona(RrhPersonaDto persona)
         {
             _Persona = persona;
             ToggleExpand();
         }
+
+        private void FormEditarContrato(RrhContratoDto contrato)
+        {
+            _Contrato = contrato;
+        }
+
         private void ResetPerfil() => _Persona = new RrhPersonaDto();
         private void ResetContrato() => _Contrato = new RrhContratoDto();
 
@@ -381,7 +445,7 @@ namespace Server.Pages.Pages.Persona
         private bool FilterFunc1(RrhPersonaDto element) => FilterFunc(element, searchString);
 
 
-        /*///////////////////////////////////////////////////////////////////////////////////////////////////////*/
+        /*//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
         private bool FilterFunc(RrhPersonaDto element, string searchString)
         {
             if (string.IsNullOrWhiteSpace(searchString))
@@ -586,7 +650,7 @@ namespace Server.Pages.Pages.Persona
             return resultado;
         }
 
-        //THIS IS FOR THE BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART ...
+        //THIS IS FOR THE BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART ...
         private List<RrhChartsDto> GenerarDonutDepartamento(IEnumerable<RrhPersonaDto> personas, string grupoLabel, out int totalPersonas)
         {
             var departamentoMap = new Dictionary<string, string>
