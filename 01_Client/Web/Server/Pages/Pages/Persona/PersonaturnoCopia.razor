@@ -1,0 +1,132 @@
+﻿@page "/personaturno1"
+@using Infraestructura.Models.Biometrico
+@using Infraestructura.Models.Clasificador
+@using Infraestructura.Models.Horario
+@using Infraestructura.Models.Persona
+@using Microsoft.AspNetCore.Components
+@using Syncfusion.Blazor.Grids
+@using System.Globalization
+@using Server.Pages.Pages.Biometrico
+@using MudBlazor
+@using Syncfusion.Blazor.Buttons
+@inherits MainBaseComponent
+@layout MainLayout
+@inject NavigationManager Navigation
+@inject NavigationManager Nav
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
+
+
+<MudCard>
+    <!-- Panel de formulario -->
+    <MudExpansionPanels MultiExpansion="false">
+        <MudExpansionPanel @bind-IsExpanded="expande" HideIcon="true">
+            <TitleContent>
+                <MudContainer MaxWidth="MaxWidth.ExtraSmall" Class="mb-5">
+                    <MudButton Variant="Variant.Outlined"
+                               Color="@(expande ? Color.Error : Color.Success)"
+                               OnClick="@ToggleExpand">
+                        @(expande ? "CERRAR" : "AGREGAR")
+                    </MudButton>
+                </MudContainer>
+            </TitleContent>
+            <ChildContent>
+                <MudCard>
+                    <MudTabs>
+                        <EditForm Model="@_DiaEvento" OnValidSubmit="OnValidDiaEvento">
+                            <DataAnnotationsValidator />
+                            <MudCardContent>
+                                <MudGrid>
+                                    <MudItem xs="12" sm="4">
+                                        <MudAutocomplete T="PersonaMinDto"
+                                                         Value="_personaSeleccionada"
+                                                         ValueChanged="OnPersonaChanged"
+                                                         ValueExpression="() => _personaSeleccionada"
+                                                         ToStringFunc="p => p?.NombreApellido ?? string.Empty"
+                                                         SearchFunc="SearchPersonas"
+                                                         Label="Nombre del funcionario"
+                                                         Placeholder="Ej: Juan Pérez"
+                                                         HelperText="Busque por nombre completo"
+                                                         Required="true"
+                                                         Variant="Variant.Outlined"
+                                                         Margin="Margin.Dense"
+                                                         AdornmentIcon="@Icons.Material.Filled.PersonSearch"
+                                                         MinCharacters="3"
+                                                         DebounceInterval="500" />
+                                    </MudItem>
+                                    <MudItem xs="12" sm="4">
+                                        <MudSelect T="int"
+                                                   Label="TURNO:"
+                                                   @bind-Value="_DiaEvento.IdgenClasificadortipo"
+                                                   Variant="Variant.Outlined"
+                                                   Margin="Margin.Dense">
+                                            @foreach (var turno in _listaTurnos ?? Enumerable.Empty<GenClasificadorTipoDto>())
+                                            {
+                                                <MudSelectItem Value="@(turno.IdgenClasificadortipo)">
+                                                    <!-- int aquí también -->
+                                                    @turno.Descripcion
+                                                </MudSelectItem>
+                                            }
+                                        </MudSelect>
+
+                                    </MudItem>
+                                    <MudItem xs="12" sm="4">
+                                        <MudSelect T="int" Label="Grupo de Turno" @bind-Value="_grupoSeleccionado"
+                                                   Variant="Variant.Outlined" Margin="Margin.Dense" Required="true">
+                                            @foreach (var grupo in _listaGrupo ?? Enumerable.Empty<GenGrupoturnoDto>())
+                                            {
+                                                <MudSelectItem Value="@(grupo.IdgenGrupoturno)">
+                                                    @grupo.Nombre
+                                                </MudSelectItem>
+                                            }
+                                        </MudSelect>
+
+                                    </MudItem>
+
+                                    <MudItem xs="12" sm="4">
+                                        <MudDatePicker Label="Fecha Inicio" @bind-Date="_fechaInicio" />
+                                    </MudItem>
+                                    <MudItem xs="12" sm="4">
+                                        <MudDatePicker Label="Fecha Fin" @bind-Date="_fechaFin" />
+                                    </MudItem>
+
+                                    <MudItem xs="12">
+                                        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="GenerarTurnos">
+                                            Generar turnos
+
+                                        </MudButton>
+
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudTable Items="_DiasCache" Dense="true" Hover="true" Elevation="2">
+                                            <HeaderContent>
+                                                <MudTh>Fecha</MudTh>
+                                                <MudTh>Turno</MudTh>
+                                            </HeaderContent>
+                                            <RowTemplate Context="item">
+                                                <MudTd DataLabel="Fecha">@item.Fecha?.ToString("dd/MM/yyyy")</MudTd>
+                                                <MudTd DataLabel="Turno">
+                                                    @_listaTurnos.FirstOrDefault(t => t.IdgenClasificadortipo == item.IdgenClasificadortipo)?.Descripcion
+                                                </MudTd>
+                                            </RowTemplate>
+                                        </MudTable>
+                                    </MudItem>
+                                    <MudItem xs="12">
+                                        <MudButton Color="Color.Success"
+                                                   Variant="Variant.Filled"
+                                                   OnClick="GuardarTurnos"
+                                                   Disabled="_DiasCache.Count == 0">
+                                            Guardar turnos generados
+                                        </MudButton>
+                                    </MudItem>
+
+                                </MudGrid>
+                            </MudCardContent>
+                        </EditForm>
+                    </MudTabs>
+                </MudCard>
+            </ChildContent>
+        </MudExpansionPanel>
+    </MudExpansionPanels>
+</MudCard>

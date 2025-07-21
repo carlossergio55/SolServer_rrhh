@@ -18,6 +18,7 @@ namespace Aplicacion.Features.Horario.Commands
         public string ModoGeneracion { get; set; }
         public int DiasLaborables { get; set; }
         public int DiasDescanso { get; set; }
+        public bool? ExcluirFinesSemana { get; set; }
 
         public class Handler : IRequestHandler<UpdateGenGrupoturnoCommand, Response<int>>
         {
@@ -38,6 +39,7 @@ namespace Aplicacion.Features.Horario.Commands
                 entity.ModoGeneracion = request.ModoGeneracion;
                 entity.DiasLaborables = request.DiasLaborables;
                 entity.DiasDescanso = request.DiasDescanso;
+                entity.ExcluirFinesSemana = request.ExcluirFinesSemana;
 
                 await _repo.UpdateAsync(entity);
                 return new Response<int>(entity.IdgenGrupoturno);

@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 
 namespace Server.Shared.Component
 {
-  
+
     public class MainBaseComponent : ComponentBase
     {
         [Inject] private ISnackbar Snackbars { get; set; }
-        [Inject] private IDialogService DialogService { get; set; } 
+        [Inject] private IDialogService DialogService { get; set; }
 
         public void _MessageShow(string Message, State state)
         {
@@ -65,7 +65,8 @@ namespace Server.Shared.Component
             {
                 aceptable();
             }
-            else {
+            else
+            {
                 cancelable();
             }
         }

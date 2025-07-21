@@ -58,7 +58,7 @@ namespace Server.Pages.Pages.Authentication
                 resultado.Menu = resultt.Data;
                 await _LoginService.LoginAsync(resultado);
                 _Loading.Hide();
-                _navMgr.NavigateTo("/personal/dashboard", true);
+                _navMgr.NavigateTo("/personaturno1", true);
 
 
 
@@ -85,7 +85,7 @@ namespace Server.Pages.Pages.Authentication
                 result.Menu = resultt.Data;
                 await _LoginService.LoginAsync(result);
                 _Loading.Hide();
-                _navMgr.NavigateTo("/personal/dashboard", true);
+                _navMgr.NavigateTo("/personaturno1", true);
             }
          
         }

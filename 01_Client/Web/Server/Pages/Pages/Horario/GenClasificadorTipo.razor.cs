@@ -24,7 +24,6 @@ namespace Server.Pages.Pages.Horario
 
         private readonly List<string> prioridades = new() { "BAJA", "NORMAL", "ALTA" };
         private List<GenClasificadorTipoDto> _listaTipos = new();
-        private List<GenGrupoturnoDto> _listagrupo = new();
 
         /* ────────────  INICIALIZACIÓN  ──────────── */
 
@@ -288,7 +287,7 @@ namespace Server.Pages.Pages.Horario
                 "MEDIA" => Color.Warning,
                 "BAJA" => Color.Success,
                 _ => Color.Default
-            };
+            }; 
         }
 
 
@@ -301,7 +300,7 @@ namespace Server.Pages.Pages.Horario
 
         // Lista de registros
         public List<GenGrupoturnoDetalleDto> _lista = new();
-
+        private List<GenGrupoturnoDto> _listagrupo = new();
 
         // ----- CRUD -----
 
@@ -408,6 +407,65 @@ namespace Server.Pages.Pages.Horario
         {
             popupAdmView = true;
             expandeMov = false;
+        }
+        private GenGrupoturnoDto _NuevoGrupo = new GenGrupoturnoDto();
+
+        private async Task OnValidNuevoGrupo(EditContext _)
+        {
+            _Loading.Show();
+            if (_NuevoGrupo.IdgenGrupoturno > 0)
+            {
+                var resp = await _Rest.PutAsync<int>("GenGrupoturno", _NuevoGrupo, _NuevoGrupo.IdgenGrupoturno);
+                _MessageShow(resp.Message, resp.State);
+            }
+            else
+            {
+                var resp = await _Rest.PostAsync<int?>("GenGrupoturno", new { _GenGrupoturno = _NuevoGrupo });
+                _MessageShow(resp.Message, resp.State);
+            }
+            _Loading.Hide();
+            _NuevoGrupo = new GenGrupoturnoDto();
+            await ObtenerGrupo();
+            expandeMov = false;
+            StateHasChanged();
+        }
+
+        private void ResetNuevoGrupo()
+        {
+            _NuevoGrupo = new GenGrupoturnoDto();
+        }
+        private void FormEditarGrupo(GenGrupoturnoDto grupo)
+        {
+            _NuevoGrupo = new GenGrupoturnoDto
+            {
+                IdgenGrupoturno = grupo.IdgenGrupoturno,
+                Nombre = grupo.Nombre,
+                ModoGeneracion = grupo.ModoGeneracion,
+                DiasLaborables = grupo.DiasLaborables,
+                DiasDescanso = grupo.DiasDescanso,
+                ExcluirFinesSemana = grupo.ExcluirFinesSemana
+            };
+            expandeMov = true;
+            StateHasChanged();
+        }
+
+
+        protected async Task EliminarGrupo(int idCliente)
+        {
+            await _MessageConfirm("¿Está seguro de eliminar el registro...?", async () =>
+            {
+                var response = await _Rest.DeleteAsync<int>("GenGrupoturno", idCliente);
+                if (!response.Succeeded)
+                {
+                    _MessageShow(response.Message, State.Error);
+                }
+                else
+                {
+                    _MessageShow(response.Message, response.State);
+                    await ObtenerGrupo();
+                    StateHasChanged();
+                }
+            });
         }
 
 

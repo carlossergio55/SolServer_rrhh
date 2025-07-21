@@ -14,7 +14,6 @@ namespace Infraestructura.Models.Persona
         public int IdgenClasificadortipo { get; set; }
         public DateTime? Fecha { get; set; }
         public string? Motivo { get; set; }
-
         public RrhPersonaDto RrhPersona { get; set; }
         public GenClasificadorTipoDto GenClasificadortipo { get; set; }
     }
