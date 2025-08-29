@@ -49,9 +49,9 @@ namespace Dominio.Entities.Persona
         public int? IdgenProfesion { get; set; }
         public int? IdgengrupoTrabajo { get; set; }
         public int? IdgenPuestodescripcion { get; set; }
-
-
         public char? Estado { get; set; }
-    }
 
+        //Inmediato Superior ...
+        public int? InmediatoSuperior { get; set; }
+    }
 }

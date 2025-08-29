@@ -17,6 +17,7 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 @inject IDialogService DialogService
+@inject IJSRuntime JS
 
 <MudCard>
     <!-- Panel de formulario -->
@@ -110,22 +111,12 @@
                                 <MudItem xs="12" sm="6">
                                     <MudTextField T="string"
                                                   @bind-Value="_Persona.Celular"
-                                                  Label="CELULAR:"
+                                                  Label="CELULAR: "
                                                   Variant="Variant.Outlined"
                                                   Margin="Margin.Dense"
                                                   MaxLength="11"
                                                   Adornment="Adornment.Start"
                                                   AdornmentText="+591" />
-                                </MudItem>
-
-                                <!-- Contraseña -->
-                                <MudItem xs="12" sm="6">
-                                    <MudTextField T="string"
-                                                  @bind-Value="_Persona.Contrasena"
-                                                  Label="CONTRASEÑA: "
-                                                  Variant="Variant.Outlined"
-                                                  Margin="Margin.Dense"
-                                                  MaxLength="20" />
                                 </MudItem>
 
                                 <!-- Fecha de Nacimiento -->
@@ -135,17 +126,6 @@
                                                    Label="FECHA DE NACIMIENTO: "
                                                    Variant="Variant.Outlined"
                                                    Margin="Margin.Dense" />
-                                </MudItem>
-
-                                <!-- Edad -->
-                                <MudItem xs="12" sm="6">
-                                    <MudNumericField T="int?"
-                                                     @bind-Value="_Persona.Edad"
-                                                     Label="EDAD: "
-                                                     Variant="Variant.Outlined"
-                                                     Margin="Margin.Dense"
-                                                     Min="0"
-                                                     Max="120" />
                                 </MudItem>
 
                                 <!-- Domicilio -->
@@ -168,15 +148,6 @@
                                                   MaxLength="100" />
                                 </MudItem>
 
-                                <!-- Inicio Contrato -->
-                                <MudItem xs="12" sm="6">
-                                    <MudDatePicker T="DateTime?"
-                                                   @bind-Date="_Persona.InicioContrato"
-                                                   Label="INICIO DE CONTRATO: "
-                                                   Variant="Variant.Outlined"
-                                                   Margin="Margin.Dense" />
-                                </MudItem>
-
                                 <!-- Correo -->
                                 <MudItem xs="12" sm="6">
                                     <MudTextField T="string"
@@ -187,8 +158,10 @@
                                                   MaxLength="100" />
                                 </MudItem>
 
+
+
                                 <!-- Profesión -->
-                                <MudItem xs="12" sm="6" md="4">
+                                <MudItem xs="12" sm="6" >
                                     <AutoSelectClasificador TItem="GenClasificadorDto"
                                                             Label="PROFESIÓN: "
                                                             Items="_ListaPrfesion"
@@ -198,10 +171,11 @@
                                                             @bind-DataValue="_Persona.IdgenProfesion" />
                                 </MudItem>
 
-                                <!--Nivel Salarial-->
-                                <MudItem xs="12" sm="6" md="4">
+
+                                <!-- Nivel Salarial -->
+                                <MudItem xs="12" sm="6" >
                                     <AutoSelectClasificador TItem="GenClasificadorDto"
-                                                            Label="NIVEL SALARIAL"
+                                                            Label="NIVEL SALARIAL: "
                                                             Items="_ListaSalario"
                                                             IdProperty="IdgenClasificador"
                                                             DescriptionProperty="Descripcion"
@@ -210,7 +184,7 @@
                                 </MudItem>
 
                                 <!--Puesto Denominación-->
-                                <MudItem xs="12" sm="6" md="4">
+                                <MudItem xs="12" sm="6" >
                                     <AutoSelectClasificador TItem="GenClasificadorDto"
                                                             Label="PUESTO DENOMINACION: "
                                                             Items="_ListaPuestoDenominacion"
@@ -219,6 +193,19 @@
                                                             MaxItems="50"
                                                             @bind-DataValue="_Persona.IdgenPuestodenominacion" />
                                 </MudItem>
+
+
+                                <!--INMEDIATO SUPERIOR, INMEDIATO SUPERIOR-->
+                               <MudItem xs="12" sm="6" md="4">
+                                    <AutoSelectClasificador TItem="RrhPersonaDto"
+                                                            Label="INMEDIATO SUPERIOR: "
+                                                            Items="Tablapersona"
+                                                            IdProperty="IdrrhPersona"
+                                                            DescriptionProperty="NombreApellido"
+                                                            MaxItems="50"
+                                                            @bind-DataValue="_Persona.InmediatoSuperior" />
+                                </MudItem> 
+
 
                                 <!--Grupo Trabajo-->
                                 <MudItem xs="12" sm="6" md="4">
@@ -247,7 +234,7 @@
                                                             IdProperty="IdgenClasificador"
                                                             DescriptionProperty="Descripcion"
                                                             @bind-DataValue="_Persona.IdgenPuestodescripcion" />
-                                </MudItem>
+                                </MudItem> 
 
                                 <!--Grupo Categoria-->
                                 <MudItem xs="12" sm="6" md="4">
@@ -309,6 +296,8 @@
                                                             MaxItems="50"
                                                             @bind-DataValue="_Persona.IdgenUnidad" />
                                 </MudItem>
+
+
                             </MudGrid>
                         </MudCardContent>
 
@@ -333,10 +322,10 @@
     </MudExpansionPanels>
 </MudCard>
 
-<!--////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
 
-<div style="display: flex; flex-direction: column; align-items: center; width: 100%;">
-    <div style="width: 100%; max-width: 100%;">
+<div class="container-center scroll-sync-container">
+    <div class="full-width">
         <MudPaper Class="pa-4 mt-4" Elevation="5" Outlined="true">
 
             <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Success" Class="my-2">
@@ -344,108 +333,125 @@
             </MudText>
 
             <!-- Contenedor de tabla con scroll horizontal -->
-            <div style="overflow-x: auto; width: 100%;">
-                <div style="width: 100%;">
-                    <MudTable Items="@Tablapersona"
-                              Hover="true"
-                              Bordered="true"
-                              Striped="true"
-                              Dense="true"
-                              Filter="new Func<RrhPersonaDto,bool>(FilterFunc1)">
+            <div class="table_employee">
+                <div>
+                    <div class="table-scroll">
+                        <MudTable Items="@Tablapersona"
+                                  Hover="true"
+                                  Bordered="true"
+                                  Striped="true"
+                                  Dense="true"
+                                  Filter="new Func<RrhPersonaDto,bool>(FilterFunc1)">
 
-                        <ToolBarContent>
-                            <MudTextField @bind-Value="searchString"
-                                          Placeholder="Buscar"
-                                          Adornment="Adornment.Start"
-                                          AdornmentIcon="@Icons.Material.Filled.Search"
-                                          Immediate="true"
-                                          DebounceInterval="300"
-                                          Class="mt-4 mb-2" />
-                        </ToolBarContent>
-
-
-                        <HeaderContent>
-                            <MudTh Style="text-align: left;">OPCIONES</MudTh> 
-                            <MudTh Style="text-align: left;">ID PERSONA</MudTh>
-                            <MudTh Style="text-align: left;">NOMBRE</MudTh>
-                            <MudTh Style="text-align: left;">APELLIDO PATERNO</MudTh>
-                            <MudTh Style="text-align: left;">APELLIDO MATERNO</MudTh>
-                            <MudTh Style="text-align: left;">CI</MudTh>
-                            <MudTh Style="text-align: left;">EXT</MudTh>
-                            <MudTh Style="text-align: left;">EXP</MudTh>
-                            <MudTh Style="text-align: left;">CELULAR</MudTh>
-                            <MudTh Style="text-align: left;">CONTRASEÑA</MudTh>
-                            <MudTh Style="text-align: left;">UNIDAD ORGANIZACIONAL</MudTh>
-                            <MudTh Style="text-align: left;">CATEGORIA</MudTh>
-                            <MudTh Style="text-align: left;">CLASE</MudTh>
-                            <MudTh Style="text-align: left;">N. SALARIAL</MudTh>
-                            <MudTh Style="text-align: left;">PUESTO DENOMINACION</MudTh>
-                            <MudTh Style="text-align: left;">PROFESION</MudTh>
-                            <MudTh Style="text-align: left;">GRUPO TRABAJO</MudTh>
-                            <MudTh Style="text-align: left;">PUESTO DESCRIPCION</MudTh>
-                            <MudTh Style="text-align: left;">SEXO</MudTh>
-                            <MudTh Style="text-align: left;">FECHA NACIMIENTO</MudTh>
-                            <MudTh Style="text-align: left;">DOMICILIO</MudTh>
-                            <MudTh Style="text-align: left;">RESIDENCIA</MudTh>
-                            <MudTh Style="text-align: left;">EDAD</MudTh>
-                            <MudTh Style="text-align: left;">INICIO CONTRATO</MudTh>
-                            <MudTh Style="text-align: left;">CORREO</MudTh>                    
-                        </HeaderContent>
-
-                        <RowTemplate>
-                            <MudTd>
-                                    <MudTooltip Text="EDITAR REGISTRO" Placement="Placement.Top">
-                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => FormEditarPersona(context))"
-                                                       Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small" />
-                                    </MudTooltip>
-
-                                    <MudTooltip Text="ELIMINAR REGISTRO" Placement="Placement.Top">
-                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => EliminarPersona(context.IdrrhPersona))"
-                                                       Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" />
-                                    </MudTooltip>
-
-                                    <MudIconButton Icon="@(context.Estado == '1' ? Icons.Material.Filled.ToggleOn : Icons.Material.Filled.ToggleOff)"
-                                                   Variant="Variant.Outlined"
-                                                   Color="@(context.Estado == '1' ? Color.Success : Color.Secondary)"
+                            <ToolBarContent>
+                                <!-- Download Report -->
+                                <MudTooltip Text="DESCARGAR REPORTE" Color="Color.Dark" Placement="Placement.Bottom">
+                                    <MudIconButton Style="margin-top: 25px; margin-right: 20px;"
+                                                   Color="@Color.Dark"
+                                                   Variant="Variant.Filled"
+                                                   Icon="@Icons.Material.Filled.FileDownload"
                                                    Size="Size.Small"
-                                                   OnClick="@(() => CambiarEstado(context))" />
+                                                   OnClick="@(() => ExportarPersonas())" />
+                                </MudTooltip>
 
-                                    <MudTooltip Text="Mostrar contrato" Placement="Placement.Top">
-                                        <MudIconButton Icon="@Icons.Material.Filled.GridView" OnClick="@(() => ShowPopu(context.IdrrhPersona))"
-                                                       Variant="Variant.Outlined" Color="Color.Info" Size="Size.Small" />
-                                    </MudTooltip>
-                            </MudTd>
+
+                                <!-- Searcher -->
+                                <MudTextField @bind-Value="searchString"
+                                              Placeholder="Buscar"
+                                              Adornment="Adornment.Start"
+                                              AdornmentIcon="@Icons.Material.Filled.Search"
+                                              Immediate="true"
+                                              DebounceInterval="300"
+                                              Class="mt-4 mb-2" />
+                            </ToolBarContent>
+
+                            <HeaderContent>
+                                <MudTh Style="text-align: left;">OPCIONES</MudTh> 
+                                <MudTh Style="text-align: left;">ID PERSONA</MudTh>
+                                <MudTh Style="text-align: left;">NOMBRE</MudTh>
+                                <MudTh Style="text-align: left;">APELLIDO PATERNO</MudTh>
+                                <MudTh Style="text-align: left;">APELLIDO MATERNO</MudTh>
+                                <MudTh Style="text-align: left;">CI</MudTh>
+                                <MudTh Style="text-align: left;">EXT</MudTh>
+                                <MudTh Style="text-align: left;">EXP</MudTh>
+                                <MudTh Style="text-align: left;">CELULAR</MudTh>
+                                <MudTh Style="text-align: left;">CONTRASEÑA</MudTh>
+                                <MudTh Style="text-align: left;">UNIDAD ORGANIZACIONAL</MudTh>
+                                <MudTh Style="text-align: left;">CATEGORIA</MudTh>
+                                <MudTh Style="text-align: left;">CLASE</MudTh>
+                                <MudTh Style="text-align: left;">N. SALARIAL</MudTh>
+                                <MudTh Style="text-align: left;">PUESTO DENOMINACION</MudTh>
+                                <MudTh Style="text-align: left;">PROFESION</MudTh>
+                                <MudTh Style="text-align: left;">GRUPO TRABAJO</MudTh>
+                                <MudTh Style="text-align: left;">PUESTO DESCRIPCION</MudTh>
+                                <MudTh Style="text-align: left;">SEXO</MudTh>
+                                <MudTh Style="text-align: left;">FECHA NACIMIENTO</MudTh>
+                                <MudTh Style="text-align: left;">DOMICILIO</MudTh>
+                                <MudTh Style="text-align: left;">RESIDENCIA</MudTh>
+                                <MudTh Style="text-align: left;">EDAD</MudTh>
+                                <!-- <MudTh Style="text-align: left;">INICIO CONTRATO</MudTh> -->
+                                <MudTh Style="text-align: left;">INMEDIATO SUPERIOR</MudTh>
+                                <MudTh Style="text-align: left;">CORREO</MudTh>                    
+                            </HeaderContent>
+
+                            <RowTemplate>
+                                <MudTd>
+                                        <MudTooltip Text="EDITAR REGISTRO" Placement="Placement.Top">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => FormEditarPersona(context))"
+                                                           Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small" />
+                                        </MudTooltip>
+
+                                        <MudTooltip Text="ELIMINAR REGISTRO" Placement="Placement.Top">
+                                                <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => EliminarPersona(context.IdrrhPersona))"
+                                                           Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" />
+                                        </MudTooltip>
+
+                                        <MudIconButton Icon="@(context.Estado == '1' ? Icons.Material.Filled.ToggleOn : Icons.Material.Filled.ToggleOff)"
+                                                       Variant="Variant.Outlined"
+                                                       Color="@(context.Estado == '1' ? Color.Success : Color.Secondary)"
+                                                       Size="Size.Small"
+                                                       OnClick="@(() => CambiarEstado(context))" />
+
+                                        <MudTooltip Text="Mostrar contrato" Placement="Placement.Top">
+                                            <MudIconButton Icon="@Icons.Material.Filled.GridView" OnClick="@(() => ShowPopu(context.IdrrhPersona))"
+                                                           Variant="Variant.Outlined" Color="Color.Info" Size="Size.Small" />
+                                        </MudTooltip>
+                                </MudTd>
                   
-                            <MudTd Class="text-center">@context.IdrrhPersona</MudTd>
-                            <MudTd Class="text-center">@context.Nombre</MudTd>
-                            <MudTd Class="text-center">@context.ApellidoPaterno</MudTd>
-                            <MudTd Class="text-center">@context.ApellidoMaterno</MudTd>
-                            <MudTd Class="text-center">@context.Ci</MudTd>
-                            <MudTd Class="text-center">@context.Extension</MudTd>
-                            <MudTd Class="text-center">@context.Exp</MudTd>
-                            <MudTd Class="text-center">@context.Celular</MudTd>
-                            <MudTd Class="text-center">@context.Contrasena</MudTd>
-                            <MudTd Class="text-center">@GetUnidadDescripcion(context.IdgenUnidad)</MudTd>
-                            <MudTd Class="text-center">@GetCategoriaDescripcion(context.IdgenCategoria)</MudTd>
-                            <MudTd Class="text-center">@context.IdgenClase</MudTd>
-                            <MudTd Class="text-center">@context.IdgenNivelsalarial</MudTd>
-                            <MudTd Class="text-center">@GetPuestoDenominacionDescripcion(context.IdgenPuestodenominacion)</MudTd>
-                            <MudTd Class="text-center">@GetProfesionDescripcion(context.IdgenProfesion)</MudTd>
-                            <MudTd Class="text-center">@GetGrupoTrabajoDescripcion(context.IdgengrupoTrabajo)</MudTd>
-                            <MudTd Class="text-center">@GetPuestoDescripcion(context.IdgenPuestodescripcion)</MudTd>
-                            <MudTd Class="text-center">@context.Sexo</MudTd>
-                            <MudTd Class="text-center">@(context.FechaNacimiento.HasValue ? context.FechaNacimiento.Value.ToString("dd/MM/yyyy") : "")</MudTd>
-                            <MudTd Class="text-center">@context.Domicilio</MudTd>
-                            <MudTd Class="text-center">@context.Residencia</MudTd>
-                            <MudTd Class="text-center">@context.Edad</MudTd>
-                            <MudTd Class="text-center">@(context.InicioContrato.HasValue ?context.InicioContrato.Value.ToString("dd/MM/yyyy") : "")</MudTd>
-                            <MudTd Class="text-center">@context.Correo</MudTd>                 
+                                <MudTd Class="text-center">@context.IdrrhPersona</MudTd>
+                                <MudTd Class="text-center">@context.Nombre</MudTd>
+                                <MudTd Class="text-center">@context.ApellidoPaterno</MudTd>
+                                <MudTd Class="text-center">@context.ApellidoMaterno</MudTd>
+                                <MudTd Class="text-center">@context.Ci</MudTd>
+                                <MudTd Class="text-center">@context.Extension</MudTd>
+                                <MudTd Class="text-center">@context.Exp</MudTd>
+                                <MudTd Class="text-center">@context.Celular</MudTd>
+                                <MudTd Class="text-center">@context.Contrasena</MudTd>
+                                <MudTd Class="text-center">@GetUnidadDescripcion(context.IdgenUnidad)</MudTd>
+                                <MudTd Class="text-center">@GetCategoriaDescripcion(context.IdgenCategoria)</MudTd>
+                                <MudTd Class="text-center">@GetClaseDescripcion(context.IdgenClase) </MudTd>
+                                <MudTd Class="text-center">@GetNivelSalarialDescripcion(context.IdgenNivelsalarial)</MudTd>
+                                <MudTd Class="text-center">@GetPuestoDenominacionDescripcion(context.IdgenPuestodenominacion)</MudTd>
+                                <MudTd Class="text-center">@GetProfesionDescripcion(context.IdgenProfesion)</MudTd>
+                                <MudTd Class="text-center">@GetGrupoTrabajoDescripcion(context.IdgengrupoTrabajo)</MudTd>
+                                <MudTd Class="text-center">@GetPuestoDescripcion(context.IdgenPuestodescripcion)</MudTd>
+                                <MudTd Class="text-center">@context.Sexo</MudTd>
+                                <MudTd Class="text-center">@(context.FechaNacimiento.HasValue ? context.FechaNacimiento.Value.ToString("dd/MM/yyyy") : "")</MudTd>
+                                <MudTd Class="text-center">@context.Domicilio</MudTd>
+                                <MudTd Class="text-center">@context.Residencia</MudTd>
+                                <MudTd Class="text-center">@context.Edad</MudTd>
+                                <!-- <MudTd Class="text-center">@(context.InicioContrato.HasValue ?context.InicioContrato.Value.ToString("dd/MM/yyyy") : "")</MudTd>  -->
+                                <!--<MudTd Class="text-center">@context.InmediatoSuperior</MudTd>  -->
+                                <MudTd Class="text-center">@SupervisorNombre(context.InmediatoSuperior)</MudTd>
 
-                        </RowTemplate>
-                        <PagerContent>
-                            <MudTablePager /> <!--Rows per page ...-->
-                        </PagerContent>
-                    </MudTable> 
+                                <MudTd Class="text-center">@context.Correo</MudTd>                 
+
+                            </RowTemplate>
+                            <PagerContent>
+                                <MudTablePager PageSizeOptions="new int [] {5,15,30,45, 70, 100} " /> <!--Rows per page ...-->
+                            </PagerContent>
+                        </MudTable>
+                    </div>
                 </div>
             </div>
 
@@ -517,7 +523,7 @@
                 </div>
             </div>
 
-            <!--THE BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART-->
+            <!-- THE BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART, BAR CHART -->
             <div style="display: flex; justify-content: center; gap: 0px; flex-wrap: wrap; margin-top: 2rem; width: 100%; max-width: 1600px;">
 
                 <!-- Chart 1 -->
@@ -631,15 +637,28 @@
                         </ChartSeriesCollection>
                     </SfChart>
                 </div>
-
-
             </div>
 
         </MudPaper>
     </div>
 </div>
 
-<!-- "CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS, CONTRATOS" -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- "CONTRATOS NEW PAGE, CONTRATOS NEW PAGE, CONTRATOS NEW PAGE, CONTRATOS NEW PAGE, CONTRATOS NEW PAGE, CONTRATOS NEW PAGE, CONTRATOS NEW PAGE ..." -->
 <SfDialog Target="#target" ZIndex="999" Width="60%" Height="90%" AllowDragging="true" IsModal="true" style="min-height: 90%" CloseOnEscape="false" @bind-Visible="@popupAdmView">
     <DialogTemplates>
         <Header><strong>HISTORIAL</strong> <strong></strong></Header>

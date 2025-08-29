@@ -1,5 +1,7 @@
-﻿using Aplicacion.Interfaces;
+﻿using Aplicacion.Wrappers;
+using Aplicacion.Interfaces;
 using Dominio.Common;
+using Dominio.Entities.Persona;
 using Dominio.Settings;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -13,12 +15,14 @@ namespace Persistencia.Contexts
         private readonly IDateTimeService _dateTime;
         private readonly ICurrentUserService _user;
                          
+
         public AplicationDbContext(DbContextOptions<AplicationDbContext> options, IDateTimeService dateTime, ICurrentUserService user) : base(options)
         {
             ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
             _dateTime = dateTime;
             _user = user;
         }
+
 
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
         {
@@ -49,5 +53,6 @@ namespace Persistencia.Contexts
             }
             return base.SaveChangesAsync(cancellationToken);
         }
+
     }
 }

@@ -38,4 +38,3 @@ function setPositionForDialog(x, y) {
 }
 
 
-

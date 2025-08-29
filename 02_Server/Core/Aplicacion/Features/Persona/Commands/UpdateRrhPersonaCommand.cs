@@ -13,41 +13,41 @@ namespace Aplicacion.Features.Persona.Commands
 {
     public class UpdateRrhPersonaCommand : IRequest<Response<int>>
     {
-        public int IdrrhPersona { get; set; }
+        public int IdrrhPersona      { get; set; }
         public string NombreApellido { get; set; }
-        public string Ci { get; set; }
-        public string Exp { get; set; }
-        public string Celular { get; set; }
+        public string Ci             { get; set; }
+        public string Exp            { get; set; }
+        public string Celular        { get; set; }
 
         public string ApellidoPaterno { get; set; }
         public string ApellidoMaterno { get; set; }
 
-        public string Nombre { get; set; }
-        public string Apellido { get; set; }
-        public string Extension { get; set; }
-        public string Contrasena { get; set; }
+        public string Nombre             { get; set; }
+        public string Apellido           { get; set; }
+        public string Extension          { get; set; }
+        public string Contrasena         { get; set; }
         public DateTime? FechaNacimiento { get; set; }
 
 
-        public int? Edad { get; set; }
-        public string Domicilio { get; set; }
-        public string Residencia { get; set; }
+        public int? Edad                { get; set; }
+        public string Domicilio         { get; set; }
+        public string Residencia        { get; set; }
         public DateTime? InicioContrato { get; set; }
-        public string Correo { get; set; }
+        public string Correo            { get; set; }
 
 
         /*id*/
-        public int? IdgenUnidad { get; set; }    //Idgen UNIDAD ...
-        public int? IdgenCategoria { get; set; }
-        public int? IdgenClase { get; set; }
-        public int? IdgenNivelsalarial { get; set; }
+        public int? IdgenUnidad             { get; set; }    //Idgen UNIDAD ...
+        public int? IdgenCategoria          { get; set; }
+        public int? IdgenClase              { get; set; }
+        public int? IdgenNivelsalarial      { get; set; }
         public int? IdgenPuestodenominacion { get; set; }
-        public string? Sexo { get; set; }
-        public int? IdgenProfesion { get; set; }
-        public int? IdgengrupoTrabajo { get; set; }
-        public int? IdgenPuestodescripcion { get; set; }
-        public char? Estado { get; set; }
-
+        public string? Sexo                 { get; set; }
+        public int? IdgenProfesion          { get; set; }
+        public int? IdgengrupoTrabajo       { get; set; }
+        public int? IdgenPuestodescripcion  { get; set; }
+        public char? Estado                 { get; set; }
+        public int? InmediatoSuperior       { get; set; }
 
 
         public class Handler : IRequestHandler<UpdateRrhPersonaCommand, Response<int>>
@@ -65,11 +65,11 @@ namespace Aplicacion.Features.Persona.Commands
                 if (entity == null)
                     throw new KeyNotFoundException("Persona no encontrada");
 
+
                 //entity.NombreApellido = request.NombreApellido;
                 entity.Ci = request.Ci;
                 entity.Exp = request.Exp;
                 entity.Celular = request.Celular;
-
 
                 entity.ApellidoPaterno = request.ApellidoPaterno;
                 entity.ApellidoMaterno = request.ApellidoMaterno;
@@ -97,10 +97,13 @@ namespace Aplicacion.Features.Persona.Commands
                 entity.IdgengrupoTrabajo = request.IdgengrupoTrabajo;
                 entity.IdgenPuestodescripcion = request.IdgenPuestodescripcion;
                 entity.Estado = request.Estado;
+                entity.InmediatoSuperior = request.InmediatoSuperior;
+
 
                 await _repo.UpdateAsync(entity);
-                return new Response<int>(entity.IdrrhPersona);
+                return new Response<int>(entity.IdrrhPersona, "Actualizado correctamente.");
             }
+
         }
     }
 

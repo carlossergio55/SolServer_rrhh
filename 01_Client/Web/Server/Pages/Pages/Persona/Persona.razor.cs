@@ -8,6 +8,8 @@ using Infraestructura.Models.Clasificador;
 using Infraestructura.Models.Persona;
 using Microsoft.JSInterop;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components;
+
 
 using MudBlazor;
 using Microsoft.AspNetCore.Http.Connections;
@@ -23,6 +25,9 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Diagnostics;
 using static System.Net.WebRequestMethods;
+using Aplicacion.DTOs.Supervisor;
+using ClosedXML.Excel;
+
 
 namespace Server.Pages.Pages.Persona
 {
@@ -31,25 +36,24 @@ namespace Server.Pages.Pages.Persona
         private bool expande = false;
         public bool popupAdmView = false;
         private string searchString = "";  //added recently ...
-        private string TotalText;
-        private bool formVisible = true; // para mostrar/ocultar el formulario
 
-        protected List<RrhPersonaDto>       Tablapersona            { get; set; } = new(); //Each employee is represented by a DTO object of type RrhPersonaDto like Nombre, Celular, Sexo, Edad
-        protected List<RrhContratoDto>      TablaContrato            { get; set; } = new();
+        protected List<RrhPersonaDto>       Tablapersona            { get; set; } = new(); //Each employee is represented by a DTO object of type RrhPersonaDto like Nombre, Celular, Sexo, Edad ... 
+        protected List<RrhContratoDto>      TablaContrato           { get; set; } = new();
+
+        protected List<GenClasificadorDto> _ListaPrfesion           { get; set; } = new(); //Foreign key
+        protected List<GenClasificadorDto> _ListaSalario            { get; set; } = new(); //Foreign Key
+        protected List<GenClasificadorDto> _ListaPuestoDenominacion { get; set; } = new(); //Foreign key
+        protected List<GenClasificadorDto> _ListaGrupoTrabajo       { get; set; } = new(); //Foreign key
+        protected List<GenClasificadorDto> _ListaPuestoDescripcion  { get; set; } = new(); //Foreign key
+        protected List<GenClasificadorDto> _ListaCategoria          { get; set; } = new(); //Foreign key
+        protected List<GenClasificadorDto> _ListaClase              { get; set; } = new(); //Foreign key
+        protected List<GenClasificadorDto> _ListaUnidad             { get; set; } = new(); //Foreign Key
 
 
-        protected List<GenClasificadorDto> _ListaPrfesion           { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaSalario            { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaPuestoDenominacion { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaGrupoTrabajo       { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaPuestoDescripcion  { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaCategoria          { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaClase              { get; set; } = new();
-        protected List<GenClasificadorDto> _ListaUnidad             { get; set; } = new(); 
 
         private RrhPersonaDto  _Persona   = new RrhPersonaDto();
         private RrhContratoDto _Contrato  = new RrhContratoDto();
-        
+
         protected List<RrhContratoDto> TablaContratoPersona = new List<RrhContratoDto>();
 
         private List<GenClasificadorDto> _AllClasificadores = new();
@@ -98,11 +102,17 @@ namespace Server.Pages.Pages.Persona
                 _Loading.Show();
                 var result = await _Rest.GetAsync<List<RrhPersonaDto>>("RrhPersona/GetAll");
                 _Loading.Hide();
+
+
                 if (result.State == State.Success)
+                {
                     //Tablapersona = result.Data;
-                    Tablapersona = result.Data.OrderByDescending(p => p.IdrrhPersona).ToList(); // <-- sorting added here
+                    Tablapersona = result.Data.OrderByDescending(p => p.IdrrhPersona).ToList(); // Sorting added here ...
+                }
                 else
+                {
                     _MessageShow($"Error_Persona: {result.Message}", State.Error);
+                }
             }
             catch (Exception ex)
             {
@@ -119,10 +129,15 @@ namespace Server.Pages.Pages.Persona
                 _Loading.Show();
                 var result = await _Rest.GetAsync<List<RrhContratoDto>>("RrhContrato/GetAll");
                 _Loading.Hide();
+
                 if (result.State == State.Success)
+                {
                     TablaContrato = result.Data.OrderBy(p => p.NumeroContrato).ToList(); // <-- sorting added here
+                }
                 else
+                {
                     _MessageShow($"Error_Contrato: {result.Message}", State.Error);
+                }
             }
             catch (Exception ex)
             {
@@ -133,11 +148,10 @@ namespace Server.Pages.Pages.Persona
 
         protected override async Task OnInitializedAsync()
         {
-            await GetPersonaTurnos      ();
-            await LoadClasificadores    ();
-            await GetPersonaContrato    ();
+            await GetPersonaTurnos     ();
+            await LoadClasificadores   ();
+            await GetPersonaContrato   ();
 
-           
             LoadDonutCharts();
         }
 
@@ -176,12 +190,43 @@ namespace Server.Pages.Pages.Persona
         {
             return GetDescripcionById(_ListaPrfesion, id);
         }
+
+        private string GetClaseDescripcion(int? id)
+        {
+            return GetDescripcionById(_ListaClase, id);
+        }
+
+        private string GetNivelSalarialDescripcion(int? id)
+        {
+            return GetDescripcionById(_ListaSalario, id);
+        }
+            
+        private string SupervisorNombre(int? id)
+        {
+            // if no ID, return default
+            if (id == null)
+                return "No definido";
+
+            // try to find the supervisor in the list
+            var supervisor = Tablapersona.FirstOrDefault(p => p.IdrrhPersona == id);
+
+            // if found, return the name
+            if (supervisor != null)
+                return supervisor.NombreApellido;
+
+            // if not found, just return the ID number as text
+            return $"ID {id}";
+        }        
+
+
         //////////////////////////////////////////////////////////////////////////////////////////////////////
         //Crear/api/{version}/RrhPersona, RrhPersona, RrhPersona ...
         private async Task SavePersona(RrhPersonaDto persona)
         {
             try
             {
+                _MessageShow($"==> Save Persona ...", State.Success);
+
                 // Verificar si el CI ya existe en la lista de personas
                 var personaExistente = Tablapersona.FirstOrDefault(p =>
                     !string.IsNullOrWhiteSpace(p.Ci) &&
@@ -196,6 +241,12 @@ namespace Server.Pages.Pages.Persona
                     }
                 }
 
+                var codigo = GeneratePassword();                         //Añadir contraseña ....   
+                _Persona.Contrasena = codigo;
+                _Persona.Edad = CalcularEdad(_Persona.FechaNacimiento);  //Añadir la edad del trabajador ...
+
+                //_MessageShow($"_Persona.Contrasena: {_Persona.Contrasena}", State.Success);
+
                 if (personaExistente != null)
                 {
                     _MessageShow($"Ya existe una persona registrada con este CI: {personaExistente.Ci}, Nombre: {personaExistente.NombreApellido}", State.Warning);
@@ -204,10 +255,9 @@ namespace Server.Pages.Pages.Persona
                 }
 
                 _Loading.Show();
-
                 var response = await _Rest.PostAsync<int?>("RrhPersona", persona);
-
                 _Loading.Hide();
+
                 _MessageShow(response.Message, response.State);
 
                 if (response.Errors != null)
@@ -222,7 +272,7 @@ namespace Server.Pages.Pages.Persona
         }
 
 
-        //Crear/api/{version}/RrhContrato, RrhContrato, RrhContrato ...
+        //Crear/api/{version}/RrhContrato, RrhContrato, RrhContrato, RrhContrato, RrhContrato ...
         private async Task SaveContrato(RrhContratoDto contrato)
         {
             try
@@ -250,11 +300,13 @@ namespace Server.Pages.Pages.Persona
             }
         }
 
+
         // Actualizar Contrato de Empleado de la Persona ...
         private async Task UpdateContrato(RrhContratoDto contrato)
         {
             try
             {
+
                 _Loading.Show();
                 var response = await _Rest.PutAsync<int>("RrhContrato", contrato, contrato.IdrrhhContrato);
                 _Loading.Hide();
@@ -267,15 +319,27 @@ namespace Server.Pages.Pages.Persona
             }
         }
 
+
         // Actualizar la persona de Recursos Humanos ...
         private async Task UpdatePersona(RrhPersonaDto persona)
         {
             try
             {
+                _MessageShow($"==> Update_Persona ...", State.Success);
+
+                //_MessageShow($"Up IdrrhPersona      ==> {persona.IdrrhPersona}", State.Success);
+                //_MessageShow($"Up Nombre            ==> {persona.Nombre}", State.Success);
+                //_MessageShow($"Up ApellidoPaterno   ==> {persona.ApellidoPaterno}", State.Success);
+                //_MessageShow($"Up ApellidoMaterno   ==> {persona.ApellidoMaterno}", State.Success);
+                //_MessageShow($"Up InmediatoSuperior ==> {persona.InmediatoSuperior}", State.Success);
+                //_MessageShow($"Up InmediatoSuperior Nombre: {SupervisorNombre(_Persona.InmediatoSuperior)}", State.Success);
+
+
                 _Loading.Show();
                 var response = await _Rest.PutAsync<int>("RrhPersona", persona, persona.IdrrhPersona);
                 _Loading.Hide();
-                _MessageShow(response.Message, response.State);
+
+                _MessageShow($"=====>: {response.Message}", response.State);
             }
             catch (Exception ex)
             {
@@ -283,6 +347,7 @@ namespace Server.Pages.Pages.Persona
                 _MessageShow(ex.Message, State.Error);
             }
         }
+
 
         // Eliminar la persona de Recursos Humanos ...
         protected async Task EliminarPersona(int id)
@@ -320,16 +385,23 @@ namespace Server.Pages.Pages.Persona
                     StateHasChanged();
                 }
 
-            await GetPersonaContrato();
-            TablaContratoPersona = TablaContrato.Where(x => x.IdrrhhPersona == _Contrato.IdrrhhPersona).ToList();
-            StateHasChanged();
+                await GetPersonaContrato();
+                TablaContratoPersona = TablaContrato.Where(x => x.IdrrhhPersona == _Contrato.IdrrhhPersona).ToList();
+                StateHasChanged();
             //});
         }
 
 
         //Validar y guardar/actualizar el formulario
-        private async Task OnValidPerfil(EditContext ctx)
+        private async Task OnValidPerfil(EditContext ctx) 
         {
+            //_MessageShow($"_Persona.Nombre            ==> {_Persona.Nombre}", State.Success);
+            //_MessageShow($"_Persona.IdrrhPersona      ==> {_Persona.IdrrhPersona}", State.Success);
+            //_MessageShow($"_Persona.ApellidoPaterno   ==> {_Persona.ApellidoPaterno}", State.Success);
+            //_MessageShow($"_Persona.ApellidoMaterno   ==> {_Persona.ApellidoMaterno}", State.Success);
+            //_MessageShow($"_Persona.InmediatoSuperior ==> {_Persona.InmediatoSuperior}", State.Success);
+            //_MessageShow($"[SAVE] InmediatoSuperior Nombre: {SupervisorNombre(_Persona.InmediatoSuperior)}", State.Success);
+
             if (_Persona.IdrrhPersona > 0)
             {
                 await UpdatePersona(_Persona);
@@ -340,9 +412,11 @@ namespace Server.Pages.Pages.Persona
             }
             _Persona = new RrhPersonaDto();
             await GetPersonaTurnos();
+
             ToggleExpand();
             StateHasChanged();
         }
+
 
         //Validar y guardar/actualizar ...
         private async Task OnValidContrato(EditContext ctx)
@@ -352,14 +426,15 @@ namespace Server.Pages.Pages.Persona
 
             if (_Contrato.IdrrhhContrato > 0)
             {
-                _MessageShow("¡Update Contrato! primero", State.Success);
                 await UpdateContrato(_Contrato);
+                _MessageShow($"Contrato actualizado correctamente (ID: {_Contrato.IdrrhhContrato})", State.Success);
             }
             else
             {
-                _MessageShow("¡Save Contrato! segundo", State.Success);
                 await SaveContrato(_Contrato);
+                _MessageShow($"Contrato registrado exitosamente (ID: {_Contrato.IdrrhhContrato})", State.Success);
             }
+
             await GetPersonaContrato(); // 🔄 Vuelve a cargar todos los contratos o al menos los del empleado actual
 
             //"TablaContratoPersona" guarda en una nueva lista ...
@@ -372,14 +447,10 @@ namespace Server.Pages.Pages.Persona
             //_MessageShow($"_Contrato.TipoContrato   ==> {_Contrato.TipoContrato}", State.Success);
             //_MessageShow($"_Contrato.IdrrhhPersona  ==> {_Contrato.IdrrhhPersona}", State.Success);
 
-            //_Contrato = new RrhContratoDto();  // 🧹 Limpia el formulario si quieres
-
             _Contrato.InicioContrato = null;
             _Contrato.FinContrato = null;
             _Contrato.NumeroContrato = 0;
             _Contrato.TipoContrato = null;
-
-
 
             StateHasChanged();  // 🔃 Forzar el renderizado de la vista actualizada
         }
@@ -411,6 +482,7 @@ namespace Server.Pages.Pages.Persona
             }
         }
 
+
         private async Task CambiarEstado(RrhPersonaDto persona)
         {
             persona.Estado = persona.Estado == '1' ? '2' : '1';
@@ -431,7 +503,12 @@ namespace Server.Pages.Pages.Persona
             _Contrato = contrato;
         }
 
-        private void ResetPerfil() => _Persona = new RrhPersonaDto();
+        private void ResetPerfil()
+        {
+            _Persona = new RrhPersonaDto();
+        }
+
+
         private void ResetContrato() => _Contrato = new RrhContratoDto();
 
 
@@ -445,7 +522,33 @@ namespace Server.Pages.Pages.Persona
         private bool FilterFunc1(RrhPersonaDto element) => FilterFunc(element, searchString);
 
 
-        /*//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+        /*////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+
+        private int CalcularEdad(DateTime? BornDate)
+        {
+            if (BornDate == null)
+            {
+                return 0;
+            }
+
+            var today = DateTime.Today;
+            var edad = today.Year - BornDate.Value.Year;
+
+            
+
+            if (BornDate.Value.Date > today.AddYears(-edad))
+                edad = edad - 1;
+
+            return edad;
+        }
+
+        private String GeneratePassword()
+        {
+            Random aleatorio = new Random();
+            int numero = aleatorio.Next(1000,9999);
+            return numero.ToString();
+        }
+
         private bool FilterFunc(RrhPersonaDto element, string searchString)
         {
             if (string.IsNullOrWhiteSpace(searchString))
@@ -457,7 +560,8 @@ namespace Server.Pages.Pages.Persona
                 || (element.ApellidoPaterno?.Contains (searchString, StringComparison.OrdinalIgnoreCase) ?? false)
                 || (element.ApellidoMaterno?.Contains (searchString, StringComparison.OrdinalIgnoreCase) ?? false)
                 || (element.Ci?.Contains              (searchString, StringComparison.OrdinalIgnoreCase) ?? false)
-                || (element.Celular?.Contains         (searchString, StringComparison.OrdinalIgnoreCase) ?? false);
+                || (element.Celular?.Contains         (searchString, StringComparison.OrdinalIgnoreCase) ?? false)
+;
         }
 
         private string GetCategoriaPorId(int id)
@@ -533,7 +637,6 @@ namespace Server.Pages.Pages.Persona
                 Tablapersona,
                 "EDAD",
                 out int totalEdad);
-
         }
 
         //Bar Char Formacion Edad ...
@@ -695,5 +798,182 @@ namespace Server.Pages.Pages.Persona
             }
             return grouped;
         }
+
+        // METTODO DE DESCARGA EN EXCEL
+        public async Task ExportarPersonas()
+        {
+            try
+            {
+                if (Tablapersona == null || !Tablapersona.Any())
+                {
+                    _MessageShow("No hay datos para exportar a Excel.", State.Warning);
+                    return;
+                }
+
+                using var workbook = new XLWorkbook();
+                var worksheet = workbook.Worksheets.Add("Personal_Envibol_" + DateTime.Now.ToString("MM-yyyy"));
+
+                int filaActual = 1;
+
+                // === Estilo cabecera base ===
+                var estiloCabecera = workbook.Style;
+                estiloCabecera.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                estiloCabecera.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                estiloCabecera.Font.Bold = true;
+                estiloCabecera.Fill.BackgroundColor = XLColor.LightGreen;
+                estiloCabecera.Font.FontColor = XLColor.Black;
+
+                // === Cabeceras (idénticas a la tabla) ===
+                string[] cabeceras = {
+                    "OPCIONES",                 // (sólo marcador, quedará vacío)
+                    "ID PERSONA",
+                    "NOMBRE",
+                    "APELLIDO PATERNO",
+                    "APELLIDO MATERNO",
+                    "CI",
+                    "EXT",
+                    "EXP",
+                    "CELULAR",
+                    "CONTRASEÑA",
+                    "UNIDAD ORGANIZACIONAL",
+                    "CATEGORIA",
+                    "CLASE",
+                    "N. SALARIAL",
+                    "PUESTO DENOMINACION",
+                    "PROFESION",
+                    "GRUPO TRABAJO",
+                    "PUESTO DESCRIPCION",
+                    "SEXO",
+                    "FECHA NACIMIENTO",
+                    "DOMICILIO",
+                    "RESIDENCIA",
+                    "EDAD",
+                    "INMEDIATO SUPERIOR",
+                    "CORREO"
+                };
+
+                for (int i = 0; i < cabeceras.Length; i++)
+                {
+                    worksheet.Cell(filaActual, i + 1).Value = cabeceras[i];
+                    worksheet.Cell(filaActual, i + 1).Style = estiloCabecera;
+                }
+
+                // Congelar fila de cabecera y activar autofiltro
+                worksheet.SheetView.FreezeRows(1);
+                worksheet.Range(filaActual, 1, filaActual, cabeceras.Length).SetAutoFilter();
+
+                // === Anchos de columnas (ajústalos si deseas) ===
+                worksheet.Column(1).Width = 12;   // OPCIONES
+                worksheet.Column(2).Width = 12;   // ID PERSONA
+                worksheet.Column(3).Width = 22;   // NOMBRE
+                worksheet.Column(4).Width = 20;   // APELLIDO PATERNO
+                worksheet.Column(5).Width = 20;   // APELLIDO MATERNO
+                worksheet.Column(6).Width = 14;   // CI
+                worksheet.Column(7).Width = 8;    // EXT
+                worksheet.Column(8).Width = 8;    // EXP
+                worksheet.Column(9).Width = 16;   // CELULAR
+                worksheet.Column(10).Width = 18;  // CONTRASEÑA
+                worksheet.Column(11).Width = 28;  // UNIDAD ORGANIZACIONAL
+                worksheet.Column(12).Width = 18;  // CATEGORIA
+                worksheet.Column(13).Width = 14;  // CLASE
+                worksheet.Column(14).Width = 16;  // N. SALARIAL
+                worksheet.Column(15).Width = 26;  // PUESTO DENOMINACION
+                worksheet.Column(16).Width = 22;  // PROFESION
+                worksheet.Column(17).Width = 20;  // GRUPO TRABAJO
+                worksheet.Column(18).Width = 26;  // PUESTO DESCRIPCION
+                worksheet.Column(19).Width = 10;  // SEXO
+                worksheet.Column(20).Width = 16;  // FECHA NACIMIENTO
+                worksheet.Column(21).Width = 30;  // DOMICILIO
+                worksheet.Column(22).Width = 24;  // RESIDENCIA
+                worksheet.Column(23).Width = 10;  // EDAD
+                worksheet.Column(24).Width = 28;  // INMEDIATO SUPERIOR
+                worksheet.Column(25).Width = 30;  // CORREO
+
+                filaActual++;
+
+                // === Datos ===
+                foreach (var p in Tablapersona)
+                {
+                    int c = 1;
+
+                    worksheet.Cell(filaActual, c++).Value = ""; // OPCIONES (vacío)
+                    worksheet.Cell(filaActual, c++).Value = p.IdrrhPersona;
+                    worksheet.Cell(filaActual, c++).Value = p.Nombre;
+                    worksheet.Cell(filaActual, c++).Value = p.ApellidoPaterno;
+                    worksheet.Cell(filaActual, c++).Value = p.ApellidoMaterno;
+                    worksheet.Cell(filaActual, c++).Value = p.Ci;
+                    worksheet.Cell(filaActual, c++).Value = p.Extension;
+                    worksheet.Cell(filaActual, c++).Value = p.Exp;
+                    worksheet.Cell(filaActual, c++).Value = p.Celular;
+                    worksheet.Cell(filaActual, c++).Value = p.Contrasena; // Si prefieres, enmascara aquí
+                    worksheet.Cell(filaActual, c++).Value = GetUnidadDescripcion(p.IdgenUnidad);
+                    worksheet.Cell(filaActual, c++).Value = GetCategoriaDescripcion(p.IdgenCategoria);
+                    worksheet.Cell(filaActual, c++).Value = GetClaseDescripcion(p.IdgenClase);
+                    worksheet.Cell(filaActual, c++).Value = GetNivelSalarialDescripcion(p.IdgenNivelsalarial);
+                    worksheet.Cell(filaActual, c++).Value = GetPuestoDenominacionDescripcion(p.IdgenPuestodenominacion);
+                    worksheet.Cell(filaActual, c++).Value = GetProfesionDescripcion(p.IdgenProfesion);
+                    worksheet.Cell(filaActual, c++).Value = GetGrupoTrabajoDescripcion(p.IdgengrupoTrabajo);
+                    worksheet.Cell(filaActual, c++).Value = GetPuestoDescripcion(p.IdgenPuestodescripcion);
+                    worksheet.Cell(filaActual, c++).Value = p.Sexo;
+
+                    var celdaFecha = worksheet.Cell(filaActual, c++);
+                    if (p.FechaNacimiento.HasValue)
+                    {
+                        celdaFecha.Value = p.FechaNacimiento.Value;
+                        celdaFecha.Style.DateFormat.Format = "dd/MM/yyyy";
+                    }
+                    else
+                    {
+                        celdaFecha.Value = "";
+                    }
+
+                    worksheet.Cell(filaActual, c++).Value = p.Domicilio;
+                    worksheet.Cell(filaActual, c++).Value = p.Residencia;
+                    worksheet.Cell(filaActual, c++).Value = p.Edad;
+                    worksheet.Cell(filaActual, c++).Value = SupervisorNombre(p.InmediatoSuperior);
+                    worksheet.Cell(filaActual, c++).Value = p.Correo;
+
+                    // Ajustes de alineación
+                    worksheet.Range(filaActual, 1, filaActual, cabeceras.Length)
+                             .Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                    filaActual++;
+                }
+
+                // === Bordes para toda el área usada ===
+                var rangoUsado = worksheet.RangeUsed();
+                if (rangoUsado != null)
+                {
+                    rangoUsado.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+                    rangoUsado.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+                }
+
+                // Ajuste de texto en celdas de texto largo
+                worksheet.Columns(11, 25).Style.Alignment.WrapText = true;
+
+                // === Guardar y descargar ===
+                using var stream = new MemoryStream();
+                workbook.SaveAs(stream);
+
+                var base64 = Convert.ToBase64String(stream.ToArray());
+                await JSRuntime.InvokeVoidAsync("downloadFile",
+                    "personas_" + DateTime.Now.ToString("MM-yy") + ".xlsx",
+                    base64);
+            }
+            catch (Exception ex)
+            {
+                _MessageShow("Error al exportar personas: " + ex.Message, State.Error);
+            }
+        }
+
     }
 }
+
+
+
+
+
+
+
+
+

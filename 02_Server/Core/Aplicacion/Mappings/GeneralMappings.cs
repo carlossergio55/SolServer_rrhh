@@ -43,7 +43,7 @@ namespace Aplicacion.Mappings
             CreateMap<RrhPersona, RrhPersonaCumpleanieroDto>();
             CreateMap<GenGrupoturno, GenGrupoturnoDto>();
             CreateMap<GenGrupoturnoDetalle, GenGrupoturnoDetalleDto>();
-            CreateMap<RrhContrato, RrhContratoDto>();
+            CreateMap<RrhContrato, RrhContratoDto>();     //RrhContrato RrhContrato RrhContrato ...
 
             #endregion
             //TODO: Agregar aqui el registro de mapeo para ejecucion de comandos  direccion  ModeloDto --> EntidadDominio Ej. : CreateMap<ProductoDto, CapProducto>();
@@ -53,7 +53,7 @@ namespace Aplicacion.Mappings
             CreateMap<GenClasificadorDto, GenClasificador>();
             CreateMap<GenClasificadortipoDto, GenClasificadortipo>();
             CreateMap<SAsistenciaDto, SAsistencia>();
-            CreateMap<RrhPersonaDto, RrhPersona>();
+            CreateMap<RrhPersonaDto, RrhPersona>();     //RrhPersona RrhPersona RrhPersona ...
             CreateMap<RrhhTurnodiaDto, RrhhTurnodia>();
             CreateMap<RrhhTurnotoleranciaDto, RrhhTurnotolerancia>();
 
@@ -63,7 +63,7 @@ namespace Aplicacion.Mappings
             CreateMap<RrhDiaeventoDto, RrhDiaevento>();
             CreateMap<GenGrupoturnoDto, GenGrupoturno>();
             CreateMap<GenGrupoturnoDetalleDto, GenGrupoturnoDetalle>();
-            CreateMap<RrhContratoDto, RrhContrato>();
+            CreateMap<RrhContratoDto, RrhContrato>();  //RrhContrato RrhContrato RrhContrato ...
             #endregion
         }
     }
