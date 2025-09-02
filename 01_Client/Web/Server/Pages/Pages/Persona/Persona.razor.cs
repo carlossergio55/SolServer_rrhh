@@ -28,6 +28,10 @@ using static System.Net.WebRequestMethods;
 using Aplicacion.DTOs.Supervisor;
 using ClosedXML.Excel;
 
+using Aplicacion.Features.Asistencia;    //Vacaciones ...
+using Infraestructura.Models.Biometrico; //Vacaciones ...
+
+
 
 namespace Server.Pages.Pages.Persona
 {
@@ -48,6 +52,14 @@ namespace Server.Pages.Pages.Persona
         protected List<GenClasificadorDto> _ListaCategoria          { get; set; } = new(); //Foreign key
         protected List<GenClasificadorDto> _ListaClase              { get; set; } = new(); //Foreign key
         protected List<GenClasificadorDto> _ListaUnidad             { get; set; } = new(); //Foreign Key
+
+
+        //Vacaciones ...
+
+
+
+        protected List<VwMarcacionBiometricoDto> MarcacionPersonal { get; set; } = new();
+
 
 
 
@@ -242,7 +254,7 @@ namespace Server.Pages.Pages.Persona
                 }
 
                 var codigo = GeneratePassword();                         //Añadir contraseña ....   
-                _Persona.Contrasena = codigo;
+                _Persona.Contrasena = codigo;                               
                 _Persona.Edad = CalcularEdad(_Persona.FechaNacimiento);  //Añadir la edad del trabajador ...
 
                 //_MessageShow($"_Persona.Contrasena: {_Persona.Contrasena}", State.Success);
@@ -807,7 +819,7 @@ namespace Server.Pages.Pages.Persona
                 if (Tablapersona == null || !Tablapersona.Any())
                 {
                     _MessageShow("No hay datos para exportar a Excel.", State.Warning);
-                    return;
+                    return;  //Shows warning if it doesnt work.
                 }
 
                 using var workbook = new XLWorkbook();
@@ -815,17 +827,17 @@ namespace Server.Pages.Pages.Persona
 
                 int filaActual = 1;
 
-                // === Estilo cabecera base ===
+                // ==== Estilo cabecera base ====
                 var estiloCabecera = workbook.Style;
                 estiloCabecera.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                estiloCabecera.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                estiloCabecera.Font.Bold = true;
+                estiloCabecera.Alignment.Vertical   = XLAlignmentVerticalValues.Center;
+                estiloCabecera.Font.Bold            = true;
                 estiloCabecera.Fill.BackgroundColor = XLColor.LightGreen;
-                estiloCabecera.Font.FontColor = XLColor.Black;
+                estiloCabecera.Font.FontColor       = XLColor.Black;
 
                 // === Cabeceras (idénticas a la tabla) ===
-                string[] cabeceras = {
-                    "OPCIONES",                 // (sólo marcador, quedará vacío)
+                string[] cabeceras = {  //Creating headers ...
+                    //"OPCIONES",            // (sólo marcador, quedará vacío)
                     "ID PERSONA",
                     "NOMBRE",
                     "APELLIDO PATERNO",
@@ -852,6 +864,10 @@ namespace Server.Pages.Pages.Persona
                     "CORREO"
                 };
 
+
+                _MessageShow($"Cantidad Cabeceras ==> {cabeceras.Length}", State.Success);
+
+
                 for (int i = 0; i < cabeceras.Length; i++)
                 {
                     worksheet.Cell(filaActual, i + 1).Value = cabeceras[i];
@@ -863,31 +879,31 @@ namespace Server.Pages.Pages.Persona
                 worksheet.Range(filaActual, 1, filaActual, cabeceras.Length).SetAutoFilter();
 
                 // === Anchos de columnas (ajústalos si deseas) ===
-                worksheet.Column(1).Width = 12;   // OPCIONES
-                worksheet.Column(2).Width = 12;   // ID PERSONA
-                worksheet.Column(3).Width = 22;   // NOMBRE
-                worksheet.Column(4).Width = 20;   // APELLIDO PATERNO
-                worksheet.Column(5).Width = 20;   // APELLIDO MATERNO
-                worksheet.Column(6).Width = 14;   // CI
-                worksheet.Column(7).Width = 8;    // EXT
-                worksheet.Column(8).Width = 8;    // EXP
-                worksheet.Column(9).Width = 16;   // CELULAR
-                worksheet.Column(10).Width = 18;  // CONTRASEÑA
-                worksheet.Column(11).Width = 28;  // UNIDAD ORGANIZACIONAL
-                worksheet.Column(12).Width = 18;  // CATEGORIA
-                worksheet.Column(13).Width = 14;  // CLASE
-                worksheet.Column(14).Width = 16;  // N. SALARIAL
-                worksheet.Column(15).Width = 26;  // PUESTO DENOMINACION
-                worksheet.Column(16).Width = 22;  // PROFESION
-                worksheet.Column(17).Width = 20;  // GRUPO TRABAJO
-                worksheet.Column(18).Width = 26;  // PUESTO DESCRIPCION
-                worksheet.Column(19).Width = 10;  // SEXO
-                worksheet.Column(20).Width = 16;  // FECHA NACIMIENTO
-                worksheet.Column(21).Width = 30;  // DOMICILIO
-                worksheet.Column(22).Width = 24;  // RESIDENCIA
-                worksheet.Column(23).Width = 10;  // EDAD
-                worksheet.Column(24).Width = 28;  // INMEDIATO SUPERIOR
-                worksheet.Column(25).Width = 30;  // CORREO
+                //worksheet.Column(1).Width = 12;   // OPCIONES
+                worksheet.Column(1).Width = 12;   // ID PERSONA
+                worksheet.Column(2).Width = 22;   // NOMBRE
+                worksheet.Column(3).Width = 20;   // APELLIDO PATERNO
+                worksheet.Column(4).Width = 20;   // APELLIDO MATERNO
+                worksheet.Column(5).Width = 14;   // CI
+                worksheet.Column(6).Width = 8;    // EXT
+                worksheet.Column(7).Width = 8;    // EXP
+                worksheet.Column(8).Width = 16;   // CELULAR
+                worksheet.Column(9).Width = 18;  // CONTRASEÑA
+                worksheet.Column(10).Width = 38;  // UNIDAD ORGANIZACIONAL
+                worksheet.Column(11).Width = 18;  // CATEGORIA
+                worksheet.Column(12).Width = 14;  // CLASE
+                worksheet.Column(13).Width = 16;  // N. SALARIAL
+                worksheet.Column(14).Width = 26;  // PUESTO DENOMINACION
+                worksheet.Column(15).Width = 22;  // PROFESION
+                worksheet.Column(16).Width = 20;  // GRUPO TRABAJO
+                worksheet.Column(17).Width = 26;  // PUESTO DESCRIPCION
+                worksheet.Column(18).Width = 10;  // SEXO
+                worksheet.Column(19).Width = 16;  // FECHA NACIMIENTO
+                worksheet.Column(20).Width = 30;  // DOMICILIO
+                worksheet.Column(21).Width = 24;  // RESIDENCIA
+                worksheet.Column(22).Width = 10;  // EDAD
+                worksheet.Column(23).Width = 28;  // INMEDIATO SUPERIOR
+                worksheet.Column(24).Width = 30;  // CORREO
 
                 filaActual++;
 
@@ -896,7 +912,7 @@ namespace Server.Pages.Pages.Persona
                 {
                     int c = 1;
 
-                    worksheet.Cell(filaActual, c++).Value = ""; // OPCIONES (vacío)
+                    //worksheet.Cell(filaActual, c++).Value = ""; // OPCIONES (vacío)
                     worksheet.Cell(filaActual, c++).Value = p.IdrrhPersona;
                     worksheet.Cell(filaActual, c++).Value = p.Nombre;
                     worksheet.Cell(filaActual, c++).Value = p.ApellidoPaterno;

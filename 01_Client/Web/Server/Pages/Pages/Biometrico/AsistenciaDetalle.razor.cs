@@ -37,6 +37,8 @@ namespace Server.Pages.Pages.Biometrico
             await GetMarcaciones();
             await MostrarDialogoBienvenida();
         }
+
+
         protected async Task ObtenerNombreUsuarioDesdeLocalStorage()
         {
             try
@@ -78,6 +80,8 @@ namespace Server.Pages.Pages.Biometrico
                 _MessageShow($"Error al obtener marcaciones: {ex.Message}", State.Error);
             }
         }
+
+
         private async Task MostrarDialogoBienvenida()
         {
             var options = new DialogOptions
@@ -90,9 +94,9 @@ namespace Server.Pages.Pages.Biometrico
             };
 
             var parameters = new DialogParameters
-    {
-        { "ContentText", "Configuración inicial" } // Mantenemos el parámetro aunque no se use
-    };
+            {
+                { "ContentText", "Configuración inicial" } // Mantenemos el parámetro aunque no se use
+            };
 
             var dialog = DialogService.Show<DialogoSimple>("", parameters, options);
             await Task.Delay(10000);

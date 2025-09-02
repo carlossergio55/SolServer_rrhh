@@ -53,5 +53,9 @@ namespace Dominio.Entities.Persona
 
         //Inmediato Superior ...
         public int? InmediatoSuperior { get; set; }
+
+
+        //The Full Name ...
+        //public string FullName { get; set; } = "";
     }
 }

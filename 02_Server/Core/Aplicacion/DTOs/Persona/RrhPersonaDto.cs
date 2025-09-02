@@ -42,5 +42,9 @@ namespace Aplicacion.DTOs.Persona
         //Inmediato Superior ...
         public int? InmediatoSuperior { get; set; }
 
+        //The Full Name of all the employees ...
+        public string FullName =>
+            string.Join(" ", new[] { Nombre, ApellidoPaterno, ApellidoMaterno }
+                .Where(s => !string.IsNullOrWhiteSpace(s)));
     }
 }
