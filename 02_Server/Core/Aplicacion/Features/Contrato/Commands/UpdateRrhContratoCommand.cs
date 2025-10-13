@@ -15,11 +15,11 @@ namespace Aplicacion.Features.Contrato.Commands
     public class UpdateRrhContratoCommand : IRequest<Response<int>>
     {
 
-        public int        IdrrhhContrato   { get; set; }
+        public int       IdrrhhContrato   { get; set; }
         public DateTime  InicioContrato   { get; set; }
         public DateTime  FinContrato      { get; set; }
         public int       NumeroContrato   { get; set; }
-        public string     TipoContrato     { get; set; }
+        public string    TipoContrato     { get; set; }
 
 
         public class Handler : IRequestHandler<UpdateRrhContratoCommand, Response<int>>
@@ -35,7 +35,7 @@ namespace Aplicacion.Features.Contrato.Commands
             {
                 var entity = await _repo.GetByIdAsync(request.IdrrhhContrato);
                 if (entity == null)
-                    throw new KeyNotFoundException("Contrato no encontrado");
+                    throw new KeyNotFoundException("Contrato no encontrado Command ...");
 
                 entity.InicioContrato  =  request.InicioContrato;
                 entity.FinContrato     =  request.FinContrato;

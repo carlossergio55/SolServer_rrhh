@@ -15,6 +15,6 @@ namespace Aplicacion.DTOs.Contrato
         public DateTime?   FinContrato     { get; set; }
         public int         NumeroContrato  { get; set; }
         public string      TipoContrato    { get; set; }
-        public int         IdrrhhPersona   { get; set; }
+        public int         IdrrhhPersona   { get; set; } 
     }
 }

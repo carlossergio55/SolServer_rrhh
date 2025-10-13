@@ -13,16 +13,16 @@ namespace Dominio.Entities.Asistencia
     public partial class SAsistencia : AuditableBaseEntity
     {
         [Key]
-        public int IdbioAsistencia { get; set; }
-        public int Uid { get; set; }
-        public long UserId { get; set; }
-        public DateTime Timestamp { get; set; }
-        public int Status { get; set; }
-        public int Punch { get; set; }
-        public string IpBiometrico { get; set; }
-        public DateTime? HoraEntrada { get; set; }
-        public DateTime? HoraSalida { get; set; }
-        public DateTime Fecha { get; set; }
+        public int       IdbioAsistencia { get; set; }
+        public int       Uid             { get; set; }
+        public long      UserId          { get; set; }
+        public DateTime  Timestamp       { get; set; }
+        public int       Status          { get; set; }
+        public int       Punch           { get; set; }
+        public string    IpBiometrico    { get; set; }
+        public DateTime? HoraEntrada     { get; set; }
+        public DateTime? HoraSalida      { get; set; }
+        public DateTime  Fecha           { get; set; }
     }
 
 }

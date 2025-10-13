@@ -18,7 +18,6 @@ namespace Aplicacion.Features.Persona.Commands
         //New added
         public RrhPersonaDto _RrhPersonapost { get; set; }
 
-
         public class Handler : IRequestHandler<CreateRrhPersonaCommand, Response<int>>
         {
             private readonly IRepositoryAsync<RrhPersona> _repo;

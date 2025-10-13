@@ -15,25 +15,28 @@ namespace Server.Pages.Pages.Biometrico
 {
     public partial class AsistenciaDetalle
     {
-        protected string BusquedaCi { get; set; } = string.Empty;
-        protected DateTime? FechaInicio { get; set; } = null;
-        protected DateTime? FechaFin { get; set; } = null;
-        protected List<VwMarcacionBiometricoDto> Marcaciones { get; set; } = new();
+        protected string    BusquedaCi    { get; set; } = string.Empty;
+        protected DateTime? FechaInicio   { get; set; } = null;
+        protected DateTime? FechaFin      { get; set; } = null;
 
-        public ObjectEntity _usuarioSeg;
+
+
+        public ObjectEntity _usuarioSeg;  //A  field
+        protected List<VwMarcacionBiometricoDto> Marcaciones { get; set; } = new();  //A property
+
 
         protected override async Task OnInitializedAsync()
         {
-            // Obtener el usuario desde localStorage
+            //Obtener el usuario desde localStorage
             await ObtenerNombreUsuarioDesdeLocalStorage();
             if (_usuarioSeg != null && !string.IsNullOrEmpty(_usuarioSeg.loginUsuario))
             {
                 BusquedaCi = _usuarioSeg.loginUsuario;
             }
             FechaFin = DateTime.Today.AddDays(1);
-            // Fijar la fecha inicio como el día 20 del mes anterior
+            //Fijar la fecha inicio como el día 20 del mes anterior
             FechaInicio = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 20).AddMonths(-1);
-            // Ejecutar la consulta automáticamente con los filtros por defecto
+            //Ejecutar la consulta automáticamente con los filtros por defecto
             await GetMarcaciones();
             await MostrarDialogoBienvenida();
         }
@@ -47,6 +50,10 @@ namespace Server.Pages.Pages.Biometrico
                 if (!string.IsNullOrEmpty(localStorageValue))
                 {
                     _usuarioSeg = JsonSerializer.Deserialize<ObjectEntity>(localStorageValue);
+
+                    _MessageShow($"_UsuarioSeg.nombreCompleto...: {_usuarioSeg.nombreCompleto}", State.Success);
+                    _MessageShow($"_UsuarioSeg.loginUsuario...: {_usuarioSeg.loginUsuario}", State.Success);
+
                 }
             }
             catch (Exception ex)
@@ -74,6 +81,14 @@ namespace Server.Pages.Pages.Biometrico
                 {
                     Marcaciones = response.Data;
                 }
+
+
+                /* It's gold ... */
+                foreach (var m in Marcaciones)
+                {
+                    Console.WriteLine($"{m.NombreApellido} - {m.Timestamp} - {m.TipoRegistro}");
+                }
+
             }
             catch (Exception ex)
             {
@@ -93,9 +108,11 @@ namespace Server.Pages.Pages.Biometrico
                 DisableBackdropClick = true
             };
 
+
+
             var parameters = new DialogParameters
             {
-                { "ContentText", "Configuración inicial" } // Mantenemos el parámetro aunque no se use
+                { "ContentText", "Configuración Inicial" } // Mantenemos el parámetro aunque no se use
             };
 
             var dialog = DialogService.Show<DialogoSimple>("", parameters, options);

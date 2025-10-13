@@ -13,6 +13,8 @@ namespace WebApi.Controllers.v1.Persona
     [ApiController]
     public class RrhPersona : BaseApiController
     {
+
+
         [HttpGet("GetCumpleaniosDelMes")]
         [Authorize]
         public async Task<IActionResult> GetCumpleaniosDelMes()
@@ -32,6 +34,28 @@ namespace WebApi.Controllers.v1.Persona
         [Authorize]
         public async Task<IActionResult> GetAll()
         => Ok(await Mediator.Send(new GetAllRrhPersonaQuery()));
+
+
+
+
+        //To get the CI ...
+         [HttpGet("GetPersona/{ci}")]
+        [Authorize]
+        public async Task<IActionResult> GetByUnidad(string ci)
+        {
+            return Ok(await Mediator.Send(new GetPersonasByCiQuery(ci)));
+        }
+
+
+        //By ChatGPT ...
+        /*[HttpGet("ByCi/{ci}")]
+        [Authorize]
+        public async Task<IActionResult> GetByCi([FromRoute] string ci)
+        {
+            var resp = await Mediator.Send(new GetPersonasByCiQuery(ci));
+            return Ok(resp.Data); // return plain List<RrhPersonaDto>
+        }*/
+
 
 
         [HttpPost]

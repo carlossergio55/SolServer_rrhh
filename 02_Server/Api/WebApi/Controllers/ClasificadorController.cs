@@ -17,7 +17,6 @@ namespace WebApi.Controllers
     public class ClasificadorController : BaseApiController
     {
 
-   
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Post(CreateGenClasificadorCommand command)
@@ -51,7 +50,6 @@ namespace WebApi.Controllers
 
 
 
-
         [HttpGet("Clasificador")]
         [Authorize]
         public async Task<IActionResult> Get()
@@ -59,12 +57,16 @@ namespace WebApi.Controllers
             return Ok(await Mediator.Send(new GetAllClasificadorQuery()));
         }
 
+
+
         [HttpGet("GetAllGenClasificadortipo")]
         [Authorize]
         public async Task<IActionResult> GetAllGenClasificadortipo()
         {
             return Ok(await Mediator.Send(new GetAllGenClasificadortipoQuery()));
         } 
+
+
 
         [HttpGet("Turno")]
         [Authorize]

@@ -7,14 +7,22 @@
 @using Server.Pages.Pages.Biometrico
 @using MudBlazor
 @using Syncfusion.Blazor.Buttons
+
+@using Infraestructura.Models.Persona
+
+
 @inherits MainBaseComponent
 @layout MainLayout
 @inject NavigationManager Navigation
 @inject NavigationManager Nav
 @inject NavigationManager NavigationManager
+
+
+
+
 @inject IJSRuntime JSRuntime
 @inject IDialogService DialogService
-
+@inject IJSRuntime JS
 
 <MudContainer MaxWidth="MaxWidth.False" Class="p-6">
 
@@ -35,6 +43,12 @@
         </MudCard>
     }
 
+    <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Success" Class="my-2">
+        <b>LISTA DEL PERSONAL DE ENVIBOL</b>
+    </MudText>
+
+
+
     <!-- ░░░░░  FORMULARIO DE FILTRO  ░░░░░ -->
     <MudCard Class="mb-6" Outlined="true" Elevation="1">
         <MudCardHeader>
@@ -42,19 +56,26 @@
         </MudCardHeader>
         <MudCardContent>
             <MudGrid Spacing="3">
+
                 <MudItem xs="12" md="4">
                     <MudTextField T="string" @bind-Value="BusquedaCi" Label="Cédula" Disabled="true"
                                   Placeholder="CI del funcionario" Adornment="Adornment.Start"
                                   AdornmentIcon="@Icons.Filled.Person" />
                 </MudItem>
+
+
                 <MudItem xs="12" md="4">
                     <MudDatePicker @bind-Date="FechaInicio" Label="Fecha inicio" DateFormat="dd/MM/yyyy"
                                    PickerVariant="PickerVariant.Inline" AdornmentIcon="@Icons.Filled.CalendarToday" />
                 </MudItem>
+
+
                 <MudItem xs="12" md="4">
                     <MudDatePicker @bind-Date="FechaFin" Label="Fecha fin" DateFormat="dd/MM/yyyy"
                                    PickerVariant="PickerVariant.Inline" AdornmentIcon="@Icons.Filled.EventAvailable" />
                 </MudItem>
+
+
                 <MudItem xs="12" Class="d-flex justify-end gap-4 mt-4">
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" EndIcon="@Icons.Filled.Search"
                                Disabled="!HayParametrosValidos" OnClick="GetMarcaciones">Filtrar</MudButton>
@@ -62,6 +83,7 @@
             </MudGrid>
         </MudCardContent>
     </MudCard>
+
     <style>
         .input-disabled .mud-input-outlined-border {
             border-color: var(--mud-palette-primary-hover) !important;
@@ -99,6 +121,28 @@
         </MudTable>
     </MudPaper>
 </MudContainer>
+
+
+
+
+<MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Success" Class="my-2">
+    <b>BILLETERA MOVIL </b>
+</MudText>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @code {
     // Variables para ordenamiento
     private string _sortBy = nameof(SVistaAsistenciasDto.ShiftDate);

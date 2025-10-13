@@ -96,3 +96,65 @@ table_employee {
 .searchstring {
     flex: 1; /* opcional, si quieres que el input ocupe el espacio restante */
 }
+
+
+
+/*VACACIONES DE LA PERSONA*/
+
+.custom-table .col-nombre {
+    width: 10%;
+}
+
+.custom-table .col-puesto {
+    width: 10%;
+}
+
+.custom-table .col-fecha {
+    width: 5%;
+}
+
+.custom-table .col-turno {
+    width: 5%;
+}
+
+.custom-table .col-fecha {
+    width: 5%;
+}
+
+.custom-table .col-lugar {
+    width: 5%;
+}
+
+
+
+/*COMISIONES DE LA PERSONA */
+.custom-table .col-nombreComision {
+    width: 10%;
+    align-items: center;
+}
+
+.custom-table .col-cargoComision {
+    width: 8%;
+   
+}
+
+.custom-table .col-fechaSolicitudComision {
+    width: 1%;
+}
+
+.custom-table .col-fechaSalidaComision {
+    width:1%;
+}
+
+.custom-table .col-horarioTurnoComision {
+    width: 10%;
+}
+
+.custom-table .col-motivoComision {
+    width: 10%;
+}
+
+.custom-table .col-justificacionComision {
+    width: 10%;
+}
+

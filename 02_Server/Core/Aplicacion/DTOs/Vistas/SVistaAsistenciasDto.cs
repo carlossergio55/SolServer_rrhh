@@ -8,14 +8,19 @@ namespace Aplicacion.DTOs.Vistas
 {
     public class SVistaAsistenciasDto
     {
-        public int IdbioAsistencia { get; set; }
-        public int Uid { get; set; }
-        public string NombreApellido { get; set; }
-        public string Ci { get; set; }
-        public string Celular { get; set; }
-        public DateTime ShiftDate { get; set; }
-        public string HoraEntrada { get; set; }
-        public string HoraSalida { get; set; }
+        public int      IdbioAsistencia { get; set; }
+        public int      Uid             { get; set; }
+        public string   NombreApellido  { get; set; }
+        public string   Ci              { get; set; }
+        public string   Celular         { get; set; }
+        public DateTime ShiftDate       { get; set; }
+        public string   HoraEntrada     { get; set; }
+        public string   HoraSalida      { get; set; }
+
+
+
+
+
 
         //public int IdrrhPersona { get; set; }
         //public string NombreApellido { get; set; }
@@ -28,5 +33,4 @@ namespace Aplicacion.DTOs.Vistas
         //public string UsuarioModificacion { get; set; }
         //public DateTime? FechaModificacion { get; set; }
     }
-
 }

@@ -30,6 +30,17 @@ using ClosedXML.Excel;
 
 using Aplicacion.Features.Asistencia;    //Vacaciones ...
 using Infraestructura.Models.Biometrico; //Vacaciones ...
+using Infraestructura.Models.Authentication;
+using Microsoft.AspNetCore.WebUtilities;
+using Server.Pages.Pages.Biometrico;
+using Aplicacion.DTOs.BajaMedica;
+using System.Diagnostics.Contracts;
+using Aplicacion.DTOs.Falta;
+using Aplicacion.DTOs.Vacacion;
+using DocumentFormat.OpenXml.Math;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Aplicacion.DTOs.Comision;
+
 
 
 
@@ -37,12 +48,21 @@ namespace Server.Pages.Pages.Persona
 {
     public partial class Persona
     {
-        private bool expande = false;
-        public bool popupAdmView = false;
-        private string searchString = "";  //added recently ...
+        private bool expande        = false;
+        public bool  popupAdmView   = false;
+        public bool  bajaMedicaView = false;
+        public bool  faltaView      = false;
+        public bool  vacacionView   = false;
+        public bool  comisionView   = false; 
+        private string searchString   = "";  //added recently ...
 
-        protected List<RrhPersonaDto>       Tablapersona            { get; set; } = new(); //Each employee is represented by a DTO object of type RrhPersonaDto like Nombre, Celular, Sexo, Edad ... 
-        protected List<RrhContratoDto>      TablaContrato           { get; set; } = new();
+        protected List<RrhPersonaDto>     Tablapersona       { get; set; } = new();
+        protected List<RrhContratoDto>    TablaContrato      { get; set; } = new();
+        protected List<RrhBajaMedicaDto>  TablaBajaMedica    { get; set; } = new();
+        protected List<RrhVacacionDto>    TablaVacacion      { get; set; } = new();
+        protected List<RrhComisionDto>    TablaComision      { get; set; } = new();
+
+
 
         protected List<GenClasificadorDto> _ListaPrfesion           { get; set; } = new(); //Foreign key
         protected List<GenClasificadorDto> _ListaSalario            { get; set; } = new(); //Foreign Key
@@ -53,20 +73,27 @@ namespace Server.Pages.Pages.Persona
         protected List<GenClasificadorDto> _ListaClase              { get; set; } = new(); //Foreign key
         protected List<GenClasificadorDto> _ListaUnidad             { get; set; } = new(); //Foreign Key
 
+        //HorarioTurno ...
+        protected List<GenClasificadorDto> _ListaHorarioTurno       { get; set; } = new();
 
-        //Vacaciones ...
-
-
-
-        protected List<VwMarcacionBiometricoDto> MarcacionPersonal { get; set; } = new();
+        protected List<GenClasificadorDto> _ListaMotivoComision     { get; set; } = new();
 
 
+        public ObjectEntity _usuarioSeg; //Vacaciones ...
 
 
-        private RrhPersonaDto  _Persona   = new RrhPersonaDto();
-        private RrhContratoDto _Contrato  = new RrhContratoDto();
+        private RrhPersonaDto    _Persona    = new RrhPersonaDto();
+        private RrhContratoDto   _Contrato   = new RrhContratoDto();
+        private RrhBajaMedicaDto _BajaMedica = new RrhBajaMedicaDto();
+        private RrhVacacionDto   _Vacacion   = new RrhVacacionDto();
+        private RrhComisionDto   _Comision   = new RrhComisionDto();
 
-        protected List<RrhContratoDto> TablaContratoPersona = new List<RrhContratoDto>();
+
+
+        protected List<RrhContratoDto>   TablaContratoPersona    = new List<RrhContratoDto>  ();    //Window View ...
+        protected List<RrhBajaMedicaDto> TablaBajaMedicaPersona  = new List<RrhBajaMedicaDto>();    //Window View ...
+        protected List<RrhVacacionDto>   TablaVacacionPersona    = new List<RrhVacacionDto>  ();    //Window View ...
+        protected List<RrhComisionDto>   TablaComisionPersona    = new List<RrhComisionDto>  ();                          
 
         private List<GenClasificadorDto> _AllClasificadores = new();
 
@@ -79,6 +106,10 @@ namespace Server.Pages.Pages.Persona
         private List<RrhChartsDto> BarDataChuquisaca = new();
         private List<RrhChartsDto> BarDataEducacion  = new();
         private List<RrhChartsDto> BarDataEdad       = new();
+
+        //Variable para guardar los datos de la persona
+        private RrhPersonaDto PersonaSeleccionada = new();
+
 
         private async Task LoadClasificadores()
         {
@@ -94,6 +125,8 @@ namespace Server.Pages.Pages.Persona
                 _ListaPuestoDenominacion = FilterClasificadorByTipo(9);
                 _ListaPrfesion           = FilterClasificadorByTipo(11);
                 _ListaSalario            = FilterClasificadorByTipo(8);
+                _ListaHorarioTurno       = FilterClasificadorByTipo(19);
+                _ListaMotivoComision     = FilterClasificadorByTipo(20);
             }
             else
             {
@@ -158,16 +191,178 @@ namespace Server.Pages.Pages.Persona
             }
         }
 
-        protected override async Task OnInitializedAsync()
+        private async Task GetBajaMedica()
         {
-            await GetPersonaTurnos     ();
-            await LoadClasificadores   ();
-            await GetPersonaContrato   ();
+            try
+            {
+                _Loading.Show();
+                var result = await _Rest.GetAsync<List<RrhBajaMedicaDto>>("RrhBajaMedica/GetAll");
+                _Loading.Hide();
 
-            LoadDonutCharts();
+
+                if (result.State == State.Success)
+                {
+                    TablaBajaMedica = result.Data.OrderBy(p => p.IdrrhBajaMedica).ToList();
+                }
+                else
+                {
+                    _MessageShow($"Error_BajaMedica: {result.Message}", State.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                _Loading.Hide();
+                _MessageShow($"Excepción_BajaMedica: {ex.Message}", State.Error);
+            }
         }
 
-        ////////////////////////////////UNIDADES////////////////////////////////////////////////////////////    
+        private async Task GetVacacion()
+        {
+            try
+            {
+                _Loading.Show();
+                var result = await _Rest.GetAsync<List<RrhVacacionDto>>("RrhVacacion/GetAll");
+                _Loading.Hide();
+
+                if(result.State == State.Success)
+                {
+                    TablaVacacion = result.Data.OrderBy(p => p.IdrrhVacacion).ToList();
+                }
+                else
+                {
+                    _MessageShow($"Error_Vacacion: {result.Message}", State.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                _MessageShow($"Excepción_Vacacion GetVacacion: {ex.Message}", State.Error);
+                _Loading.Hide();
+            }
+        }
+
+
+        private async Task GetComision()
+        {
+            try
+            {
+                _Loading.Show();
+                var result = await _Rest.GetAsync<List<RrhComisionDto>>("RrhComision/GetAll");
+                _Loading.Hide();
+
+                if (result.State == State.Success)
+                {
+                    TablaComision = result.Data.OrderBy(p => p.IdrrhComision).ToList();
+                }
+                else
+                {
+                    _MessageShow($"Error_Comision: {result.Message}", State.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                _MessageShow($"Excepción_Comision GetComision: {ex.Message}", State.Error);
+                _Loading.Hide();
+            }
+        }
+
+        private async Task GetPersonaByNroCi()
+        {
+            try
+            {
+                if (_usuarioSeg != null && !string.IsNullOrWhiteSpace(_usuarioSeg.nroCi))
+                {
+                    _Loading.Show();
+
+                    // Ahora pedimos una LISTA
+                    var result = await _Rest.GetAsync<List<RrhPersonaDto>>(
+                        $"RrhPersona/GetPersona/{Uri.EscapeDataString(_usuarioSeg.nroCi)}");
+
+                    _Loading.Hide();
+
+                    if (result.State == State.Success)
+                    {
+                        if (result.Data != null && result.Data.Count > 0)
+                        {
+                            //Asignamos la primera persona de la lista
+                            PersonaSeleccionada = result.Data.First();
+                            _MessageShow($"Nombre GetPersonaByNroCi(): {PersonaSeleccionada.Nombre} {PersonaSeleccionada.ApellidoPaterno} {PersonaSeleccionada.ApellidoMaterno}", State.Success);
+                            
+                        }
+                        else
+                        {
+                            _MessageShow($"No se encontró la persona con CI: {_usuarioSeg.nroCi}", State.Warning);
+                        }
+                    }
+                    else
+                    {
+                        _MessageShow($"Error_Persona: {result.Message}", State.Error);
+                    }
+                }
+                else
+                {
+                    _MessageShow("No se pudo obtener el número de CI del usuario.", State.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                _Loading.Hide();
+                _MessageShow($"Error al obtener persona por CI: {ex.Message}", State.Error);
+            }
+        }
+
+        //Get Name Local Storage ...
+        protected async Task ObtenerNombreUsuarioDesdeLocalStorage()
+        {//it's taking the values from a Database "I dont know" _usuarioSeg.nombreCompleto, _usuarioSeg.nroCi or more.
+            try
+            {
+                var localStorageValue = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "USER");
+
+                if (!string.IsNullOrEmpty(localStorageValue))
+                {
+                    //_MessageShow($"[LocalStorage Raw] Local Storage Value: {localStorageValue}", State.Success);
+                    _usuarioSeg = JsonSerializer.Deserialize<ObjectEntity>(localStorageValue);  // ===> Infraestructura.Models.Authentication.ObjectEntity
+
+                    //_MessageShow($"_usuarioSeg: {_usuarioSeg}", State.Success);
+
+                    if (_usuarioSeg != null)
+                    {
+                        //Example: showing ID and Name (adjust to your ObjectEntity properties)
+                        //_MessageShow($"[UsuarioSeg] nombreCompleto: {_usuarioSeg.nombreCompleto}, nroCi: {_usuarioSeg.nroCi}", State.Success); //The most 
+                        //important things.
+                    }
+                    else
+                    {
+                        _MessageShow("No se pudo deserializar el usuario", State.Warning);
+                    }
+                }
+                else
+                {
+                    _MessageShow("No existe el valor USER en LocalStorage", State.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error al obtener el usuario desde localStorage: " + ex.Message);
+            }
+        }
+
+
+
+        protected override async Task OnInitializedAsync()
+        {
+            await ObtenerNombreUsuarioDesdeLocalStorage  ();
+            await GetPersonaByNroCi                      ();
+            await GetPersonaTurnos                       ();
+            await LoadClasificadores                     ();
+            await GetPersonaContrato                     ();
+            await GetBajaMedica                          ();
+            await GetVacacion                            ();
+            await GetComision                            ();
+            await LoadDonutCharts                        ();
+        }
+
+
+        ////////////////////////////////UNIDADES//////////////////////////////////   
         private string GetDescripcionById(List<GenClasificadorDto> lista, int? id)
         {
             return lista?.FirstOrDefault(x => x.IdgenClasificador == id)?.Descripcion ?? "No definido";
@@ -212,7 +407,18 @@ namespace Server.Pages.Pages.Persona
         {
             return GetDescripcionById(_ListaSalario, id);
         }
-            
+
+        private string GetHorarioTurnoDescripcion(int  id)
+        {
+            return GetDescripcionById(_ListaHorarioTurno, id);
+        }
+
+        private string GetMotivoComisionDescripcion(int id)
+        {
+            return GetDescripcionById(_ListaMotivoComision, id);
+        }
+
+
         private string SupervisorNombre(int? id)
         {
             // if no ID, return default
@@ -231,7 +437,7 @@ namespace Server.Pages.Pages.Persona
         }        
 
 
-        //////////////////////////////////////////////////////////////////////////////////////////////////////
+        /////////////////////////////////////////////////////////////////////////////////////////
         //Crear/api/{version}/RrhPersona, RrhPersona, RrhPersona ...
         private async Task SavePersona(RrhPersonaDto persona)
         {
@@ -284,6 +490,50 @@ namespace Server.Pages.Pages.Persona
         }
 
 
+        private async Task SaveComision(RrhComisionDto comision)
+        {
+            try
+            {
+                _Loading.Show();
+                var response = await _Rest.PostAsync<int?>("RrhComision", comision);
+                _Loading.Hide();
+
+                _MessageShow(response.Message, response.State);
+
+                if (response.Errors != null)
+                    response.Errors.ForEach(e => _MessageShow(e, State.Warning));
+            }
+            catch (Exception ex)
+            {
+                _Loading.Hide();
+                _MessageShow(ex.Message, State.Error);
+                await GetComision();
+            }
+        }
+
+
+        private async Task SaveVacacion(RrhVacacionDto vacacion)
+        {
+            try
+            {
+                _Loading.Show();
+
+                var response = await _Rest.PostAsync<int?>("RrhVacacion", vacacion);
+
+                _Loading.Hide();
+                _MessageShow(response.Message, response.State);
+
+                if (response.Errors != null)
+                    response.Errors.ForEach(e => _MessageShow(e, State.Warning));
+            }
+            catch (Exception ex)
+            {
+                _Loading.Hide();
+                _MessageShow(ex.Message, State.Error);
+                await GetVacacion();
+            }
+        }
+
         //Crear/api/{version}/RrhContrato, RrhContrato, RrhContrato, RrhContrato, RrhContrato ...
         private async Task SaveContrato(RrhContratoDto contrato)
         {
@@ -313,24 +563,29 @@ namespace Server.Pages.Pages.Persona
         }
 
 
-        // Actualizar Contrato de Empleado de la Persona ...
-        private async Task UpdateContrato(RrhContratoDto contrato)
+        private async Task SaveBajaMedica(RrhBajaMedicaDto bajaMedica)
         {
             try
             {
-
                 _Loading.Show();
-                var response = await _Rest.PutAsync<int>("RrhContrato", contrato, contrato.IdrrhhContrato);
+
+                var response = await _Rest.PostAsync<int?>("RrhBajaMedica", bajaMedica);
+
                 _Loading.Hide();
                 _MessageShow(response.Message, response.State);
+
+                if (response.Errors != null)
+                    response.Errors.ForEach(e => _MessageShow(e, State.Warning));
+
+
             }
             catch (Exception ex)
             {
                 _Loading.Hide();
                 _MessageShow(ex.Message, State.Error);
-            }
+                await GetBajaMedica();
+            }  
         }
-
 
         // Actualizar la persona de Recursos Humanos ...
         private async Task UpdatePersona(RrhPersonaDto persona)
@@ -338,14 +593,12 @@ namespace Server.Pages.Pages.Persona
             try
             {
                 _MessageShow($"==> Update_Persona ...", State.Success);
-
                 //_MessageShow($"Up IdrrhPersona      ==> {persona.IdrrhPersona}", State.Success);
                 //_MessageShow($"Up Nombre            ==> {persona.Nombre}", State.Success);
                 //_MessageShow($"Up ApellidoPaterno   ==> {persona.ApellidoPaterno}", State.Success);
                 //_MessageShow($"Up ApellidoMaterno   ==> {persona.ApellidoMaterno}", State.Success);
                 //_MessageShow($"Up InmediatoSuperior ==> {persona.InmediatoSuperior}", State.Success);
                 //_MessageShow($"Up InmediatoSuperior Nombre: {SupervisorNombre(_Persona.InmediatoSuperior)}", State.Success);
-
 
                 _Loading.Show();
                 var response = await _Rest.PutAsync<int>("RrhPersona", persona, persona.IdrrhPersona);
@@ -360,6 +613,88 @@ namespace Server.Pages.Pages.Persona
             }
         }
 
+
+
+        private async Task UpdateComision(RrhComisionDto comision)
+        {
+            try
+            {
+                _MessageShow($@"
+                _10Comision.IdrrhComision             ==> {_Comision.IdrrhComision}
+                _10Comision.FechaSolicitudComision    ==> {_Comision.FechaSolicitudComision}
+                _10Comision.FechaSalidaComision       ==> {_Comision.FechaSalidaComision}
+                _10Comision.IdgenMotivoComision       ==> {_Comision.IdgenMotivoComision}
+                _10Comision.JustificacionComision     ==> {_Comision.JustificacionComision}
+                _10Comision.IdrrhPersonaComision      ==> {_Comision.IdrrhPersonaComision}
+                _10Comision.IdgenHorarioTurnoComision ==> {_Comision.IdgenHorarioTurnoComision}", State.Success);
+
+
+                _Loading.Show();
+                var response = await _Rest.PutAsync<int>("RrhComision", comision, comision.IdrrhComision);  // "PUT"
+                _Loading.Hide();
+
+                _MessageShow($"=====>: {response.Message}", response.State);
+
+            }
+            catch (Exception ex)
+            {
+                _Loading.Hide();
+                _MessageShow(ex.Message, State.Error);
+            }
+        }
+
+        //Actualizar Vacación de la Persona ...
+        private async Task UpdateVacacion(RrhVacacionDto vacacion)
+        {
+            try{
+                _Loading.Show();
+                var response = await _Rest.PutAsync<int>("RrhVacacion", vacacion, vacacion.IdrrhVacacion);  // "PUT"
+                _Loading.Hide();
+                _MessageShow(response.Message, response.State);
+            }
+            catch (Exception ex) {
+                _Loading.Hide();
+                _MessageShow(ex.Message, State.Error);
+            }
+        }
+
+        // Actualizar UpdateContrato de la Persona ...
+        private async Task UpdateContrato(RrhContratoDto contrato)
+        {
+            try{
+                _Loading.Show();
+                var response = await _Rest.PutAsync<int>("RrhContrato", contrato, contrato.IdrrhhContrato);
+                _Loading.Hide();
+                _MessageShow(response.Message, response.State);
+            }
+            catch (Exception ex){
+                _Loading.Hide();
+                _MessageShow(ex.Message, State.Error);
+            }
+        }
+
+        private async Task UpdateBajaMedica(RrhBajaMedicaDto bajaMedica)
+        {
+            try
+            {
+                _MessageShow($"==> Update_BajaMedica ...", State.Success);
+                _MessageShow($"Up IdrrhBajaMedica    ==> {bajaMedica.IdrrhBajaMedica}", State.Success);
+                _MessageShow($"Up FechaInicioReposo  ==> {bajaMedica.FechaInicioReposo}", State.Success);
+                _MessageShow($"Up Nombre             ==> {bajaMedica.FechaFinReposo}", State.Success);
+
+
+                _Loading.Show();
+                var response = await _Rest.PutAsync<int>("RrhBajaMedica", bajaMedica, bajaMedica.IdrrhBajaMedica);
+                _Loading.Hide();
+
+                _MessageShow($"=====>: {response.Message}", response.State);
+            }
+            catch (Exception ex)
+            {
+                _Loading.Hide();
+                _MessageShow(ex.Message, State.Error);
+            }
+        }
 
         // Eliminar la persona de Recursos Humanos ...
         protected async Task EliminarPersona(int id)
@@ -383,8 +718,6 @@ namespace Server.Pages.Pages.Persona
 
         protected async Task EliminarContrato(int id)
         {
-           //await _MessageConfirm("¿Seguro de eliminar el registro de esta persona?", async () => {
-
                 var response = await _Rest.DeleteAsync<int>("RrhContrato", id);
                 if (!response.Succeeded)
                 {
@@ -399,10 +732,62 @@ namespace Server.Pages.Pages.Persona
 
                 await GetPersonaContrato();
                 TablaContratoPersona = TablaContrato.Where(x => x.IdrrhhPersona == _Contrato.IdrrhhPersona).ToList();
-                StateHasChanged();
-            //});
         }
 
+        protected async Task EliminarComision(int id)
+        {
+            var response = await _Rest.DeleteAsync<int>("RrhComision", id);
+            if (!response.Succeeded)
+            {
+                _MessageShow(response.Message, State.Error);
+            }
+            else
+            {
+                _MessageShow(response.Message, response.State);
+                await GetPersonaTurnos();
+                StateHasChanged();
+            }
+            await GetComision();
+            TablaComisionPersona = TablaComision.Where(x => x.IdrrhPersonaComision == _Comision.IdrrhPersonaComision).ToList();
+
+        }
+
+        protected async Task EliminarVacacion(int id)
+        {
+            var response = await _Rest.DeleteAsync<int>("RrhVacacion", id);
+            if (!response.Succeeded)
+            {
+                _MessageShow(response.Message, State.Error);
+            }
+            else
+            {
+                _MessageShow(response.Message, response.State);
+                await GetPersonaTurnos();
+                StateHasChanged();
+            }
+            await GetVacacion();
+            TablaVacacionPersona = TablaVacacion.Where(x => x.IdrrhPersonaVac == _Vacacion.IdrrhPersonaVac).ToList();
+
+        }
+
+
+        protected async Task EliminarBajaMedica(int id)
+        {
+            var response = await _Rest.DeleteAsync<int>("RrhBajaMedica", id);
+            if (!response.Succeeded)
+            {
+                _MessageShow(response.Message, State.Error);
+            }
+            else
+            {
+                _MessageShow(response.Message, response.State);
+                await GetPersonaTurnos();
+                StateHasChanged();
+            }
+
+            await GetBajaMedica();
+            TablaBajaMedicaPersona = TablaBajaMedica.Where(x => x.IdrrhPersona == _BajaMedica.IdrrhPersona).ToList();
+        }
 
         //Validar y guardar/actualizar el formulario
         private async Task OnValidPerfil(EditContext ctx) 
@@ -430,6 +815,67 @@ namespace Server.Pages.Pages.Persona
         }
 
 
+        private async Task OnValidComision(EditContext ctx)
+        {
+            _MessageShow($@"
+                _1Comision.IdrrhComision             ==> {_Comision.IdrrhComision}
+                _1Comision.FechaSolicitudComision    ==> {_Comision.FechaSolicitudComision}
+                _1Comision.FechaSalidaComision       ==> {_Comision.FechaSalidaComision}
+                _1Comision.IdgenMotivoComision       ==> {_Comision.IdgenMotivoComision}
+                _1Comision.JustificacionComision     ==> {_Comision.JustificacionComision}
+                _1Comision.IdrrhPersonaComision      ==> {_Comision.IdrrhPersonaComision}
+                _1Comision.IdgenHorarioTurnoComision ==> {_Comision.IdgenHorarioTurnoComision}", State.Success);
+
+            if (_Comision.IdrrhComision > 0)
+            {
+                await UpdateComision(_Comision);
+                _MessageShow($"Comision actualizado Update correctamente OnValidComision ===> (ID: {_Comision.IdrrhComision})", State.Success);
+            }
+            else
+            {
+                await SaveComision(_Comision);
+                _MessageShow($"Comision Guardado Save exitosamente ===> (ID: {_Comision.IdrrhComision})", State.Success);
+
+                _MessageShow($@"
+                    _2Comision.IdrrhComision             ==> {_Comision.IdrrhComision}
+                    _2Comision.FechaSolicitudComision    ==> {_Comision.FechaSolicitudComision}
+                    _2Comision.FechaSalidaComision       ==> {_Comision.FechaSalidaComision}
+                    _2Comision.IdgenMotivoComision       ==> {_Comision.IdgenMotivoComision}
+                    _2Comision.JustificacionComision     ==> {_Comision.JustificacionComision}
+                    _2Comision.IdrrhPersonaComision      ==> {_Comision.IdrrhPersonaComision}
+                    _2Comision.IdgenHorarioTurnoComision ==> {_Comision.IdgenHorarioTurnoComision}", State.Success);
+            }
+
+            //_Comision = new RrhComisionDto();
+
+            await GetComision();
+            TablaComisionPersona = TablaComision.Where(x => x.IdrrhPersonaComision == _Comision.IdrrhPersonaComision).ToList();
+
+            //_Comision.IdrrhComision = 0;
+            //_Comision.FechaSolicitudComision = null;
+            //_Comision.FechaSalidaComision = null;
+            //_Comision.IdgenMotivoComision = 0;
+            //_Comision.JustificacionComision = null;
+            //_Comision.IdrrhPersonaComision    = 0;
+            //_Comision.IdgenHorarioTurnoComision = 0;
+
+
+            _MessageShow($@"
+                _3Comision.IdrrhComision             ==> {_Comision.IdrrhComision}
+                _3Comision.FechaSolicitudComision    ==> {_Comision.FechaSolicitudComision}
+                _3Comision.FechaSalidaComision       ==> {_Comision.FechaSalidaComision}
+                _3Comision.IdgenMotivoComision       ==> {_Comision.IdgenMotivoComision}
+                _3Comision.JustificacionComision     ==> {_Comision.JustificacionComision}
+                _3Comision.IdrrhPersonaComision      ==> {_Comision.IdrrhPersonaComision}
+                _3Comision.IdgenHorarioTurnoComision ==> {_Comision.IdgenHorarioTurnoComision}", State.Success);
+
+
+            StateHasChanged();
+        }
+
+
+
+
         //Validar y guardar/actualizar ...
         private async Task OnValidContrato(EditContext ctx)
         {
@@ -454,10 +900,10 @@ namespace Server.Pages.Pages.Persona
 
             //_MessageShow($"_Contrato.IdrrhhContrato ==> {_Contrato.IdrrhhContrato}", State.Success);
             //_MessageShow($"_Contrato.InicioContrato ==> {_Contrato.InicioContrato}", State.Success);
-            //_MessageShow($"_Contrato.FinContrato    ==> {_Contrato.FinContrato}", State.Success);
+            //_MessageShow($"_Contrato.FinContrato    ==> {_Contrato.FinContrato}",    State.Success);
             //_MessageShow($"_Contrato.NumeroContrato ==> {_Contrato.NumeroContrato}", State.Success);
-            //_MessageShow($"_Contrato.TipoContrato   ==> {_Contrato.TipoContrato}", State.Success);
-            //_MessageShow($"_Contrato.IdrrhhPersona  ==> {_Contrato.IdrrhhPersona}", State.Success);
+            //_MessageShow($"_Contrato.TipoContrato   ==> {_Contrato.TipoContrato}",   State.Success);
+            //_MessageShow($"_Contrato.IdrrhhPersona  ==> {_Contrato.IdrrhhPersona}",  State.Success);
 
             _Contrato.InicioContrato = null;
             _Contrato.FinContrato = null;
@@ -467,9 +913,68 @@ namespace Server.Pages.Pages.Persona
             StateHasChanged();  // 🔃 Forzar el renderizado de la vista actualizada
         }
 
-        /* ///////////////////////////////////////////////////////////////////////////////// */
+
+
+        private async Task OnValidVacacion(EditContext ctx)
+        {
+            _MessageShow($"_Vacacion.IdrrhVacacion ==> {_Vacacion.IdrrhVacacion}", State.Success);
+
+
+            if (_Vacacion.IdrrhVacacion > 0)
+            {
+                await UpdateVacacion(_Vacacion);
+                _MessageShow($"Vacación actualizado correctamente OnValidVacacion (ID: {_Vacacion.IdrrhVacacion})", State.Success);
+            }
+            else
+            {
+                await SaveVacacion(_Vacacion);
+                _MessageShow($"Vacacion Guardado exitosamente (ID: {_Vacacion.IdrrhVacacion})", State.Success);
+            }
+
+            await GetVacacion();
+            TablaVacacionPersona = TablaVacacion.Where(x => x.IdrrhPersonaVac == _Vacacion.IdrrhPersonaVac).ToList();
+
+            _Vacacion.FechaSolicitudVacacion =  null;
+            _Vacacion.IdgenHorarioturno      =  null;
+            _Vacacion.FechaInicioVacacion    =  null;
+            _Vacacion.FechaFinVacacion       =  null;
+            _Vacacion.AutorizacionLugar      =  null;
+            _Vacacion.AutorizacionFecha      =  null;
+            StateHasChanged();
+        }
+
+        private async Task OnValidBajaMedica(EditContext ctx)
+        {
+            if(_BajaMedica.IdrrhBajaMedica > 0)
+            {
+                await UpdateBajaMedica(_BajaMedica);
+                _MessageShow($"Baja Medica actualizada correctamente (ID: {_BajaMedica.IdrrhBajaMedica})", State.Success);
+            }
+            else
+            {
+                await SaveBajaMedica(_BajaMedica);
+                _MessageShow($"Baja Medica registrado exitosamente (ID: {_BajaMedica.IdrrhBajaMedica})", State.Success);
+            }
+
+            await GetBajaMedica();
+
+            TablaBajaMedicaPersona = TablaBajaMedica.Where(x => x.IdrrhPersona == _BajaMedica.IdrrhPersona).ToList();
+
+            _BajaMedica.FechaInicioReposo = null;
+            _BajaMedica.FechaFinReposo    = null;
+            _BajaMedica.Diagnostico = null;
+            _BajaMedica.DiasReposo = 0;
+
+
+            StateHasChanged();  // 🔃 Forzar el renderizado de la vista actualizada
+        }
+
+        /* ////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
         protected async Task ShowPopu(int id)
         {
+
+            _MessageShow($"Contrado 'id' ==> {id}", State.Success);
+
             try
             {
                 TablaContratoPersona = TablaContrato.Where(x => x.IdrrhhPersona == id).ToList();
@@ -478,7 +983,6 @@ namespace Server.Pages.Pages.Persona
                 {
                     popupAdmView = true;
                     _Contrato.IdrrhhPersona = id;
-
                 }
                 else
                 {
@@ -486,13 +990,106 @@ namespace Server.Pages.Pages.Persona
                     _Contrato.IdrrhhPersona = id;
                     //popupAdmView = false;
                     //_MessageShow("No hay contrato para la persona", State.Warning);
-
                 }
             }
             catch (Exception ex) {
                 _MessageShow("Error al filtrar datos de contrato" + ex, State.Error);
             }
         }
+
+
+        //FALTA MEDICA ...
+        protected async Task ShowBajaMedica(int id)
+        {
+            _MessageShow($"Baja Medica 'id' ==> {id}", State.Success);
+
+            try
+            {
+                TablaBajaMedicaPersona = TablaBajaMedica.Where(x => x.IdrrhPersona == id).ToList();
+
+                if (TablaBajaMedicaPersona.Any())
+                {
+                    bajaMedicaView = true;
+                    _BajaMedica.IdrrhPersona = id;
+                }
+                else
+                {
+                    bajaMedicaView = true;
+                    _BajaMedica.IdrrhPersona = id;
+                    _MessageShow("No hay Baja Medica para la persona", State.Warning);
+                }
+            }
+            catch (Exception ex){
+                _MessageShow("Error al filtrar datos de Faltas Medicas" + ex, State.Error);
+            }
+        }
+
+        protected async Task ShowComision(int id)
+        {
+            _MessageShow($"Boton de Comisión ... {id}", State.Success);
+
+            try
+            {
+                TablaComisionPersona = TablaComision.Where(x => x.IdrrhPersonaComision == id).ToList();
+
+
+                if (TablaComisionPersona.Any())
+                {
+                    comisionView = true;
+                    _Comision.IdrrhPersonaComision = id;
+                }
+                else
+                {
+                    comisionView = true;
+                    _Comision.IdrrhPersonaComision = id;
+                    _MessageShow("No hay Comision para la persona 'ShowComision'", State.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                _MessageShow("Error al filtrar datos de Comision 'ShowComision'" + ex, State.Error);
+            }
+        }
+
+
+        //VACACION DEL PERSONAL
+        protected async Task ShowVacacion(int id)
+        {
+            _MessageShow($"Boton de Vacación ... {id}"  , State.Success);
+
+            try
+            {
+                TablaVacacionPersona = TablaVacacion.Where(x => x.IdrrhPersonaVac == id).ToList();
+
+
+                if (TablaVacacionPersona.Any())
+                {
+                    vacacionView = true;
+                    _Vacacion.IdrrhPersonaVac = id;
+                }
+                else
+                {
+                    vacacionView = true;
+                    _Vacacion.IdrrhPersonaVac = id;
+                    _MessageShow("No hay Vacación para la persona 'ShowVacacion'", State.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                _MessageShow("Error al filtrar datos de Vacacion 'ShowVacacion'" + ex, State.Error);
+            }
+        }
+
+
+        protected async Task GeneratePDFVacacion()
+        {
+            //var pdfBytes = await Http.PostAsJsonAsync("api/vacaciones/pdf", _Vacacion);
+        }
+
+
+
+
+
 
 
         private async Task CambiarEstado(RrhPersonaDto persona)
@@ -515,26 +1112,49 @@ namespace Server.Pages.Pages.Persona
             _Contrato = contrato;
         }
 
+        private void FormEditarVacacion(RrhVacacionDto vacacion)
+        {
+            _Vacacion = vacacion;
+        }
+
+        protected void FormEditarBajaMedica(RrhBajaMedicaDto bajaMedica)
+        {
+            _BajaMedica = bajaMedica;
+        }
+
+        protected void FormEditarComision(RrhComisionDto comision)
+        {
+            _Comision = comision;
+        }
+
         private void ResetPerfil()
         {
             _Persona = new RrhPersonaDto();
         }
 
 
-        private void ResetContrato() => _Contrato = new RrhContratoDto();
-
-
+        private void ResetTabla()
+        {
+            _Contrato   = new RrhContratoDto   ();
+            _BajaMedica = new RrhBajaMedicaDto ();
+            _Vacacion   = new RrhVacacionDto   ();
+            _Comision   = new RrhComisionDto   ();
+        }
+            
         private void ToggleExpand() => expande = !expande;
 
         private void btnCancelPop()
         {
-            popupAdmView= false;
+            popupAdmView   = false;
+            bajaMedicaView = false;
+            vacacionView   = false;
+            comisionView   = false;
         }
 
         private bool FilterFunc1(RrhPersonaDto element) => FilterFunc(element, searchString);
 
 
-        /*////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+        /*///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
         private int CalcularEdad(DateTime? BornDate)
         {
@@ -610,7 +1230,7 @@ namespace Server.Pages.Pages.Persona
 
 
         //GRAPHICS, GRAPHICS, GRAPHICS, GRAPHICS, GRAPHICS, GRAPHICS, GRAPHICS, GRAPHICS ...
-        private void LoadDonutCharts()
+        private async Task LoadDonutCharts()
         {
             DonutDataTotalPersonal = GenerarDonutPorSexo(
                 Tablapersona,
@@ -771,14 +1391,14 @@ namespace Server.Pages.Pages.Persona
             var departamentoMap = new Dictionary<string, string>
             {
                 { "CH", "CHUQUISACA" },
-                { "LP", "LA PAZ" },
+                { "LP", "LA PAZ"     },
                 { "CB", "COCHABAMBA" },
-                { "OR", "ORURO" },
-                { "PT", "POTOSI" },
-                { "TJ", "TARIJA" },
+                { "OR", "ORURO"      },
+                { "PT", "POTOSI"     },
+                { "TJ", "TARIJA"     },
                 { "SC", "SANTA CRUZ" },
-                { "BN", "BENI" },
-                { "PD", "PANDO" }
+                { "BN", "BENI"       },
+                { "PD", "PANDO"      }
             };
 
             string[] colores = {
@@ -811,7 +1431,9 @@ namespace Server.Pages.Pages.Persona
             return grouped;
         }
 
-        // METTODO DE DESCARGA EN EXCEL
+
+
+        //METODO DE DESCARGA EN EXCEL ...
         public async Task ExportarPersonas()
         {
             try

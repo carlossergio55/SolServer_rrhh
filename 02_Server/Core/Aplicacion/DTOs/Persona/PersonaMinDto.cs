@@ -8,8 +8,16 @@ namespace Aplicacion.DTOs.Persona
 {
     public class PersonaMinDto
     {
-        public int IdrrhPersona { get; set; }
-        public int? IdgengrupoTrabajo { get; set; }
-        public string NombreApellido { get; set; } = string.Empty;
+        public string    Nombre                 { get; set; }
+        public string    ApellidoPaterno        { get; set; }
+        public string    ApellidoMaterno        { get; set; }
+        public int       IdgenPuestodescripcion { get; set; }
+        public int?      InmediatoSuperior      { get; set; }
+
+
+
+        public string FullName =>
+            string.Join(" ", new[] { Nombre, ApellidoPaterno, ApellidoMaterno }
+                .Where(s => !string.IsNullOrWhiteSpace(s)));
     }
 }

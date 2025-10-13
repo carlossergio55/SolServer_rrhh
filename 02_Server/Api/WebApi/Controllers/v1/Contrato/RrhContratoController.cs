@@ -9,6 +9,7 @@ namespace WebApi.Controllers.v1.Contrato
 {
     [ApiVersion("1.0")]
     [ApiController]
+
     public class RrhContrato : BaseApiController
     {
         [HttpGet("GetAll")]

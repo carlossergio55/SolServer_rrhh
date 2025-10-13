@@ -13,14 +13,14 @@ namespace Aplicacion.Features.Persona.Commands
 {
     public class UpdateRrhPersonaCommand : IRequest<Response<int>>
     {
-        public int IdrrhPersona      { get; set; }
-        public string NombreApellido { get; set; }
-        public string Ci             { get; set; }
-        public string Exp            { get; set; }
-        public string Celular        { get; set; }
+        public int IdrrhPersona          { get; set; }
+        public string NombreApellido     { get; set; }
+        public string Ci                 { get; set; }
+        public string Exp                { get; set; }
+        public string Celular            { get; set; }
 
-        public string ApellidoPaterno { get; set; }
-        public string ApellidoMaterno { get; set; }
+        public string ApellidoPaterno    { get; set; }
+        public string ApellidoMaterno    { get; set; }
 
         public string Nombre             { get; set; }
         public string Apellido           { get; set; }
@@ -29,11 +29,11 @@ namespace Aplicacion.Features.Persona.Commands
         public DateTime? FechaNacimiento { get; set; }
 
 
-        public int? Edad                { get; set; }
-        public string Domicilio         { get; set; }
-        public string Residencia        { get; set; }
-        public DateTime? InicioContrato { get; set; }
-        public string Correo            { get; set; }
+        public int? Edad                 { get; set; }
+        public string Domicilio          { get; set; }
+        public string Residencia         { get; set; }
+        public DateTime? InicioContrato  { get; set; }
+        public string Correo             { get; set; }
 
 
         /*id*/
@@ -103,7 +103,6 @@ namespace Aplicacion.Features.Persona.Commands
                 await _repo.UpdateAsync(entity);
                 return new Response<int>(entity.IdrrhPersona, "Actualizado correctamente.");
             }
-
         }
     }
 

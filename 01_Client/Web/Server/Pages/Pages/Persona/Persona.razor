@@ -5,19 +5,27 @@
 @using Syncfusion.Blazor.Grids
 @using System.Globalization
 @using Server.Pages.Pages.Biometrico
+@using Infraestructura.Models.Biometrico
 @using MudBlazor
 @using Syncfusion.Blazor.Popups
 @using Syncfusion.Blazor.Charts
 @using Aplicacion.DTOs.Charts
+@using Syncfusion.Blazor.Buttons
+@using Aplicacion.DTOs.Vacacion
+
+
 
 @inherits MainBaseComponent
-@layout MainLayout
-@inject NavigationManager Navigation
-@inject NavigationManager Nav
-@inject NavigationManager NavigationManager
+@layout   MainLayout
+@inject   NavigationManager Navigation
+@inject   NavigationManager Nav
+@inject   NavigationManager NavigationManager
+
 @inject IJSRuntime JSRuntime
 @inject IDialogService DialogService
 @inject IJSRuntime JS
+
+
 
 <MudCard>
     <!-- Panel de formulario -->
@@ -322,7 +330,7 @@
     </MudExpansionPanels>
 </MudCard>
 
-<!--////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!--/////////////////////////////////////////////////////////////////////////////////////-->
 
 <div class="container-center scroll-sync-container">
     <div class="full-width">
@@ -389,33 +397,58 @@
                                 <MudTh Style="text-align: left;">DOMICILIO</MudTh>
                                 <MudTh Style="text-align: left;">RESIDENCIA</MudTh>
                                 <MudTh Style="text-align: left;">EDAD</MudTh>
-                                <!-- <MudTh Style="text-align: left;">INICIO CONTRATO</MudTh> -->
                                 <MudTh Style="text-align: left;">INMEDIATO SUPERIOR</MudTh>
                                 <MudTh Style="text-align: left;">CORREO</MudTh>                    
                             </HeaderContent>
 
                             <RowTemplate>
                                 <MudTd>
-                                        <MudTooltip Text="EDITAR REGISTRO" Placement="Placement.Top">
-                                            <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => FormEditarPersona(context))"
-                                                           Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small" />
-                                        </MudTooltip>
+                                    <MudTooltip Text="EDITAR REGISTRO" Placement="Placement.Top">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => FormEditarPersona(context))"
+                                                        Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small" />
+                                    </MudTooltip>
 
-                                        <MudTooltip Text="ELIMINAR REGISTRO" Placement="Placement.Top">
-                                                <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => EliminarPersona(context.IdrrhPersona))"
-                                                           Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" />
-                                        </MudTooltip>
 
-                                        <MudIconButton Icon="@(context.Estado == '1' ? Icons.Material.Filled.ToggleOn : Icons.Material.Filled.ToggleOff)"
+                                    <MudTooltip Text="ELIMINAR REGISTRO" Placement="Placement.Top">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => EliminarPersona(context.IdrrhPersona))"
+                                                        Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" />
+                                    </MudTooltip>
+
+
+                                    <MudIconButton Icon="@(context.Estado == '1' ? Icons.Material.Filled.ToggleOn : Icons.Material.Filled.ToggleOff)"
                                                        Variant="Variant.Outlined"
                                                        Color="@(context.Estado == '1' ? Color.Success : Color.Secondary)"
                                                        Size="Size.Small"
                                                        OnClick="@(() => CambiarEstado(context))" />
 
-                                        <MudTooltip Text="Mostrar contrato" Placement="Placement.Top">
-                                            <MudIconButton Icon="@Icons.Material.Filled.GridView" OnClick="@(() => ShowPopu(context.IdrrhPersona))"
-                                                           Variant="Variant.Outlined" Color="Color.Info" Size="Size.Small" />
-                                        </MudTooltip>
+
+                                    <!--CONTRATOS-->
+                                    <MudTooltip Text="MOSTRAR CONTRATO" Placement="Placement.Top">
+                                        <MudIconButton Icon="@Icons.Material.Filled.GridView" OnClick="@(() => ShowPopu(context.IdrrhPersona))"
+                                                        Variant="Variant.Outlined" Color="Color.Info" Size="Size.Small" />
+                                    </MudTooltip>
+
+
+                                    <!--FALTAS MEDICAS-->
+                                    <MudTooltip Text="BAJA MEDICA" Placement="Placement.Bottom">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Sick" OnClick="@(() => ShowBajaMedica(context.IdrrhPersona))"
+                                                       Variant="Variant.Outlined" Color="Color.Info" Size="Size.Small" />
+                                    </MudTooltip>
+
+
+                                    <!--VACACIONES-->
+                                    <MudTooltip Text="VACACIONES" Placement="Placement.Bottom">
+                                        <MudIconButton Icon="@Icons.Material.Filled.BeachAccess" OnClick="@(() => ShowVacacion(context.IdrrhPersona))"
+                                                       Variant="Variant.Outlined" Color="Color.Success" Size="Size.Small" />
+                                    </MudTooltip>
+
+
+                                    <!--COMISIONES-->
+                                    <MudTooltip Text="AUTORIZACION DE SALIDA" Placement="Placement.Bottom">
+                                        <MudIconButton Icon="@Icons.Material.Filled.BusinessCenter" OnClick="@(() => ShowComision(context.IdrrhPersona))"
+                                                       Variant="Variant.Outlined" Color="Color.Success" Size="Size.Small" />
+                                    </MudTooltip>
+
                                 </MudTd>
                   
                                 <MudTd Class="text-center">@context.IdrrhPersona</MudTd>
@@ -440,15 +473,12 @@
                                 <MudTd Class="text-center">@context.Domicilio</MudTd>
                                 <MudTd Class="text-center">@context.Residencia</MudTd>
                                 <MudTd Class="text-center">@context.Edad</MudTd>
-                                <!-- <MudTd Class="text-center">@(context.InicioContrato.HasValue ?context.InicioContrato.Value.ToString("dd/MM/yyyy") : "")</MudTd>  -->
-                                <!--<MudTd Class="text-center">@context.InmediatoSuperior</MudTd>  -->
                                 <MudTd Class="text-center">@SupervisorNombre(context.InmediatoSuperior)</MudTd>
-
                                 <MudTd Class="text-center">@context.Correo</MudTd>                 
 
                             </RowTemplate>
                             <PagerContent>
-                                <MudTablePager PageSizeOptions="new int [] {5,15,30,45, 70, 100} " /> <!--Rows per page ...-->
+                                <MudTablePager PageSizeOptions="new int [] {5,15,30,45,70,100} " /> <!--Rows per page ...-->
                             </PagerContent>
                         </MudTable>
                     </div>
@@ -457,11 +487,19 @@
 
 
             <!-- VACACIONES DE LOS EMPLEADOS, VACACIONES DE LOS EMPLEADOS, VACACIONES DE LOS EMPLEADOS ... -->
+            <!-- ░░░░░  CABECERA DEL FUNCIONARIO  ░░░░░ -->
 
+            <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Success" Class="my-2">
+                <b>LISTA DEL PERSONAL DE ENVIBOL</b>
+            </MudText>
 
-
-
-
+   
+            @if (PersonaSeleccionada != null)
+            {
+                <MudText Typo="Typo.h6">
+                    Bienvenido, @PersonaSeleccionada.NombreApellido, @PersonaSeleccionada.Ci, @GetPuestoDescripcion(PersonaSeleccionada.IdgenPuestodescripcion)
+                </MudText>
+            }
 
 
             <div style="display: flex; justify-content: center; gap: 0px; flex-wrap: wrap; margin-top: 2rem; width: 100%; max-width: 1200px;">
@@ -655,22 +693,11 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+<!--==================================================================================================================================================-->
 <!-- "CONTRATOS NEW PAGE, CONTRATOS NEW PAGE, CONTRATOS NEW PAGE, CONTRATOS NEW PAGE, CONTRATOS NEW PAGE, CONTRATOS NEW PAGE, CONTRATOS NEW PAGE ..." -->
 <SfDialog Target="#target" ZIndex="999" Width="60%" Height="90%" AllowDragging="true" IsModal="true" style="min-height: 90%" CloseOnEscape="false" @bind-Visible="@popupAdmView">
     <DialogTemplates>
-        <Header><strong>HISTORIAL</strong> <strong></strong></Header>
+        <Header><strong>HISTORIAL</strong></Header>
         <Content>
             <MudCardContent>
                 <div>
@@ -731,15 +758,7 @@
                                     <MudSelectItem Value="@("CONTRATO")"> CONTRATO </MudSelectItem>
                                     <MudSelectItem Value="@("ADENDA")"> ADENDA </MudSelectItem>
                                 </MudSelect>
- 
-                                <!-- <MudNumericField T="int"
-                                                 @bind-Value="_Contrato.IdrrhhPersona"
-                                                 Label="ID CONTRATO"
-                                                 Step="1"
-                                                 Min="1"
-                                                 Max="9999"
-                                                 Immediate="true" />  -->
-                                <!--BUTTONS, BUTTONS, BUTTONS ...-->
+
 
                                 <MudCardActions Class="mt-4">
                                     <MudButton ButtonType="MudBlazor.ButtonType.Submit" 
@@ -750,11 +769,407 @@
                                     </MudButton>
                                     <MudButton ButtonType="MudBlazor.ButtonType.Button" 
                                                Variant="Variant.Outlined"
-                                               OnClick="@ResetContrato"
+                                               OnClick="@ResetTabla"
                                                Color="Color.Default">
                                         LIMPIAR
                                     </MudButton>
                                 </MudCardActions>
+                            </MudPaper>
+                        </EditForm>
+                    </MudCard>
+                </div>
+            </MudCardContent>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="CERRAR" OnClick="@btnCancelPop" />
+    </DialogButtons>
+</SfDialog>
+
+
+
+<!--====================================================================================================================================-->
+<!-- "BAJA MEDICA, BAJA MEDICA, BAJA MEDICA, BAJA MEDICA, BAJA MEDICA, BAJA MEDICA, BAJA MEDICA, BAJA MEDICA, BAJA MEDICA, BAJA MEDICA" -->
+<SfDialog Target="#target" ZIndex="999" Width="60%" Height="90%" AllowDragging="true" IsModal="true" style="min-height: 90%" CloseOnEscape="false" @bind-Visible="@bajaMedicaView">
+    <DialogTemplates>
+        <Header><strong>BAJA MEDICA</strong></Header>
+        <Content>
+            <MudCardContent>
+                <div>
+                    <MudCard>
+                        <MudTable Items="@TablaBajaMedicaPersona" Hover="true" Bordered="true" Striped="true" Dense="true">
+                            <HeaderContent>
+                                <MudTh Style="text-align: left;">ID PERSONA          </MudTh>
+                                <MudTh Style="text-align: left;">INICIO BAJA MEDICA  </MudTh> 
+                                <MudTh Style="text-align: left;">FIN BAJA MEDICA     </MudTh> 
+                                <MudTh Style="text-align: left;">DIAGNOSTICO         </MudTh>
+                                <MudTh Style="text-align: left;">DIAS DE REPOSO      </MudTh>
+                            </HeaderContent>
+
+                            <RowTemplate>
+                                <MudTd Class="text-center">@context.IdrrhPersona</MudTd>
+                                <MudTd Class="text-center">@context.FechaInicioReposo.Value.ToString("dd/MM/yyyy")</MudTd>
+                                <MudTd Class="text-center">@context.FechaFinReposo.Value.ToString("dd/MM/yyyy")</MudTd> 
+                                <MudTd Class="text-center">@context.Diagnostico</MudTd> 
+                                <MudTd Class="text-center">@context.DiasReposo</MudTd>
+
+                                <!--Add Button of "Borrar y Editar"-->
+                                <MudTd>
+                                    <MudTooltip Text="EDITAR BAJA MEDICA" Placement="Placement.Top">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" OnClick="@(() => FormEditarBajaMedica(context))"
+                                                       Variant="Variant.Outlined" Color="Color.Warning" Size="Size.Small" />
+                                    </MudTooltip>
+
+                                    <MudTooltip Text="ELIMINAR BAJA MEDICA" Placement="Placement.Top">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => EliminarBajaMedica(context.IdrrhBajaMedica))"
+                                                       Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small" />
+                                    </MudTooltip>
+                                </MudTd>
+
+                            </RowTemplate>
+                        </MudTable>
+                    </MudCard>
+
+                    <MudCard Class="mt-4">
+                        <EditForm Model="@_BajaMedica" OnValidSubmit="OnValidBajaMedica">
+                            <DataAnnotationsValidator />
+                            <MudPaper Class="p-4" Style="max-width:250px;">
+                                <MudText>AGREGAR BAJA MEDICA</MudText>
+
+                                <MudDatePicker @bind-Date="_BajaMedica.FechaInicioReposo" 
+                                    Label="Inicio Reposo" />
+
+                                <MudDatePicker @bind-Date="_BajaMedica.FechaFinReposo" 
+                                    Label="Fin Reposo" />
+
+                                <MudTextField T="string"
+                                              Label="Diagnóstico"
+                                              @bind-Value="_BajaMedica.Diagnostico"
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              FullWidth="true"
+                                              Lines="3" />
+
+
+                                <MudNumericField T="int"
+                                                 @bind-Value="_BajaMedica.DiasReposo"
+                                                 Label="Días de reposo"
+                                                 Step="1"
+                                                 Min="1"
+                                                 Max="9999"
+                                                 Immediate="true" />
+
+
+                                <MudCardActions Class="mt-4">
+                                    <MudButton ButtonType="MudBlazor.ButtonType.Submit"
+                                               Variant="Variant.Outlined"
+                                               Color="Color.Success"
+                                               Class="ml-auto button-spacing">
+                                        GUARDAR
+                                    </MudButton>
+                                    <MudButton ButtonType="MudBlazor.ButtonType.Button"
+                                               Variant="Variant.Outlined"
+                                               OnClick="@ResetTabla"
+                                               Color="Color.Default">
+                                        LIMPIAR
+                                    </MudButton>
+                                </MudCardActions> 
+
+                            </MudPaper>
+                        </EditForm>
+                    </MudCard>
+                </div>
+            </MudCardContent>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="CERRAR" OnClick="@btnCancelPop" />
+    </DialogButtons>
+</SfDialog>
+
+
+<!--///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!--===================================================================================================================================================================-->
+<!-- "VACACION, VACACION, VACACION, VACACION, VACACION, VACACION, VACACION,VACACION, VACACION, VACACION, VACACION, VACACION, VACACION, VACACION, VACACION, VACACION .."-->
+<SfDialog Target="#target" ZIndex="999" Width="73%" Height="90%" AllowDragging="true" IsModal="true" style="min-height: 90%" CloseOnEscape="false" @bind-Visible="@vacacionView">
+    <DialogTemplates>
+        <Header><strong>VACACIONES DE LA PERSONA</strong></Header>
+        <Content>
+            <MudCardContent>
+                <div>
+                    <MudCard>
+                        <MudTable Items="@TablaVacacionPersona" Hover="true" Bordered="true" Striped="true" Dense="true" Class="custom-table">
+                            <HeaderContent>
+                                <MudTh class="col-nombre">NOMBRE: </MudTh>
+                                <MudTh class="col-puesto">PUESTO DESCRIPCION:   </MudTh>
+                                <MudTh class="col-fecha">FECHA DE SOLICITUD:    </MudTh>
+                                <MudTh class="col-turno">HORARIO DE TURNO:      </MudTh>
+                                <MudTh class="col-turno">FECHA INICIO VACACION: </MudTh>
+                                <MudTh class="col-turno">FECHA FIN VACACION:    </MudTh>
+                                <MudTh class="col-turno">LUGAR:                 </MudTh>
+                                <MudTh class="col-turno">FECHA:                 </MudTh>
+                                <MudTh class="col-turno">INMEDIATO SUPERIOR:    </MudTh>
+                                <MudTh class="col-turno">OPCIONES:              </MudTh>
+                            </HeaderContent>
+
+                            <RowTemplate>
+                                <MudTd Class="col-nombre text-center">@context.Persona.FullName</MudTd>
+                                <MudTd Class="col-puesto text-center">@GetPuestoDescripcion(context.Persona.IdgenPuestodescripcion) </MudTd>
+                                <MudTd Class="col-fecha  text-center">@context.FechaSolicitudVacacion.Value.ToString("dd/MM/yyyy")  </MudTd>
+                                <MudTd Class="col-turno text-center">@GetHorarioTurnoDescripcion(context.IdgenHorarioturno ?? 0)    </MudTd>
+                                <MudTd Class="col-fecha  text-center">@context.FechaInicioVacacion.Value.ToString("dd/MM/yyyy")     </MudTd>
+                                <MudTd Class="col-fecha  text-center">@context.FechaFinVacacion.Value.ToString("dd/MM/yyyy")        </MudTd>
+                                <MudTd Class="col-lugar  text-center">@context.AutorizacionLugar                                    </MudTd>
+                                <MudTd Class="col-fecha  text-center">@context.AutorizacionFecha.Value.ToString("dd/MM/yyyy")       </MudTd>
+                                <MudTd Class="col-fecha  text-center">@SupervisorNombre(context.Persona.InmediatoSuperior)          </MudTd>
+
+
+                                <!--Add Button of "Borrar y Editar"-->
+                                <MudTd> 
+                                    <div style="display: flex; gap: 6px; align-items: center;">
+                                        <MudTooltip Text="EDITAR VACACION" Placement="Placement.Top">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                           OnClick="@(() => FormEditarVacacion(context))"
+                                                           Variant="Variant.Outlined"
+                                                           Color="Color.Warning"
+                                                           Size="Size.Small" />
+                                        </MudTooltip>
+
+                                        <MudTooltip Text="ELIMINAR VACACION" Placement="Placement.Top">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                           OnClick="@(() => EliminarVacacion(context.IdrrhVacacion))"
+                                                           Variant="Variant.Outlined"
+                                                           Color="Color.Error"
+                                                           Size="Size.Small" />
+                                        </MudTooltip>
+
+                                        <MudTooltip Text="PDF VACACION" Placement="Placement.Top">
+                                            <MudIconButton Icon="@Icons.Material.Filled.PictureAsPdf"
+                                                           OnClick="@(() => GeneratePDFVacacion())"
+                                                           Variant="Variant.Outlined"
+                                                           Color="Color.Success"
+                                                           Size="Size.Small" />
+                                        </MudTooltip>
+                                    </div>
+                                </MudTd>
+
+
+                            </RowTemplate>
+                        </MudTable>
+                    </MudCard>
+
+
+                    <MudCard Class="mt-4">
+                        <EditForm Model="@_Vacacion" OnValidSubmit="OnValidVacacion">
+                            <DataAnnotationsValidator />
+                            <MudPaper Class="p-4" Style="max-width:350px;">
+
+                                <MudDatePicker T="DateTime?"
+                                               @bind-Date="_Vacacion.FechaSolicitudVacacion"
+                                               Label="FECHA DE SOLICITUD: "
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense" />
+
+
+                                <AutoSelectClasificador TItem="GenClasificadorDto"
+                                                        Label="HORARIO DE TURNO: "
+                                                        Items="_ListaHorarioTurno"
+                                                        IdProperty="IdgenClasificador"
+                                                        DescriptionProperty="Descripcion"
+                                                        MaxItems="50"
+                                                        @bind-DataValue="_Vacacion.IdgenHorarioturno" />
+
+
+                                <MudDatePicker T="DateTime?"
+                                               @bind-Date="_Vacacion.FechaInicioVacacion"
+                                               Label="FECHA INICIO VACACION: "
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense" />
+
+
+                                <MudDatePicker T="DateTime?"
+                                               @bind-Date="_Vacacion.FechaFinVacacion"
+                                               Label="FECHA FIN VACACION: "
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense" />
+
+
+                                <MudTextField T="string"
+                                              @bind-Value="_Vacacion.AutorizacionLugar"
+                                              Label="LUGAR: "
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense" />
+
+                                <MudDatePicker T="DateTime?"
+                                               @bind-Date="_Vacacion.AutorizacionFecha"
+                                               Label="FECHA: "
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense" />
+
+
+                                <MudCardActions Class="mt-4">
+                                    <MudButton ButtonType="MudBlazor.ButtonType.Submit"
+                                               Variant="Variant.Outlined"
+                                               Color="Color.Success"
+                                               Class="ml-auto button-spacing">
+                                        GUARDAR
+                                    </MudButton>
+                                    <MudButton ButtonType="MudBlazor.ButtonType.Button"
+                                               Variant="Variant.Outlined"
+                                               OnClick="@ResetTabla"
+                                               Color="Color.Default">
+                                        LIMPIAR
+                                    </MudButton>
+                                </MudCardActions>
+
+                            </MudPaper>
+                        </EditForm>
+                    </MudCard>
+                </div>
+            </MudCardContent>
+        </Content>
+    </DialogTemplates>
+    <DialogButtons>
+        <DialogButton Content="CERRAR" OnClick="@btnCancelPop" />
+    </DialogButtons>
+</SfDialog>
+
+
+<!--///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+<!--===================================================================================================================================================================-->
+<!-- "COMISION, COMISION, COMISION, COMISION, COMISION, COMISION, COMISION,COMISION, COMISION, COMISION, COMISION, COMISION, COMISION, COMISION, COMISION, COMISION "-->
+
+<SfDialog Target="#target" ZIndex="999" Width="73%" Height="90%" AllowDragging="true" IsModal="true" style="min-height: 90%" CloseOnEscape="false" @bind-Visible="@comisionView">
+    <DialogTemplates>
+        <Header><strong>COMISIONES DE LA PERSONA</strong></Header>
+        <Content>
+            <MudCardContent>
+                <div>
+                    <MudCard>
+                        <MudTable Items="@TablaComisionPersona" Hover="true" Bordered="true" Striped="true" Dense="true" Class="custom-table">
+                            <HeaderContent>
+
+                                <MudTh class="col-nombreComision         ">NOMBRE Y APELLIDO:     </MudTh>
+                                <MudTh class="col-cargoComision          ">CARGO:                 </MudTh>
+                                <MudTh class="col-fechaSolicitudComision ">FECHA DE SOLICITUD:    </MudTh>
+                                <MudTh class="col-fechaSalidaComision    ">FECHA/S DE SALIDA:     </MudTh>
+                                <MudTh class="col-horarioTurnoComision   ">HORARIO DE TURNO:      </MudTh>
+                                <MudTh class="col-motivoComision         ">MOTIVO DE LA SALIDA:   </MudTh>
+                                <MudTh class="col-justificacionComision  ">JUSTIFICACION:         </MudTh>
+                                <!--<MudTh class="col-justificacionComision">SUPERVISOR:       </MudTh>-->
+                                <MudTh class="col-motivoComision         ">Idrrh_Comision:        </MudTh>
+                                <MudTh class="col-motivoComision         ">Idrrh_Persona_Comision:</MudTh>
+                                <MudTh class="col-motivoComision         ">OPCIONES:              </MudTh>
+
+                            </HeaderContent>
+
+                            <RowTemplate>
+                                <MudTd Class="col-nombreComision         ">@context.Persona.FullName                                            </MudTd>
+                                <MudTd Class="col-cargoComision          ">@GetPuestoDescripcion(context.Persona.IdgenPuestodescripcion)        </MudTd>
+                                <MudTd Class="col-fechaSolicitudComision ">@context.FechaSolicitudComision.Value.ToString("dd/MM/yyyy")         </MudTd>
+                                <MudTd Class="col-fechaSalidaComision    ">@context.FechaSalidaComision.Value.ToString("dd/MM/yyyy")            </MudTd>
+                                <MudTd Class="col-horarioTurnoComision   ">@GetHorarioTurnoDescripcion(context.IdgenHorarioTurnoComision ?? 0)  </MudTd>
+                                <MudTd Class="col-motivoComision         ">@GetMotivoComisionDescripcion(context.IdgenMotivoComision ?? 0)      </MudTd>
+                                <MudTd Class="col-motivoComision         ">@context.JustificacionComision                                       </MudTd>
+                                <MudTd Class="col-motivoComision         ">@context.IdrrhComision                                               </MudTd>
+                                <MudTd Class="col-motivoComision         ">@context.IdrrhPersonaComision                                        </MudTd>
+
+
+                                <!--Add Button of "Borrar y Editar"-->
+                                <MudTd>
+                                    <div style="display: flex; gap: 6px; align-items: center;">
+                                        <MudTooltip Text="EDITAR COMISION" Placement="Placement.Top">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                           OnClick="@(() => FormEditarComision(context))"
+                                                           Variant="Variant.Outlined"
+                                                           Color="Color.Warning"
+                                                           Size="Size.Small" />
+                                        </MudTooltip>
+
+                                        <MudTooltip Text="ELIMINAR COMISION" Placement="Placement.Top">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                                           OnClick="@(() => EliminarComision(context.IdrrhComision))"
+                                                           Variant="Variant.Outlined"
+                                                           Color="Color.Error"
+                                                           Size="Size.Small" />
+                                        </MudTooltip>
+
+                                        <MudTooltip Text="PDF COMISION" Placement="Placement.Top">
+                                            <MudIconButton Icon="@Icons.Material.Filled.PictureAsPdf"
+                                                           OnClick="@(() => GeneratePDFVacacion())"
+                                                           Variant="Variant.Outlined"
+                                                           Color="Color.Success"
+                                                           Size="Size.Small" />
+                                        </MudTooltip>
+                                    </div>
+                                </MudTd>
+
+
+                            </RowTemplate>
+                        </MudTable>
+                    </MudCard>
+
+
+                    <MudCard Class="mt-4">
+                        <EditForm Model="@_Comision" OnValidSubmit="OnValidComision">
+                            <DataAnnotationsValidator />
+                            <MudPaper Class="p-4" Style="max-width:350px;">
+
+                                <MudDatePicker T="DateTime?"
+                                               @bind-Date="_Comision.FechaSolicitudComision"
+                                               Label="FECHA DE SOLICITUD: "
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense" />
+
+
+                                <MudDatePicker T="DateTime?"
+                                               @bind-Date="_Comision.FechaSalidaComision"
+                                               Label="FECHA/S DE SALIDA: "
+                                               Variant="Variant.Outlined"
+                                               Margin="Margin.Dense" />
+
+
+                                <AutoSelectClasificador TItem="GenClasificadorDto"
+                                                        Label="HORARIO DE TURNO: "
+                                                        Items="_ListaHorarioTurno"
+                                                        IdProperty="IdgenClasificador"
+                                                        DescriptionProperty="Descripcion"
+                                                        MaxItems="50"
+                                                        @bind-DataValue="_Comision.IdgenHorarioTurnoComision" />
+
+
+                                <AutoSelectClasificador TItem="GenClasificadorDto"
+                                                        Label="MOTIVO DE LA SALIDA: "
+                                                        Items="_ListaMotivoComision"
+                                                        IdProperty="IdgenClasificador"
+                                                        DescriptionProperty="Descripcion"
+                                                        MaxItems="50"
+                                                        @bind-DataValue="_Comision.IdgenMotivoComision" />
+
+
+                                <MudTextField T="string"
+                                              @bind-Value="_Comision.JustificacionComision"
+                                              Label="JUSTIFICACION: "
+                                              Variant="Variant.Outlined"
+                                              Margin="Margin.Dense"
+                                              Lines="4" />
+
+
+                                <MudCardActions Class="mt-4">
+                                    <MudButton ButtonType="MudBlazor.ButtonType.Submit"
+                                               Variant="Variant.Outlined"
+                                               Color="Color.Success"
+                                               Class="ml-auto button-spacing">
+                                        GUARDAR
+                                    </MudButton>
+                                    <MudButton ButtonType="MudBlazor.ButtonType.Button"
+                                               Variant="Variant.Outlined"
+                                               OnClick="@ResetTabla"
+                                               Color="Color.Default">
+                                        LIMPIAR
+                                    </MudButton>
+                                </MudCardActions>
+
                             </MudPaper>
                         </EditForm>
                     </MudCard>

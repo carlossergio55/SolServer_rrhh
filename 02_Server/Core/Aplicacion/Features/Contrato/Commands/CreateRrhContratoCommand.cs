@@ -28,8 +28,6 @@ namespace Aplicacion.Features.Contrato.Commands
             {
                 _repo = repo;
                 _mapper = mapper;
-
-
             }
 
             public async Task<Response<int>> Handle(CreateRrhContratoCommand request, CancellationToken cancellationToken)

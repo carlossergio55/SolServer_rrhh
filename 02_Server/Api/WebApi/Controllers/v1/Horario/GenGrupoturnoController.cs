@@ -17,10 +17,12 @@ namespace WebApi.Controllers.v1.Horario
         public async Task<IActionResult> GetAll()
             => Ok(await Mediator.Send(new GetAllGenGrupoturnoQuery()));
 
+
         [HttpPost]
         [Authorize]
         public async Task<IActionResult> Post(CreateGenGrupoturnoCommand cmd)
             => Ok(await Mediator.Send(cmd));
+
 
         [HttpPut("{id}")]
         [Authorize]
@@ -30,9 +32,11 @@ namespace WebApi.Controllers.v1.Horario
             return Ok(await Mediator.Send(cmd));
         }
 
+
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> Delete(int id)
             => Ok(await Mediator.Send(new DeleteGenGrupoturnoCommand { IdgenGrupoturno = id }));
+
     }
 }

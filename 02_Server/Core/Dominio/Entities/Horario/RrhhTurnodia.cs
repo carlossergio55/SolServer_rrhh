@@ -13,15 +13,15 @@ namespace Dominio.Entities.Horario
     public partial class RrhhTurnodia : AuditableBaseEntity
     {
         [Key]
-        public int IdrrhhTurnodia { get; set; }
+        public int          IdrrhhTurnodia { get; set; }
 
         [ForeignKey("GenClasificadortipo")]
-        public int IdgenClasificadortipo { get; set; }
+        public int          IdgenClasificadortipo { get; set; }
 
-        public string DiaSemana { get; set; }
-        public TimeSpan HoraEntrada { get; set; }
-        public TimeSpan HoraSalida { get; set; }
-        public TimeSpan? TiempoExtra { get; set; } = TimeSpan.Zero;
+        public string       DiaSemana { get; set; }
+        public TimeSpan     HoraEntrada { get; set; }
+        public TimeSpan     HoraSalida { get; set; }
+        public TimeSpan?    TiempoExtra { get; set; } = TimeSpan.Zero;
 
         public virtual GenClasificadortipo GenClasificadortipo { get; set; }
     }
