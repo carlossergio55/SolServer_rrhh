@@ -1,16 +1,17 @@
-﻿using System.Security.Policy;
-using Dominio.Entities;
+﻿using Dominio.Entities;
 using Dominio.Entities.Asistencia;
 using Dominio.Entities.BajaMedica;
+using Dominio.Entities.Comision;
 using Dominio.Entities.Contrato;
 using Dominio.Entities.Falta;
 using Dominio.Entities.Horario;
+using Dominio.Entities.Permisos;
 using Dominio.Entities.Persona;
 using Dominio.Entities.Seguridad;
 using Dominio.Entities.Vacacion;
-using Dominio.Entities.Comision;
 using Dominio.Entities.Vistas;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Policy;
 
 namespace Persistencia.Contexts
 {
@@ -41,6 +42,8 @@ namespace Persistencia.Contexts
         public DbSet<RrhFalta>              RrhFalta              { get; set; }
         public DbSet<RrhVacacion>           RrhVacacion           { get; set; }
         public DbSet<RrhComision>           RrhComision           { get; set; }
+        public DbSet<SRrhFeriado>           SRrhFeriado           { get; set; }
+        public DbSet<SRrhSolicitud>         SRrhSolicitud         { get; set; }
         #endregion
 
     }

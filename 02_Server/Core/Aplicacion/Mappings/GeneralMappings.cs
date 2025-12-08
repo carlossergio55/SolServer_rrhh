@@ -5,6 +5,7 @@ using Aplicacion.DTOs.Comision;
 using Aplicacion.DTOs.Contrato;
 using Aplicacion.DTOs.Falta;
 using Aplicacion.DTOs.Horario;
+using Aplicacion.DTOs.Permisos;
 using Aplicacion.DTOs.Persona;
 using Aplicacion.DTOs.Segurity;
 using Aplicacion.DTOs.Vacacion;
@@ -18,6 +19,7 @@ using Dominio.Entities.Comision;
 using Dominio.Entities.Contrato;
 using Dominio.Entities.Falta;
 using Dominio.Entities.Horario;
+using Dominio.Entities.Permisos;
 using Dominio.Entities.Persona;
 using Dominio.Entities.Seguridad;
 using Dominio.Entities.Vacacion;
@@ -64,7 +66,8 @@ namespace Aplicacion.Mappings
             CreateMap<RrhComision,           RrhComisionDto>();
             CreateMap<RrhPersona,            PersonaMinDto>();
 
-            //Command mapping (for insert/update)
+            CreateMap<SRrhFeriado, SRrhFeriadoDto>();
+            CreateMap<SRrhSolicitud, SRrhSolicitudDto>();
 
 
 
@@ -94,6 +97,10 @@ namespace Aplicacion.Mappings
             CreateMap<RrhVacacionDto,           RrhVacacion>();
             CreateMap<RrhComisionDto,           RrhComision>();
             CreateMap<PersonaMinDto,            RrhPersona>();
+            CreateMap<SRrhFeriadoDto,           SRrhFeriado>();
+            CreateMap<SRrhSolicitudDto,         SRrhSolicitud>();
+
+
             #endregion
         }
     }

@@ -1,0 +1,339 @@
+﻿@page "/permiso"
+@using Infraestructura.Models
+@using Infraestructura.Models.Permisos
+@using Infraestructura.Models.Clasificador
+@using Microsoft.AspNetCore.Components.Forms
+@inherits MainBaseComponent
+@layout MainLayout
+@inject IJSRuntime JSRuntime
+@inject IDialogService DialogService
+
+<MudCard>
+    @if (_cargandoDatos)
+    {
+        <!-- PANTALLA DE CARGA -->
+        <MudCardContent Class="d-flex flex-column align-center pa-6">
+            <MudProgressCircular Color="Color.Primary" Size="Size.Large" Indeterminate="true" />
+            <MudText Typo="Typo.h6" Class="mt-4">Cargando información...</MudText>
+        </MudCardContent>
+    }
+    else if (_personaActual == null)
+    {
+        <!-- ERROR: NO SE PUDO CARGAR EL USUARIO -->
+        <MudCardContent>
+            <MudAlert Severity="Severity.Error" Variant="Variant.Filled">
+                <b>No se pudo cargar la información del usuario.</b><br />
+                Por favor, inicie sesión nuevamente o recargue la página.
+            </MudAlert>
+        </MudCardContent>
+    }
+    else
+    {
+        <!-- INFORMACIÓN DEL USUARIO -->
+        <MudCardContent>
+            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-4">
+                <MudIcon Icon="@Icons.Material.Filled.Person" Class="mr-2" />
+                <b>Usuario:</b> @_personaActual.NombreApellido
+                <span class="ml-4"><b>CI:</b> @_personaActual.Ci - @_personaActual.Exp</span>
+            </MudAlert>
+        </MudCardContent>
+
+        <!-- SECCIÓN: PERMISOS DISPONIBLES -->
+        <MudCardContent>
+            <MudText Typo="Typo.h5" Align="Align.Center" Color="Color.Primary" Class="mb-4">
+                <b>📋 PERMISOS DISPONIBLES</b>
+            </MudText>
+
+            <MudGrid Justify="Justify.Center" Spacing="3">
+                @foreach (var permiso in _permisos)
+                {
+                    <MudItem xs="12" sm="6" md="3" lg="3">
+                        <MudCard Elevation="3" Style="height: 100%; cursor: pointer;"
+                                 @onclick="@(() => AbrirFormularioPermiso(permiso))">
+                            <MudCardContent Class="d-flex flex-column align-center pa-4">
+                                <!-- ICONO GRANDE -->
+                                <MudIcon Icon="@ObtenerIconoPermiso(permiso.Descripcion)"
+                                         Size="Size.Large"
+                                         Color="@ObtenerColorPermiso(permiso.Descripcion)"
+                                         Style="font-size: 4rem;"
+                                         Class="mb-3" />
+
+                                <!-- NOMBRE DEL PERMISO -->
+                                <MudText Typo="Typo.h6" Align="Align.Center" Class="mb-2">
+                                    <b>@permiso.Descripcion</b>
+                                </MudText>
+
+                                <!-- BOTÓN SOLICITAR -->
+                                <MudButton Variant="Variant.Filled"
+                                           Color="Color.Success"
+                                           FullWidth="true"
+                                           StartIcon="@Icons.Material.Filled.Add">
+                                    PEDIR
+                                </MudButton>
+                            </MudCardContent>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudCardContent>
+
+        <MudDivider Class="my-6" />
+
+        <!-- SECCIÓN: MIS PERMISOS SOLICITADOS -->
+        <MudCardContent>
+            <MudText Typo="Typo.h5" Align="Align.Center" Color="Color.Secondary" Class="mb-4">
+                <b>📝 MIS PERMISOS SOLICITADOS</b>
+            </MudText>
+
+            @if (_solicitudes == null || !_solicitudes.Any())
+            {
+                <MudAlert Severity="Severity.Info" Class="my-4">
+                    <b>No tienes permisos solicitados aún.</b><br />
+                    Selecciona un tipo de permiso arriba para comenzar.
+                </MudAlert>
+            }
+            else
+            {
+                <MudGrid Spacing="2">
+                    @foreach (var solicitud in _solicitudes)
+                    {
+                        <MudItem xs="12">
+                            <MudCard Outlined="true">
+                                <MudCardContent>
+
+                                    <!-- Fila principal: ocupa todo el ancho, responsive y con botones al final -->
+                                    <MudStack Row="true" Wrap="true" AlignItems="AlignItems.Center" Spacing="2">
+
+                                        <!-- ESTADO -->
+                                        <MudChip T="string"
+                                                 Size="Size.Large"
+                                                 Color="@ObtenerColorEstado(solicitud.Estado)"
+                                                 Icon="@ObtenerIconoEstado(solicitud.Estado)">
+                                            <b>@ObtenerTextoEstado(solicitud.Estado)</b>
+                                        </MudChip>
+
+                                        <!-- TIPO DE PERMISO -->
+                                        <MudStack Row="true" Wrap="false" AlignItems="AlignItems.Center" Spacing="1">
+                                            <MudIcon Icon="@ObtenerIconoPermiso(solicitud.TipoSolicitudNavigation?.Descripcion)"
+                                                     Size="Size.Medium"
+                                                     Color="@ObtenerColorPermiso(solicitud.TipoSolicitudNavigation?.Descripcion)" />
+                                            <MudText Typo="Typo.body1" Inline="true">
+                                                <b>@solicitud.TipoSolicitudNavigation?.Descripcion</b>
+                                            </MudText>
+                                        </MudStack>
+
+                                        <!-- FECHAS Y DÍAS -->
+                                        <MudText Typo="Typo.body2" Inline="true">
+                                            <b>Desde:</b> @solicitud.FechaInicio.ToString("dd/MM/yyyy")
+                                        </MudText>
+
+                                        <MudText Typo="Typo.body2" Inline="true">
+                                            <b>Hasta:</b> @solicitud.FechaFin.ToString("dd/MM/yyyy")
+                                        </MudText>
+
+                                        <MudText Typo="Typo.caption" Color="Color.Default" Inline="true">
+                                            @CalcularDias(solicitud.FechaInicio, solicitud.FechaFin)
+                                        </MudText>
+
+                                        <!-- MOTIVO (penúltimo) -->
+                                        <MudText Typo="Typo.body2" Color="Color.Default" Inline="true">
+                                            <b>Motivo:</b> @solicitud.Motivo
+                                        </MudText>
+
+                                        <!-- Empuja los botones al extremo derecho -->
+                                        <MudSpacer />
+
+                                        <!-- BOTONES (al final) -->
+                                        <MudStack Row="true" Wrap="false" AlignItems="AlignItems.Center" Spacing="1">
+                                            <MudTooltip Text="Ver Detalles">
+                                                <MudIconButton Icon="@Icons.Material.Filled.Visibility"
+                                                               Color="Color.Info"
+                                                               Size="Size.Small"
+                                                               OnClick="@(() => VerDetalleSolicitud(solicitud))" />
+                                            </MudTooltip>
+
+                                            @if (solicitud.Estado == "SOLICITADO")
+                                            {
+                                                <MudTooltip Text="Editar">
+                                                    <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                                                   Color="Color.Warning"
+                                                                   Size="Size.Small"
+                                                                   OnClick="@(() => EditarSolicitud(solicitud))" />
+                                                </MudTooltip>
+
+                                                <MudTooltip Text="Cancelar Solicitud">
+                                                    <MudIconButton Icon="@Icons.Material.Filled.Cancel"
+                                                                   Color="Color.Error"
+                                                                   Size="Size.Small"
+                                                                   OnClick="@(() => CancelarSolicitud(solicitud.IdrrhSolicitud))" />
+                                                </MudTooltip>
+                                            }
+                                        </MudStack>
+
+                                    </MudStack>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+                    }
+                </MudGrid>
+
+            }
+        </MudCardContent>
+    }
+</MudCard>
+
+<!-- DIALOG PARA SOLICITAR PERMISO -->
+<MudDialog @bind-IsVisible="_mostrarFormulario" Options="_dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@(_permisoSeleccionado != null ? ObtenerIconoPermiso(_permisoSeleccionado.Descripcion) : Icons.Material.Filled.Description)"
+                     Class="mr-2" />
+            @(_solicitudActual.IdrrhSolicitud > 0 ? "EDITAR" : "SOLICITAR") PERMISO: @_permisoSeleccionado?.Descripcion
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <EditForm Model="@_solicitudActual" OnValidSubmit="GuardarSolicitud">
+            <DataAnnotationsValidator />
+            <MudGrid>
+                <!-- Fecha Inicio -->
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker T="DateTime?"
+                                   Date="_solicitudActual.FechaInicio"
+                                   DateChanged="(DateTime? newDate) => _solicitudActual.FechaInicio = newDate ?? DateTime.Now"
+                                   Label="Fecha de Inicio"
+                                   Variant="Variant.Outlined"
+                                   DateFormat="dd/MM/yyyy"
+                                   Editable="true"
+                                   Required="true"
+                                   RequiredError="La fecha de inicio es requerida" />
+                </MudItem>
+
+                <!-- Fecha Fin -->
+                <MudItem xs="12" sm="6">
+                    <MudDatePicker T="DateTime?"
+                                   Date="_solicitudActual.FechaFin"
+                                   DateChanged="(DateTime? newDate) => _solicitudActual.FechaFin = newDate ?? DateTime.Now"
+                                   Label="Fecha de Fin"
+                                   Variant="Variant.Outlined"
+                                   DateFormat="dd/MM/yyyy"
+                                   Editable="true"
+                                   Required="true"
+                                   RequiredError="La fecha de fin es requerida" />
+                </MudItem>
+
+                <!-- Días calculados -->
+                <MudItem xs="12">
+                    <MudAlert Severity="Severity.Info" Dense="true">
+                        <b>Duración:</b> @CalcularDias(_solicitudActual.FechaInicio, _solicitudActual.FechaFin)
+                    </MudAlert>
+                </MudItem>
+
+                <!-- Motivo -->
+                <MudItem xs="12">
+                    <MudTextField T="string"
+                                  @bind-Value="_solicitudActual.Motivo"
+                                  Label="Motivo del Permiso"
+                                  Variant="Variant.Outlined"
+                                  Lines="4"
+                                  MaxLength="500"
+                                  Counter="500"
+                                  Required="true"
+                                  RequiredError="El motivo es requerido"
+                                  Placeholder="Explica brevemente el motivo de tu solicitud (mínimo 10 caracteres)..." />
+                </MudItem>
+            </MudGrid>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CerrarFormulario" Color="Color.Default">
+            Cancelar
+        </MudButton>
+        <MudButton OnClick="GuardarSolicitud" Color="Color.Success" Variant="Variant.Filled">
+            <MudIcon Icon="@Icons.Material.Filled.Save" Class="mr-1" />
+            Guardar
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- DIALOG PARA VER DETALLES -->
+<MudDialog @bind-IsVisible="_mostrarDetalles" Options="_dialogOptions">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Info" Class="mr-2" />
+            DETALLES DEL PERMISO
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (_solicitudDetalle != null)
+        {
+            <MudGrid Spacing="2">
+                <MudItem xs="12">
+                    <MudChip T="string" Size="Size.Large" Color="@ObtenerColorEstado(_solicitudDetalle.Estado)">
+                        <b>@ObtenerTextoEstado(_solicitudDetalle.Estado)</b>
+                    </MudChip>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudText Typo="Typo.subtitle2">Tipo de Permiso:</MudText>
+                    <MudText Typo="Typo.body1"><b>@_solicitudDetalle.TipoSolicitudNavigation?.Descripcion</b></MudText>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle2">Fecha Inicio:</MudText>
+                    <MudText Typo="Typo.body1">@_solicitudDetalle.FechaInicio.ToString("dd/MM/yyyy")</MudText>
+                </MudItem>
+
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.subtitle2">Fecha Fin:</MudText>
+                    <MudText Typo="Typo.body1">@_solicitudDetalle.FechaFin.ToString("dd/MM/yyyy")</MudText>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudText Typo="Typo.subtitle2">Duración:</MudText>
+                    <MudText Typo="Typo.body1">@CalcularDias(_solicitudDetalle.FechaInicio, _solicitudDetalle.FechaFin)</MudText>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudText Typo="Typo.subtitle2">Motivo:</MudText>
+                    <MudText Typo="Typo.body1">@_solicitudDetalle.Motivo</MudText>
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudText Typo="Typo.subtitle2">Fecha de Solicitud:</MudText>
+                    <MudText Typo="Typo.body1">@_solicitudDetalle.FechaSolicitud.ToString("dd/MM/yyyy HH:mm")</MudText>
+                </MudItem>
+
+                @if (_solicitudDetalle.FechaAprobacion != null)
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.subtitle2">Fecha de Respuesta:</MudText>
+                        <MudText Typo="Typo.body1">@_solicitudDetalle.FechaAprobacion?.ToString("dd/MM/yyyy HH:mm")</MudText>
+                    </MudItem>
+                }
+
+                @if (_solicitudDetalle.UsuarioApruebaNavigation != null)
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.subtitle2">Aprobado/Rechazado por:</MudText>
+                        <MudText Typo="Typo.body1">@_solicitudDetalle.UsuarioApruebaNavigation.NombreApellido</MudText>
+                    </MudItem>
+                }
+
+                @if (!string.IsNullOrEmpty(_solicitudDetalle.ObservacionesAprobacion))
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.subtitle2">Observaciones:</MudText>
+                        <MudAlert Severity="@(_solicitudDetalle.Estado == "RECHAZADO" ? Severity.Error : Severity.Info)">
+                            @_solicitudDetalle.ObservacionesAprobacion
+                        </MudAlert>
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _mostrarDetalles = false)" Color="Color.Primary">
+            Cerrar
+        </MudButton>
+    </DialogActions>
+</MudDialog>

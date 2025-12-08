@@ -18,10 +18,14 @@
 
   <ItemGroup>
     <Compile Remove="Pages\Pages\Inversion\**" />
+    <Compile Remove="wwwroot\Documentos\**" />
     <Content Remove="Pages\Pages\Inversion\**" />
+    <Content Remove="wwwroot\Documentos\**" />
     <EmbeddedResource Remove="Pages\Applications\**" />
     <EmbeddedResource Remove="Pages\Pages\Inversion\**" />
-    <None Remove="Pages\Pages\Inversion\**" />  
+    <EmbeddedResource Remove="wwwroot\Documentos\**" />
+    <None Remove="Pages\Pages\Inversion\**" />
+    <None Remove="wwwroot\Documentos\**" />  
   </ItemGroup>
 
   <ItemGroup>
@@ -86,7 +90,6 @@
 
   <ItemGroup>
     <Folder Include="Resources\Aplicacion\" />
-    <Folder Include="wwwroot\Documentos\" />
     <Folder Include="wwwroot\icons\" />
   </ItemGroup>
 

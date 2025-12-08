@@ -7,7 +7,6 @@
 @using Syncfusion.Blazor.Grids
 @using System.Globalization
 @using Server.Pages.Pages.Biometrico
-@using MudBlazor
 @using Syncfusion.Blazor.Buttons
 @inherits MainBaseComponent
 @layout MainLayout
@@ -55,25 +54,50 @@
                                                          MinCharacters="3"
                                                          DebounceInterval="500" />
                                     </MudItem>
+
+                                    <!-- ✅ NUEVO: Alerta de último turno -->
+                                    @if (_infoUltimoTurno != null && _infoUltimoTurno.TieneRegistros)
+                                    {
+                                        <MudItem xs="12">
+                                            <MudAlert Severity="Severity.Info" Dense="true" Class="py-2">
+                                                <strong>Último turno:</strong> @_infoUltimoTurno.Fecha?.ToString("dd/MM/yyyy") -
+                                                @_infoUltimoTurno.DescripcionTurno
+                                                (@_infoUltimoTurno.NombreGrupo)
+                                            </MudAlert>
+                                        </MudItem>
+                                    }
+
+                                    <!-- ✅ NUEVO: Alerta de ciclo incompleto -->
+                                    @if (_infoRango != null && _infoRango.CicloIncompleto)
+                                    {
+                                        <MudItem xs="12">
+                                            <MudAlert Severity="Severity.Warning" Dense="true" Class="py-2">
+                                                <strong>⚠️ Ciclo incompleto:</strong> @_infoRango.DiasCompletados de
+                                                @(_infoRango.DiasCompletados + _infoRango.DiasFaltantes) días completados.
+                                                <br />
+                                                <strong>Turno actual:</strong> @_infoRango.DescripcionTurnoActual
+                                                <br />
+                                                <strong>Faltan:</strong> @_infoRango.DiasFaltantes días para completar el ciclo
+                                            </MudAlert>
+                                        </MudItem>
+                                    }
+                                    else if (_infoRango != null && _infoRango.ExistenTurnos)
+                                    {
+                                        <MudItem xs="12">
+                                            <MudAlert Severity="Severity.Info" Dense="true" Class="py-2">
+                                                <strong>ℹ️ Turnos existentes:</strong> @_infoRango.CantidadRegistros registros
+                                                hasta @_infoRango.UltimaFechaExistente?.ToString("dd/MM/yyyy")
+                                            </MudAlert>
+                                        </MudItem>
+                                    }
+
                                     <MudItem xs="12" sm="4">
                                         <MudSelect T="int"
-                                                   Label="TURNO:"
-                                                   @bind-Value="_DiaEvento.IdgenClasificadortipo"
+                                                   Label="Grupo de Turno"
+                                                   @bind-Value="_grupoSeleccionado"
                                                    Variant="Variant.Outlined"
-                                                   Margin="Margin.Dense">
-                                            @foreach (var turno in _listaTurnos ?? Enumerable.Empty<GenClasificadorTipoDto>())
-                                            {
-                                                <MudSelectItem Value="@(turno.IdgenClasificadortipo)">
-                                                    <!-- int aquí también -->
-                                                    @turno.Descripcion
-                                                </MudSelectItem>
-                                            }
-                                        </MudSelect>
-
-                                    </MudItem>
-                                    <MudItem xs="12" sm="4">
-                                        <MudSelect T="int" Label="Grupo de Turno" @bind-Value="_grupoSeleccionado"
-                                                   Variant="Variant.Outlined" Margin="Margin.Dense" Required="true">
+                                                   Margin="Margin.Dense"
+                                                   Required="true">
                                             @foreach (var grupo in _listaGrupo ?? Enumerable.Empty<GenGrupoturnoDto>())
                                             {
                                                 <MudSelectItem Value="@(grupo.IdgenGrupoturno)">
@@ -81,43 +105,100 @@
                                                 </MudSelectItem>
                                             }
                                         </MudSelect>
-
                                     </MudItem>
 
+                                    <!-- ✅ NUEVO: Selector de turno inicial (solo para rotativos) -->
+                                    @if (EsGrupoRotativo())
+                                    {
+                                        <MudItem xs="12" sm="4">
+                                            <MudSelect T="int?"
+                                                       Label="Turno Inicial (Opcional)"
+                                                       @bind-Value="_turnoInicialSeleccionado"
+                                                       Variant="Variant.Outlined"
+                                                       Margin="Margin.Dense"
+                                                       Clearable="true">
+                                                @foreach (var detalle in _grupoDetalles.Where(d => d.IdgenGrupoturno == _grupoSeleccionado).OrderBy(d => d.Orden))
+                                                {
+                                                    <MudSelectItem Value="@(detalle.Orden)">
+                                                        @detalle.GenClasificadortipo.Descripcion
+                                                    </MudSelectItem>
+                                                }
+                                            </MudSelect>
+                                        </MudItem>
+                                    }
+
                                     <MudItem xs="12" sm="4">
-                                        <MudDatePicker Label="Fecha Inicio" @bind-Date="_fechaInicio" />
+                                        <MudDatePicker Label="Fecha Inicio"
+                                                       @bind-Date="_fechaInicio"
+                                                       Variant="Variant.Outlined"
+                                                       Margin="Margin.Dense" />
                                     </MudItem>
                                     <MudItem xs="12" sm="4">
-                                        <MudDatePicker Label="Fecha Fin" @bind-Date="_fechaFin" />
+                                        <MudDatePicker Label="Fecha Fin"
+                                                       @bind-Date="_fechaFin"
+                                                       Variant="Variant.Outlined"
+                                                       Margin="Margin.Dense" />
+                                    </MudItem>
+
+                                    <!-- ✅ NUEVO: Checkbox de continuidad automática -->
+                                    <MudItem xs="12" sm="4">
+                                        <MudCheckBox @bind-Checked="_continuarAutomatico"
+                                                     Label="Continuar desde último turno"
+                                                     Color="Color.Primary"
+                                                     Dense="true" />
+                                        <MudText Typo="Typo.caption" Color="Color.Default">
+                                            Si está activado, continuará automáticamente desde el último turno registrado
+                                        </MudText>
                                     </MudItem>
 
                                     <MudItem xs="12">
-                                        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="GenerarTurnos">
+                                        <MudButton Color="Color.Primary"
+                                                   Variant="Variant.Filled"
+                                                   OnClick="GenerarTurnos"
+                                                   StartIcon="@Icons.Material.Filled.CalendarMonth">
                                             Generar turnos
-
                                         </MudButton>
+                                    </MudItem>
 
-                                    </MudItem>
-                                    <MudItem xs="12">
-                                        <MudTable Items="_DiasCache" Dense="true" Hover="true" Elevation="2">
-                                            <HeaderContent>
-                                                <MudTh>Fecha</MudTh>
-                                                <MudTh>Turno</MudTh>
-                                            </HeaderContent>
-                                            <RowTemplate Context="item">
-                                                <MudTd DataLabel="Fecha">@item.Fecha?.ToString("dd/MM/yyyy")</MudTd>
-                                                <MudTd DataLabel="Turno">
-                                                    @_listaTurnos.FirstOrDefault(t => t.IdgenClasificadortipo == item.IdgenClasificadortipo)?.Descripcion
-                                                </MudTd>
-                                            </RowTemplate>
-                                        </MudTable>
-                                    </MudItem>
+                                    <!-- Tabla de vista previa -->
+                                    @if (_DiasCache.Any())
+                                    {
+                                        <MudItem xs="12">
+                                            <MudText Typo="Typo.h6" Class="mb-2">Vista previa de turnos generados:</MudText>
+                                            <MudTable Items="_DiasCache"
+                                                      Dense="true"
+                                                      Hover="true"
+                                                      Elevation="2"
+                                                      Height="400px"
+                                                      FixedHeader="true">
+                                                <HeaderContent>
+                                                    <MudTh>Fecha</MudTh>
+                                                    <MudTh>Día</MudTh>
+                                                    <MudTh>Turno</MudTh>
+                                                    <MudTh>Motivo</MudTh>
+                                                </HeaderContent>
+                                                <RowTemplate Context="item">
+                                                    <MudTd DataLabel="Fecha">@item.Fecha?.ToString("dd/MM/yyyy")</MudTd>
+                                                    <MudTd DataLabel="Día">@item.Fecha?.ToString("dddd", new CultureInfo("es-ES"))</MudTd>
+                                                    <MudTd DataLabel="Turno">
+                                                        <MudChip Size="Size.Small"
+                                                                 Style="@($"background-color:{GetChipColorHex(item.IdgenClasificadortipo)}; color:white;")">
+                                                            @_listaTurnos.FirstOrDefault(t => t.IdgenClasificadortipo == item.IdgenClasificadortipo)?.Descripcion
+                                                        </MudChip>
+                                                    </MudTd>
+                                                    <MudTd DataLabel="Motivo">@item.Motivo</MudTd>
+                                                </RowTemplate>
+                                            </MudTable>
+                                        </MudItem>
+                                    }
+
                                     <MudItem xs="12">
                                         <MudButton Color="Color.Success"
                                                    Variant="Variant.Filled"
                                                    OnClick="GuardarTurnos"
-                                                   Disabled="_DiasCache.Count == 0">
-                                            Guardar turnos generados
+                                                   Disabled="_DiasCache.Count == 0"
+                                                   StartIcon="@Icons.Material.Filled.Save">
+                                            Guardar turnos generados (@_DiasCache.Count días)
                                         </MudButton>
                                     </MudItem>
 
@@ -129,4 +210,191 @@
             </ChildContent>
         </MudExpansionPanel>
     </MudExpansionPanels>
+</MudCard>
+
+<!-- Calendario de Turnos Mensual -->
+<MudCard Class="mt-4">
+    <MudCardHeader>
+        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+
+<MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+    <MudText Typo="Typo.h5">Planilla de Turnos</MudText>
+
+                <MudSelect T="int"
+                           Value="_anioSeleccionado"
+                           ValueChanged="OnAnioChanged"
+                           Dense="true"
+                           Style="width: 100px;">
+                    @foreach (var anio in _listaAnios)
+                    {
+                        <MudSelectItem Value="@anio">@anio</MudSelectItem>
+                    }
+                </MudSelect>
+
+</MudStack>
+
+
+            <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">
+                <MudButton OnClick="@(() => CambiarMes(1))"
+                           Color="@(_mesSeleccionado == 1 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 1 ? Variant.Filled : Variant.Outlined)">
+                    ENERO
+                </MudButton>
+
+                <MudButton OnClick="@(() => CambiarMes(2))"
+                           Color="@(_mesSeleccionado == 2 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 2 ? Variant.Filled : Variant.Outlined)">
+                    FEBRERO
+                </MudButton>
+
+                <MudButton OnClick="@(() => CambiarMes(3))"
+                           Color="@(_mesSeleccionado == 3 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 3 ? Variant.Filled : Variant.Outlined)">
+                    MARZO
+                </MudButton>
+
+                <MudButton OnClick="@(() => CambiarMes(4))"
+                           Color="@(_mesSeleccionado == 4 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 4 ? Variant.Filled : Variant.Outlined)">
+                    ABRIL
+                </MudButton>
+
+                <MudButton OnClick="@(() => CambiarMes(5))"
+                           Color="@(_mesSeleccionado == 5 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 5 ? Variant.Filled : Variant.Outlined)">
+                    MAYO
+                </MudButton>
+
+                <MudButton OnClick="@(() => CambiarMes(6))"
+                           Color="@(_mesSeleccionado == 6 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 6 ? Variant.Filled : Variant.Outlined)">
+                    JUNIO
+                </MudButton>
+            </MudButtonGroup>
+
+            <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">
+                <MudButton OnClick="@(() => CambiarMes(7))"
+                           Color="@(_mesSeleccionado == 7 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 7 ? Variant.Filled : Variant.Outlined)">
+                    JULIO
+                </MudButton>
+
+                <MudButton OnClick="@(() => CambiarMes(8))"
+                           Color="@(_mesSeleccionado == 8 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 8 ? Variant.Filled : Variant.Outlined)">
+                    AGOSTO
+                </MudButton>
+
+                <MudButton OnClick="@(() => CambiarMes(9))"
+                           Color="@(_mesSeleccionado == 9 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 9 ? Variant.Filled : Variant.Outlined)">
+                    SEPTIEMBRE
+                </MudButton>
+
+                <MudButton OnClick="@(() => CambiarMes(10))"
+                           Color="@(_mesSeleccionado == 10 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 10 ? Variant.Filled : Variant.Outlined)">
+                    OCTUBRE
+                </MudButton>
+
+                <MudButton OnClick="@(() => CambiarMes(11))"
+                           Color="@(_mesSeleccionado == 11 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 11 ? Variant.Filled : Variant.Outlined)">
+                    NOVIEMBRE
+                </MudButton>
+
+                <!-- Botón corregido -->
+                <MudButton OnClick="@(() => CambiarMes(12))"
+                           Color="@(_mesSeleccionado == 12 ? Color.Primary : Color.Default)"
+                           Variant="@(_mesSeleccionado == 12 ? Variant.Filled : Variant.Outlined)">
+                    DICIEMBRE
+                </MudButton>
+            </MudButtonGroup>
+
+        </MudStack>
+
+    </MudCardHeader>
+
+    <MudCardContent>
+        <div style="overflow-x: auto;">
+            <MudTable Items="@_personasConTurnos"
+                      Dense="true"
+                      Bordered="true"
+                      Hover="true"
+                      Striped="true"
+                      FixedHeader="true"
+                      Height="600px">
+
+                <HeaderContent>
+                    <MudTh Style="position: sticky; left: 0; background-color: var(--mud-palette-background); z-index: 10; min-width: 200px;">
+                        <MudText Typo="Typo.subtitle2">FUNCIONARIO</MudText>
+                    </MudTh>
+
+                    @foreach (var dia in _diasDelMes)
+                    {
+                        var esFinde = dia.DayOfWeek == DayOfWeek.Saturday || dia.DayOfWeek == DayOfWeek.Sunday;
+
+                        <MudTh Class="text-center"
+                               Style="@($"min-width: 35px; padding: 4px; background-color: {(esFinde ? "#f5f5f5" : "white")};")">
+                            <MudText Typo="Typo.body2">@dia.Day</MudText>
+                            <MudText Typo="Typo.caption" Style="font-size: 9px;">
+                                @dia.ToString("ddd", new CultureInfo("es-ES")).ToUpper()
+                            </MudText>
+                        </MudTh>
+                    }
+                </HeaderContent>
+
+                <RowTemplate>
+                    <MudTd Style="position: sticky; left: 0; background-color: var(--mud-palette-background); z-index: 5; font-weight: 500;">
+                        @context.Nombre
+                    </MudTd>
+
+                    @foreach (var dia in _diasDelMes)
+                    {
+                        var evento = _eventosDelMes.FirstOrDefault(e =>
+                        e.IdrrhPersona == context.IdrrhPersona &&
+                        e.Fecha.HasValue &&
+                        e.Fecha.Value.Date == dia.Date);
+
+                        var esFinde = dia.DayOfWeek == DayOfWeek.Saturday || dia.DayOfWeek == DayOfWeek.Sunday;
+                        var bgColor = esFinde ? "#f5f5f5" : "white";
+                        var styleString = $"padding: 2px; background-color: {bgColor};";
+
+                        <MudTd Class="text-center" Style="@styleString">
+                            @if (evento != null)
+                            {
+                                <MudTooltip Text="@GetTooltipText(evento)">
+                                    <MudChip Size="Size.Small"
+                                             Style="@($"background-color:{GetChipColorHex(evento.IdgenClasificadortipo)}; color:white;")">
+                                        @GetTurnoAbreviado(evento.IdgenClasificadortipo)
+                                    </MudChip>
+                                </MudTooltip>
+                            }
+                        </MudTd>
+                    }
+                </RowTemplate>
+
+                <NoRecordsContent>
+                    <MudText>No hay registros para este mes</MudText>
+                </NoRecordsContent>
+            </MudTable>
+        </div>
+    </MudCardContent>
+</MudCard>
+
+
+<!-- Leyenda de Turnos -->
+<MudCard Class="mt-4">
+    <MudCardContent>
+        <MudText Typo="Typo.subtitle2" Class="mb-2">Leyenda de Turnos:</MudText>
+        <MudStack Row="true" Spacing="3" Wrap="Wrap.Wrap">
+            @foreach (var turno in _listaTurnos ?? Enumerable.Empty<GenClasificadorTipoDto>())
+            {
+                <MudChip Size="Size.Small"
+                         Style="@($"background-color:{GetChipColorHex(turno.IdgenClasificadortipo)}; color:white;")">
+                    @GetTurnoAbreviado(turno.IdgenClasificadortipo) - @turno.Descripcion
+                </MudChip>
+            }
+        </MudStack>
+    </MudCardContent>
 </MudCard>

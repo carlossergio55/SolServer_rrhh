@@ -59,10 +59,21 @@
         }
     </script>
     <script>
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('/service-worker.published.js')
-            .then(() => console.log('✅ Service Worker registrado'))
-            .catch(err => console.error('❌ Error registrando Service Worker:', err));
+        // SOLO en producción registrar el Service Worker
+        if ('serviceWorker' in navigator && !window.location.hostname.includes('localhost')) {
+            navigator.serviceWorker.register('/service-worker.published.js')
+                .then(() => console.log('✅ Service Worker registrado'))
+                .catch(err => console.error('❌ Error registrando Service Worker:', err));
+        }
+
+        // En desarrollo: desregistrar cualquier Service Worker existente
+        if ('serviceWorker' in navigator && window.location.hostname.includes('localhost')) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                    console.log('🛠️ Service Worker desregistrado para desarrollo');
+                }
+            });
         }
     </script>
 </body>

@@ -28,7 +28,6 @@ namespace WebApi.Controllers
         public async Task<IActionResult> Upsert([FromBody] UpsertHorarioCompletoCommand cmd)
          => Ok(await Mediator.Send(cmd));
 
-
         [HttpPut("{id}")]
         [Authorize]
         public async Task<IActionResult> Put(int id, UpdateGenClasificadorCommand command)
@@ -40,7 +39,6 @@ namespace WebApi.Controllers
             return Ok(await Mediator.Send(command));
         }
 
-
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> Delete(int id)
@@ -48,16 +46,12 @@ namespace WebApi.Controllers
             return Ok(await Mediator.Send(new DeleteGenClasificadorCommand { IdgenClasificador = id }));
         }
 
-
-
-        [HttpGet("Clasificador")]
+        [HttpGet("Clasificador")] 
         [Authorize]
         public async Task<IActionResult> Get()
         {
             return Ok(await Mediator.Send(new GetAllClasificadorQuery()));
         }
-
-
 
         [HttpGet("GetAllGenClasificadortipo")]
         [Authorize]
@@ -67,14 +61,17 @@ namespace WebApi.Controllers
         } 
 
 
-
         [HttpGet("Turno")]
         [Authorize]
         public async Task<IActionResult> GetTurno()
         {
             return Ok(await Mediator.Send(new GetAllTurnosQuery()));
         }
-
-
+        [HttpGet("Permiso")]
+        [Authorize]
+        public async Task<IActionResult> GetPermiso()
+        {
+            return Ok(await Mediator.Send(new GetAllPermisosQuery()));
+        }
     }
 }

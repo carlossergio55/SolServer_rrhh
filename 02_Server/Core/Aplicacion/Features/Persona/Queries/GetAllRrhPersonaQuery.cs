@@ -7,7 +7,6 @@ using Dominio.Entities.Persona;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
 
 
 namespace Aplicacion.Features.Persona.Queries

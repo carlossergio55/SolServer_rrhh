@@ -7,58 +7,68 @@ using System.Security.Claims;
 
 namespace Shared.Services
 {
-    /// <summary>
-    /// Este servicio permite obtener los datos del usuario actual autenticado.
-    /// Si el usuario no está autenticado (por ejemplo, en endpoints públicos), se asignan valores por defecto.
-    /// </summary>
     public class CurrentUserService : ICurrentUserService
     {
-        private readonly ILogger<CurrentUserService> _logger;
-
-        public CurrentUserService(IHttpContextAccessor httpContextAccessor, ILogger<CurrentUserService> logger)
+        public CurrentUserService(IHttpContextAccessor http, ILogger<CurrentUserService> logger)
         {
-            _logger = logger;
-            var user = httpContextAccessor.HttpContext?.User;
+            var user = http.HttpContext?.User;
 
-            if (user?.Identity?.IsAuthenticated == true)
+            if (user == null)
+            {
+                // 👉 No hay HttpContext: típico de HostedService / background
+                SetAsSystem(logger, reason: "No HttpContext (background)");
+                return;
+            }
+
+            if (user.Identity?.IsAuthenticated == true)
             {
                 LoginUsuario = user.FindFirst("Loguin")?.Value ?? "Anonimo";
-                IdgenInstitucionsucursal = Convert.ToInt32(user.FindFirst("IdSucursal")?.Value ?? "0");
-
-                // Los siguientes valores son opcionales, asegúrate de agregarlos si los necesitas
+                IdgenInstitucionsucursal = ToInt(user.FindFirst("IdSucursal")?.Value);
                 NombreCompleto = user.FindFirst("NombreCompleto")?.Value ?? "";
                 NroCi = user.FindFirst("NroCI")?.Value ?? "";
                 Espedido = user.FindFirst("Expedido")?.Value ?? "";
-                IdsegUsuarioSistema = Convert.ToInt32(user.FindFirst("uid")?.Value ?? "0");
-                IdsegPerfil = Convert.ToInt32(user.FindFirst("IdPerfil")?.Value ?? "0");
+                IdsegUsuarioSistema = ToInt(user.FindFirst("uid")?.Value);
+                IdsegPerfil = ToInt(user.FindFirst("IdPerfil")?.Value);
                 Perfil = user.FindFirst("Perfil")?.Value ?? "";
-                IdgenInstitucion = Convert.ToInt32(user.FindFirst("IdInstitucion")?.Value ?? "0");
+                IdgenInstitucion = ToInt(user.FindFirst("IdInstitucion")?.Value);
                 Institucion = user.FindFirst("Institucion")?.Value ?? "";
                 Sucursal = user.FindFirst("sucursal")?.Value ?? "";
                 Estado = user.FindFirst("Estado")?.Value ?? "";
-                Roles = new List<string>(); // Opcional: podrías mapear si tienes varios roles
+                Roles = new List<string>(); // mapear si aplican
 
-                _logger.LogInformation($"Usuario autenticado: {LoginUsuario}");
+                logger.LogInformation("Usuario autenticado: {user}", LoginUsuario);
             }
             else
             {
-                // Usuario anónimo
-                LoginUsuario = "Anonimo";
-                IdgenInstitucionsucursal = 0;
-                NombreCompleto = "";
-                NroCi = "";
-                Espedido = "";
-                IdsegUsuarioSistema = 0;
-                IdsegPerfil = 0;
-                Perfil = "";
-                IdgenInstitucion = 0;
-                Institucion = "";
-                Sucursal = "";
-                Estado = "";
-                Roles = new List<string>();
-
-                _logger.LogWarning("Se accedió al sistema sin autenticación.");
+                // 👉 Hay HttpContext pero no autenticado: endpoint público
+                SetAsAnonymous(logger);
             }
+        }
+
+        private static int ToInt(string v) => int.TryParse(v, out var n) ? n : 0;
+
+        private void SetAsAnonymous(ILogger logger)
+        {
+            LoginUsuario = "Anonimo";
+            IdgenInstitucionsucursal = 0;
+            NombreCompleto = NroCi = Espedido = Perfil = Institucion = Sucursal = Estado = "";
+            IdsegUsuarioSistema = IdsegPerfil = IdgenInstitucion = 0;
+            Roles = new List<string>();
+            logger.LogDebug("Solicitud sin autenticación (anónimo).");
+        }
+
+        private void SetAsSystem(ILogger logger, string reason)
+        {
+            // 👉 Marcamos usuario del sistema para background jobs
+            LoginUsuario = "SISTEMA_AUTO";
+            IdgenInstitucionsucursal = 0;
+            NombreCompleto = "SISTEMA";
+            NroCi = Espedido = Perfil = Institucion = Sucursal = Estado = "";
+            IdsegUsuarioSistema = -1;
+            IdsegPerfil = 0;
+            IdgenInstitucion = 0;
+            Roles = new List<string> { "BackgroundJob" };
+            logger.LogInformation("Contexto de sistema para background ({reason}).", reason);
         }
 
         public string LoginUsuario { get; set; }
@@ -75,9 +85,6 @@ namespace Shared.Services
         public string Estado { get; set; }
         public List<string> Roles { get; set; }
 
-        /// <summary>
-        /// Indica si el usuario está autenticado o no.
-        /// </summary>
         public bool EstaAutenticado => LoginUsuario != "Anonimo";
     }
 }
