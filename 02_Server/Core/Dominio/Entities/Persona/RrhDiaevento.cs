@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 
 
-namespace Dominio.Entities.Persona
+namespace Dominio.Entities.Persona 
 {
     [Table("rrh_diaevento", Schema = "public")]
     public partial class RrhDiaevento : AuditableBaseEntity
@@ -24,5 +24,6 @@ namespace Dominio.Entities.Persona
         // Navegación
         public virtual RrhPersona RrhPersona { get; set; }
         public virtual GenClasificadortipo GenClasificadortipo { get; set; }
+
     }
 }

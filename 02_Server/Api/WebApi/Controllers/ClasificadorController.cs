@@ -73,5 +73,10 @@ namespace WebApi.Controllers
         {
             return Ok(await Mediator.Send(new GetAllPermisosQuery()));
         }
+        [HttpGet("Areas")]
+        public async Task<IActionResult> GetAreas()
+        {
+            return Ok(await Mediator.Send(new GetClasificador1a13Query()));
+        }
     }
 }

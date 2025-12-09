@@ -26,5 +26,4 @@ namespace Dominio.Entities.Horario
         public virtual GenGrupoturno GenGrupoturno { get; set; }
         public virtual GenClasificadortipo GenClasificadortipo { get; set; }
     }
-
 }

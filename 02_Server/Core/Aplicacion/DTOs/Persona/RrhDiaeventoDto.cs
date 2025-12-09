@@ -1,9 +1,8 @@
 ﻿using Aplicacion.DTOs.Clasificador;
+using Aplicacion.DTOs.Horario;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Aplicacion.DTOs.Persona
 {
@@ -15,8 +14,10 @@ namespace Aplicacion.DTOs.Persona
         public DateTime Fecha { get; set; }
         public string? Motivo { get; set; }
 
-        public RrhPersonaDto RrhPersona { get; set; }
+        public PersonaMinDto RrhPersona { get; set; }
         public GenClasificadortipoDto GenClasificadortipo { get; set; }
+        public List<RrhhTurnodiaDto> TurnosDia { get; set; }
     }
+
 
 }

@@ -92,8 +92,7 @@ namespace Aplicacion.Features.Horario.Commands
                     IdgenClasificadortipo = tipo.IdgenClasificadortipo,
                     DiaSemana = d.DiaSemana,
                     HoraEntrada = d.HoraEntrada,
-                    HoraSalida = d.HoraSalida,
-                    TiempoExtra = d.TiempoExtra
+                    HoraSalida = d.HoraSalida
                 }, ct);
             }
 

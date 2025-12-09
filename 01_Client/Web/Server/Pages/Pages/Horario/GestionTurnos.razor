@@ -1,4 +1,4 @@
-﻿@page "/personaturno1"
+﻿@page "/turnos"
 @using Infraestructura.Models.Biometrico
 @using Infraestructura.Models.Clasificador
 @using Infraestructura.Models.Horario
@@ -23,10 +23,17 @@
     <MudExpansionPanels MultiExpansion="false">
         <MudExpansionPanel @bind-IsExpanded="expande" HideIcon="true">
             <TitleContent>
-                <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="px-4">
+                <MudStack Row="true"
+                          Justify="Justify.SpaceBetween"
+                          AlignItems="AlignItems.Center"
+                          Class="px-4"
+                          Style="width:100%;">
+
                     <MudText Typo="Typo.h6">
-                        <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" /> Generación de Turnos
+                        <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" />
+                        Generación de Turnos
                     </MudText>
+
                     <MudButton Variant="Variant.Filled"
                                Size="Size.Small"
                                Color="@(expande ? Color.Error : Color.Primary)"
@@ -34,8 +41,10 @@
                                StartIcon="@(expande ? Icons.Material.Filled.Close : Icons.Material.Filled.Add)">
                         @(expande ? "CERRAR" : "NUEVO")
                     </MudButton>
+
                 </MudStack>
             </TitleContent>
+
             <ChildContent>
                 <MudCardContent>
                     <EditForm Model="@_DiaEvento" OnValidSubmit="OnValidDiaEvento">
@@ -207,54 +216,68 @@
     </MudExpansionPanels>
 </MudCard>
 
-<!-- ============================================================================ -->
-<!-- CALENDARIO MENSUAL - NAVEGACIÓN MEJORADA -->
-<!-- ============================================================================ -->
+<!-- CALENDARIO MENSUAL - NAVEGACIÓN  -->
+
 <MudCard Elevation="2">
     <MudCardHeader>
-        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center" Class="flex-wrap">
-            <!-- Título compacto -->
-            <MudText Typo="Typo.h6">
-                <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Size="Size.Small" /> Turnos
-            </MudText>
+        <MudStack Row="true"
+                  Justify="Justify.SpaceBetween"
+                  AlignItems="AlignItems.Center"
+                  Spacing="2"
+                  Class="flex-wrap">
 
-            <!-- Meses compactos con scroll horizontal -->
-            <MudStack Row="true" Spacing="1" Style="overflow-x: auto; max-width: 800px;" Class="flex-nowrap">
-                @foreach (var mes in Enumerable.Range(1, 12))
-                {
-                    var esMesActual = mes == _mesSeleccionado;
-                    var esHoy = mes == DateTime.Now.Month && _anioSeleccionado == DateTime.Now.Year;
-
-                    <MudChip Size="Size.Small"
-                             Color="@(esHoy ? Color.Success : esMesActual ? Color.Primary : Color.Default)"
-                             Variant="@(esMesActual ? Variant.Filled : Variant.Outlined)"
-                             OnClick="@(() => CambiarMes(mes))"
-                             Style="cursor: pointer; min-width: 55px;">
-                        @ObtenerNombreMesCorto(mes)
-                    </MudChip>
-                }
-            </MudStack>
-
-            <!-- Controles año y hoy -->
+            <!-- Año actual -->
             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                <MudSelect T="int"
-                           Value="_anioSeleccionado"
-                           ValueChanged="OnAnioChanged"
-                           Variant="Variant.Text"
-                           Dense="true"
-                           Style="width: 80px;">
-                    @foreach (var anio in _listaAnios)
-                    {
-                        <MudSelectItem Value="@anio">@anio</MudSelectItem>
-                    }
-                </MudSelect>
+                <MudText Typo="Typo.caption" Color="Color.Primary">
+                    @_anioActual
+                </MudText>
 
-                <MudIconButton Icon="@Icons.Material.Filled.Today"
-                               Color="Color.Primary"
-                               Size="Size.Small"
-                               OnClick="IrAHoy"
-                               Title="Ir a hoy" />
+                <MudStack Row="true" Spacing="1" Class="flex-nowrap">
+                    @foreach (var mes in Enumerable.Range(1, 12))
+                    {
+                        var seleccionado = mes == _mesSeleccionado && _anioSeleccionado == _anioActual;
+                        var esHoy = mes == DateTime.Now.Month && _anioActual == DateTime.Now.Year;
+
+                        <MudChip Size="Size.Small"
+                                 Clickable="true"
+                                 Color="@(esHoy ? Color.Success : seleccionado ? Color.Primary : Color.Default)"
+                                 Variant="@(seleccionado ? Variant.Filled : Variant.Outlined)"
+                                 OnClick="@(() => CambiarMes(mes, _anioActual))">
+                            @ObtenerNombreMesCorto(mes)
+                        </MudChip>
+                    }
+                </MudStack>
             </MudStack>
+            <!-- Botón Hoy -->
+            <MudIconButton Icon="@Icons.Material.Filled.Today"
+                           Color="Color.Primary"
+                           Size="Size.Small"
+                           OnClick="IrAHoy"
+                           Title="Ir a hoy" />
+
+            <!-- Año siguiente -->
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    @_anioSiguiente
+                </MudText>
+
+                <MudStack Row="true" Spacing="1" Class="flex-nowrap">
+                    @foreach (var mes in Enumerable.Range(1, 12))
+                    {
+                        var seleccionado = mes == _mesSeleccionado && _anioSeleccionado == _anioSiguiente;
+
+                        <MudChip Size="Size.Small"
+                                 Clickable="true"
+                                 Color="@(seleccionado ? Color.Primary : Color.Default)"
+                                 Variant="@(seleccionado ? Variant.Filled : Variant.Outlined)"
+                                 OnClick="@(() => CambiarMes(mes, _anioSiguiente))">
+                            @ObtenerNombreMesCorto(mes)
+                        </MudChip>
+                    }
+                </MudStack>
+            </MudStack>
+
+
         </MudStack>
     </MudCardHeader>
 
@@ -269,14 +292,13 @@
                       Height="550px">
                 <HeaderContent>
                     <MudTh Style="position: sticky; left: 0; background-color: var(--mud-palette-background); z-index: 10; min-width: 180px;">
-                        <MudText Typo="Typo.subtitle2">FUNCIONARIO</MudText>
+                        <MudText Typo="Typo.subtitle2">PERSONAL</MudText>
                     </MudTh>
                     @foreach (var dia in _diasDelMes)
                     {
-                        var esFinde = dia.DayOfWeek == DayOfWeek.Saturday || dia.DayOfWeek == DayOfWeek.Sunday;
                         var esHoy = dia.Date == DateTime.Now.Date;
                         <MudTh Class="text-center"
-                               Style="@($"min-width: 38px; padding: 4px; background-color: {(esHoy ? "#e3f2fd" : esFinde ? "#f5f5f5" : "white")}; {(esHoy ? "border: 2px solid #1976d2;" : "")}")">
+                               Style="@($"min-width: 38px; padding: 4px; background-color: {(esHoy ? "#e3f2fd" : "white")}; {(esHoy ? "border: 2px solid #1976d2;" : "")}")">
                             <MudText Typo="Typo.body2" Style="@(esHoy ? "font-weight: bold; color: #1976d2;" : "")">@dia.Day</MudText>
                             <MudText Typo="Typo.caption" Style="font-size: 9px;">
                                 @dia.ToString("ddd", new CultureInfo("es-ES")).ToUpper()
@@ -284,10 +306,20 @@
                         </MudTh>
                     }
                 </HeaderContent>
+
                 <RowTemplate>
-                    <MudTd Style="position: sticky; left: 0; background-color: var(--mud-palette-background); z-index: 5; font-weight: 500;">
-                        @context.Nombre
+                    <MudTd Style="position: sticky; left: 0; background-color: var(--mud-palette-background); z-index: 5; font-weight: 500; cursor: pointer;"
+                           @onclick="@(() => SeleccionarPersonaDesdeCalendario(context))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Icon="@Icons.Material.Filled.Person"
+                                     Size="Size.Small"
+                                     Color="Color.Primary" />
+                            <MudText Style="text-decoration: none;">
+                                @context.FullName
+                            </MudText>
+                        </MudStack>
                     </MudTd>
+
                     @foreach (var dia in _diasDelMes)
                     {
                         var evento = _eventosDelMes.FirstOrDefault(e =>
@@ -295,9 +327,8 @@
                         e.Fecha.HasValue &&
                         e.Fecha.Value.Date == dia.Date);
 
-                        var esFinde = dia.DayOfWeek == DayOfWeek.Saturday || dia.DayOfWeek == DayOfWeek.Sunday;
                         var esHoy = dia.Date == DateTime.Now.Date;
-                        var bgColor = esHoy ? "#e3f2fd" : esFinde ? "#f5f5f5" : "white";
+                        var bgColor = esHoy ? "#e3f2fd" : "white";
                         var styleString = $"padding: 2px; background-color: {bgColor};";
 
                         <MudTd Class="text-center" Style="@styleString">

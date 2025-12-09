@@ -18,7 +18,6 @@ namespace Aplicacion.Features.Horario.Commands
         public string DiaSemana { get; set; }
         public TimeSpan HoraEntrada { get; set; }
         public TimeSpan HoraSalida { get; set; }
-        public TimeSpan TiempoExtra { get; set; }
 
         public class Handler : IRequestHandler<UpdateRrhhTurnodiaCommand, Response<int>>
         {
@@ -39,7 +38,6 @@ namespace Aplicacion.Features.Horario.Commands
                 entity.DiaSemana = request.DiaSemana;
                 entity.HoraEntrada = request.HoraEntrada;
                 entity.HoraSalida = request.HoraSalida;
-                entity.TiempoExtra = request.TiempoExtra;
 
                 await _repo.UpdateAsync(entity);
                 return new Response<int>(entity.IdrrhhTurnodia);

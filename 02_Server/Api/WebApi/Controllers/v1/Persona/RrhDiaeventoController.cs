@@ -15,12 +15,6 @@ namespace WebApi.Controllers.v1.Persona
     [ApiController]
     public class RrhDiaeventoController : BaseApiController
     {
-        [HttpGet("Horaser")]
-        [Authorize]
-        public async Task<IActionResult> Gethoraser()
-        {
-            return Ok(DateTime.Now.Date);
-        }
         [HttpGet("GetAll")]
         [Authorize]
         public async Task<IActionResult> GetAll()
@@ -87,6 +81,19 @@ namespace WebApi.Controllers.v1.Persona
 
             return Ok(result);
         }
+
+        [HttpGet("TurnosPorInmediatoSuperior")]
+        public async Task<IActionResult> GetDiaeventoPorInmediatoSuperior([FromQuery] int inmediatoSuperior)
+        {
+            var result = await Mediator.Send(
+                new GetRrhDiaeventoPorInmediatoSuperiorQuery
+                {
+                    InmediatoSuperior = inmediatoSuperior
+                });
+
+            return Ok(result.Data);  // devolvemos directamente la lista de DTO
+        }
+
 
         [HttpPost]
         [Authorize]

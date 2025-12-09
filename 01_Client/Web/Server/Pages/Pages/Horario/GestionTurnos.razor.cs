@@ -1,17 +1,21 @@
-﻿using System;
+﻿using Blazored.LocalStorage;
+using Infraestructura.Abstract;
+using Infraestructura.Models.Authentication;
+using Infraestructura.Models.Clasificador;
+using Infraestructura.Models.Horario;
+using Infraestructura.Models.Persona;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
+using Microsoft.JSInterop;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-using Infraestructura.Abstract;
-using Infraestructura.Models.Clasificador;
-using Infraestructura.Models.Horario;
-using Infraestructura.Models.Persona;
-using Microsoft.AspNetCore.Components.Forms;
 
-namespace Server.Pages.Pages.Persona
+namespace Server.Pages.Pages.Horario
 {
-    public partial class PersonaturnoCopia
+    public partial class GestionTurnos
     {
         private bool expande = false;
         private RrhDiaeventoDto _DiaEvento = new RrhDiaeventoDto();
@@ -26,8 +30,8 @@ namespace Server.Pages.Pages.Persona
         private DateTime? _fechaInicio;
         private DateTime? _fechaFin;
         private int _anioSeleccionado = DateTime.Now.Year;
-        private List<int> _listaAnios = Enumerable.Range(DateTime.Now.Year - 2, 5).ToList();
-
+        private int _anioActual = DateTime.Now.Year;
+        private int _anioSiguiente = DateTime.Now.Year + 1;
 
         // ✅ NUEVAS VARIABLES PARA CONTINUIDAD
         private bool _continuarAutomatico = true; // Por defecto activado
@@ -45,6 +49,24 @@ namespace Server.Pages.Pages.Persona
         private RrhDiaeventoDto? _eventoEditando = null;
         private int _turnoSeleccionado = 0;
         private string _motivoCambio = "";
+        private List<PersonaMinDto> _personalACargo = new();
+        [Inject] private ILocalStorageService _localStorage { get; set; }
+        private ObjectEntity _usuarioActual { get; set; } = new();
+        private async Task CargarUsuarioActual()
+        {
+            try
+            {
+                var userJson = await _localStorage.GetItemAsStringAsync("USER");
+                if (!string.IsNullOrEmpty(userJson))
+                {
+                    _usuarioActual = System.Text.Json.JsonSerializer.Deserialize<ObjectEntity>(userJson);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al cargar usuario: {ex.Message}");
+            }
+        }
         private async Task SaveDiaEvento(List<RrhDiaeventoDto> dias)
         {
             try
@@ -69,24 +91,75 @@ namespace Server.Pages.Pages.Persona
                 _Loading.Hide();
             }
         }
+        // ============================================================================
+        // ✅ NUEVO: MANEJO DE SELECCIÓN DE PERSONA CON VERIFICACIÓN AUTOMÁTICA
+        // ============================================================================
+        private async Task OnPersonaChanged(PersonaMinDto? persona)
+        {
+            _personaSeleccionada = persona;
+            _infoRango = null;
+            _infoUltimoTurno = null;
 
+            if (persona != null)
+            {
+                _DiaEvento.IdrrhPersona = persona.IdrrhPersona;
+
+                // ✅ Obtener último turno registrado (detecta ciclos incompletos)
+                await ObtenerUltimoTurno();
+
+                // ✅ NUEVO: Verificar ciclo incompleto con endpoint especializado
+                await VerificarCicloIncompleto();
+            }
+            else
+            {
+                _DiaEvento.IdrrhPersona = 0;
+            }
+
+            StateHasChanged();
+        }
+        private async Task CargarPersonalACargo()
+        {
+            if (string.IsNullOrEmpty(_usuarioActual.nroCi))
+            {
+                _MessageShow("No se pudo identificar al usuario", State.Warning);
+                return;
+            }
+
+            try
+            {
+                // ✅ Llamar al endpoint con CI del usuario actual
+                var url = $"RrhPersona/PersonalACargo/{_usuarioActual.nroCi}";
+                var response = await _Rest.GetPlainAsync<List<PersonaMinDto>>(url);
+                _personalACargo = response ?? new List<PersonaMinDto>();
+
+                if (!_personalACargo.Any())
+                {
+                    _MessageShow("No tiene personal a cargo asignado", State.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                _MessageShow($"Error cargando personal: {ex.Message}", State.Error);
+                Console.WriteLine($"Error detallado: {ex}");
+            }
+        }
         protected async Task<IEnumerable<PersonaMinDto>> SearchPersonas(string value)
         {
             if (string.IsNullOrWhiteSpace(value) || value.Length < 3)
                 return Enumerable.Empty<PersonaMinDto>();
-            try
-            {
-                var url = $"RrhPersona/FiltroDto?busqueda={value}";
-                var response = await _Rest.GetPlainAsync<List<PersonaMinDto>>(url);
-                return response ?? Enumerable.Empty<PersonaMinDto>();
-            }
-            catch (Exception e)
-            {
-                _MessageShow(e.Message, State.Error);
-                return Enumerable.Empty<PersonaMinDto>();
-            }
-        }
 
+            // ✅ Filtrar localmente en el personal ya cargado
+            var resultado = _personalACargo
+                .Where(p =>
+                    p.FullName.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                    p.Ci.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                    p.Nombre.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                    p.ApellidoPaterno.Contains(value, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(p => p.FullName)
+                .ToList();
+
+            return await Task.FromResult(resultado);
+        }
         private async Task ObtenerTurnos()
         {
             var res = await _Rest.GetAsync<List<GenClasificadorTipoDto>>("Clasificador/Turno");
@@ -114,32 +187,7 @@ namespace Server.Pages.Pages.Persona
                 _MessageShow("Error: " + res.Message, State.Warning);
         }
 
-        // ============================================================================
-        // ✅ NUEVO: MANEJO DE SELECCIÓN DE PERSONA CON VERIFICACIÓN AUTOMÁTICA
-        // ============================================================================
-        private async Task OnPersonaChanged(PersonaMinDto? persona)
-        {
-            _personaSeleccionada = persona;
-            _infoRango = null;
-            _infoUltimoTurno = null;
-
-            if (persona != null)
-            {
-                _DiaEvento.IdrrhPersona = persona.IdrrhPersona;
-
-                // ✅ Obtener último turno registrado (detecta ciclos incompletos)
-                await ObtenerUltimoTurno();
-
-                // ✅ NUEVO: Verificar ciclo incompleto con endpoint especializado
-                await VerificarCicloIncompleto();
-            }
-            else
-            {
-                _DiaEvento.IdrrhPersona = 0;
-            }
-
-            StateHasChanged();
-        }
+      
         private async Task VerificarCicloIncompleto()
         {
             if (_personaSeleccionada == null || !_infoUltimoTurno?.TieneRegistros == true)
@@ -303,12 +351,15 @@ namespace Server.Pages.Pages.Persona
 
         protected override async Task OnInitializedAsync()
         {
+            await CargarUsuarioActual();
+            await CargarPersonalACargo();
             await ObtenerTurnos();
             await ObtenerGrupos();
             await ObtenerGrupoDetalles();
+            GenerarDiasDelMes(_mesSeleccionado, _anioSeleccionado);
+
             await ObtenerEventosPorMes(_mesSeleccionado, _anioSeleccionado);
         }
-
         // ============================================================================
         // ✅ MEJORADO: GENERACIÓN CON CONTINUIDAD AUTOMÁTICA
         // ============================================================================
@@ -560,13 +611,30 @@ namespace Server.Pages.Pages.Persona
             }
 
             await SaveDiaEvento(_DiasCache.ToList());
-        }
 
-        private async Task CambiarMes(int mes)
+            // ✅ NUEVO: Limpiar formulario después de guardar
+            LimpiarFormulario();
+        }
+        private void LimpiarFormulario()
+        {
+            _personaSeleccionada = null;
+            _grupoSeleccionado = 0;
+            _turnoInicialSeleccionado = null;
+            _fechaInicio = null;
+            _fechaFin = null;
+            _DiasCache.Clear();
+            _infoRango = null;
+            _infoUltimoTurno = null;
+            _DiaEvento = new RrhDiaeventoDto();
+
+            StateHasChanged();
+        }
+        private async Task CambiarMes(int mes, int anio)
         {
             _mesSeleccionado = mes;
-            GenerarDiasDelMes(mes, _anioSeleccionado);
-            await ObtenerEventosPorMes(mes, _anioSeleccionado);
+            _anioSeleccionado = anio;
+            GenerarDiasDelMes(mes, anio);
+            await ObtenerEventosPorMes(mes, anio);
             StateHasChanged();
         }
         private async Task OnAnioChanged(int nuevoAnio)
@@ -605,19 +673,12 @@ namespace Server.Pages.Pages.Persona
                 if (response.State == State.Success)
                 {
                     _eventosDelMes = response.Data ?? new List<RrhDiaeventoDto>();
-
-                    _personasConTurnos = _eventosDelMes
-                        .Where(e => e.RrhPersona != null)
-                        .Select(e => new PersonaMinDto
-                        {
-                            IdrrhPersona = e.IdrrhPersona,
-                            Nombre = e.RrhPersona.NombreApellido ?? "Sin nombre"
-                        })
-                        .GroupBy(p => p.IdrrhPersona)
-                        .Select(g => g.First())
-                        .OrderBy(p => p.NombreApellido)
-                        .ToList();
                 }
+
+                // ✅ NUEVO: Mostrar TODO el personal a cargo (con o sin turnos)
+                _personasConTurnos = _personalACargo
+                    .OrderBy(p => p.FullName)
+                    .ToList();
             }
             catch (Exception ex)
             {
@@ -629,6 +690,27 @@ namespace Server.Pages.Pages.Persona
             }
         }
 
+        /// Selecciona una persona desde el calendario y abre el panel de generación
+    
+        private async Task SeleccionarPersonaDesdeCalendario(PersonaMinDto persona)
+        {
+            // 1. Seleccionar la persona
+            _personaSeleccionada = persona;
+            _DiaEvento.IdrrhPersona = persona.IdrrhPersona;
+
+            // 2. Obtener último turno y verificar ciclo incompleto
+            await ObtenerUltimoTurno();
+            await VerificarCicloIncompleto();
+
+            // 3. Abrir el panel si está cerrado
+            if (!expande)
+            {
+                expande = true;
+            }
+
+
+            StateHasChanged();
+        }
         private string GetTurnoAbreviado(int idTurno)
         {
             var turno = _listaTurnos.FirstOrDefault(t => t.IdgenClasificadortipo == idTurno);
@@ -742,8 +824,8 @@ namespace Server.Pages.Pages.Persona
                     _eventoEditando.IdgenClasificadortipo = _turnoSeleccionado;
                     _eventoEditando.Motivo = _motivoCambio;
 
-                    // Recargar calendario
-                    await CambiarMes(_mesSeleccionado);
+                    // ✅ CAMBIO: Pasar año también
+                    await CambiarMes(_mesSeleccionado, _anioSeleccionado);
 
                     CerrarDialog();
                 }
@@ -761,52 +843,9 @@ namespace Server.Pages.Pages.Persona
                 _Loading.Hide();
             }
         }
-        // ============================================================================
-        // ✅ NUEVOS MÉTODOS PARA NAVEGACIÓN MEJORADA DEL CALENDARIO
-        // ============================================================================
-        
-        /// <summary>
-        /// Navega al mes anterior
-        /// </summary>
-        private async Task MesAnterior()
-        {
-            if (_mesSeleccionado == 1)
-            {
-                _mesSeleccionado = 12;
-                _anioSeleccionado--;
-            }
-            else
-            {
-                _mesSeleccionado--;
-            }
-            await CambiarMes(_mesSeleccionado);
-        }
-
-        /// <summary>
-        /// Navega al mes siguiente
-        /// </summary>
-        private async Task MesSiguiente()
-        {
-            if (_mesSeleccionado == 12)
-            {
-                _mesSeleccionado = 1;
-                _anioSeleccionado++;
-            }
-            else
-            {
-                _mesSeleccionado++;
-            }
-            await CambiarMes(_mesSeleccionado);
-        }
-
-        /// <summary>
-        /// Ir al mes y año actual
-        /// </summary>
         private async Task IrAHoy()
         {
-            _mesSeleccionado = DateTime.Now.Month;
-            _anioSeleccionado = DateTime.Now.Year;
-            await CambiarMes(_mesSeleccionado);
+            await CambiarMes(DateTime.Now.Month, DateTime.Now.Year);
         }
 
         /// <summary>

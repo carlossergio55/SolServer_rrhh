@@ -1,21 +1,22 @@
 ﻿using Aplicacion.DTOs.Persona;
 using Aplicacion.Interfaces;
 using Aplicacion.Wrappers;
+using Ardalis.Specification;
 using AutoMapper;
 using Dominio.Entities.Persona;
 using MediatR;
+using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using static Aplicacion.Features.Persona.Queries.GetAllRrhPersonaFiltroQuery;
 
 namespace Aplicacion.Features.Persona.Queries
 {
-    public class GetAllRrhPersonaFiltroDtoQuery : IRequest<Response<List<PersonaMinDto>>>
+    public class GetAllRrhPersonaPorUnidadDtoQuery : IRequest<Response<List<PersonaMinDto>>>
     {
-        public string Busqueda { get; set; } = string.Empty;
+        public int? IdgenUnidad { get; set; }
 
-        public class Handler : IRequestHandler<GetAllRrhPersonaFiltroDtoQuery, Response<List<PersonaMinDto>>>
+        public class Handler : IRequestHandler<GetAllRrhPersonaPorUnidadDtoQuery, Response<List<PersonaMinDto>>>
         {
             private readonly IRepositoryAsync<RrhPersona> _repository;
             private readonly IMapper _mapper;
@@ -26,14 +27,26 @@ namespace Aplicacion.Features.Persona.Queries
                 _mapper = mapper;
             }
 
-            public async Task<Response<List<PersonaMinDto>>> Handle(GetAllRrhPersonaFiltroDtoQuery request, CancellationToken ct)
+            public async Task<Response<List<PersonaMinDto>>> Handle(
+                GetAllRrhPersonaPorUnidadDtoQuery request,
+                CancellationToken ct)
             {
                 var personas = await _repository.ListAsync(
-                    new RrhPersonaFiltroSpecification(request.Busqueda),
+                    new RrhPersonaPorUnidadSpecification(request.IdgenUnidad),
                     ct);
 
                 var dto = _mapper.Map<List<PersonaMinDto>>(personas);
                 return new Response<List<PersonaMinDto>>(dto);
+            }
+        }
+    }
+    public class RrhPersonaPorUnidadSpecification : Specification<RrhPersona>
+    {
+        public RrhPersonaPorUnidadSpecification(int? idgenUnidad)
+        {
+            if (idgenUnidad.HasValue)
+            {
+                Query.Where(x => x.IdgenUnidad == idgenUnidad.Value);
             }
         }
     }

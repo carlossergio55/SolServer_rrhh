@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
+
 
 namespace Aplicacion.DTOs.Persona
 {
@@ -14,9 +11,8 @@ namespace Aplicacion.DTOs.Persona
         public string    ApellidoMaterno        { get; set; } 
         public int       IdgenPuestodescripcion { get; set; }
         public int?      InmediatoSuperior      { get; set; }
-
-
-
+        public int? IdgenUnidad { get; set; }
+        public string Ci { get; set; }
         public string FullName =>
             string.Join(" ", new[] { Nombre, ApellidoPaterno, ApellidoMaterno }
                 .Where(s => !string.IsNullOrWhiteSpace(s)));

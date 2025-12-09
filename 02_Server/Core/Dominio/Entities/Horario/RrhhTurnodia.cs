@@ -1,11 +1,8 @@
 ﻿using Dominio.Common;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Dominio.Entities.Horario
 {
@@ -21,8 +18,6 @@ namespace Dominio.Entities.Horario
         public string       DiaSemana { get; set; }
         public TimeSpan     HoraEntrada { get; set; }
         public TimeSpan     HoraSalida { get; set; }
-        public TimeSpan?    TiempoExtra { get; set; } = TimeSpan.Zero;
-
         public virtual GenClasificadortipo GenClasificadortipo { get; set; }
     }
 

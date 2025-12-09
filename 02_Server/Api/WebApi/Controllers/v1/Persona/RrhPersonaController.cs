@@ -36,16 +36,40 @@ namespace WebApi.Controllers.v1.Persona
         => Ok(await Mediator.Send(new GetAllRrhPersonaQuery()));
 
 
+        [HttpGet("PersonaPorArea")]
+        public async Task<IActionResult> GetPersonasPorUnidadDto([FromQuery] int? idgenUnidad)
+        {
+            var result = await Mediator.Send(new GetAllRrhPersonaPorUnidadDtoQuery
+            {
+                IdgenUnidad = idgenUnidad
+            });
+
+            return Ok(result.Data);  // devolvemos directamente la lista de DTO
+        }
 
 
         //To get the CI ...
-         [HttpGet("GetPersona/{ci}")]
+        [HttpGet("GetPersona/{ci}")]
         [Authorize]
         public async Task<IActionResult> GetByUnidad(string ci)
         {
             return Ok(await Mediator.Send(new GetPersonasByCiQuery(ci)));
         }
 
+        [HttpGet("PersonalACargo/{ciSuperior}")]
+        [Authorize]
+        public async Task<IActionResult> GetPersonalACargo(string ciSuperior)
+        {
+            var result = await Mediator.Send(new GetPersonalACargoQuery
+            {
+                CiSuperior = ciSuperior // ✅ Ahora recibe CI en lugar de ID
+            });
+
+            if (!result.Succeeded)
+                return NotFound(result);
+
+            return Ok(result.Data);
+        }
 
         //By ChatGPT ...
         /*[HttpGet("ByCi/{ci}")]
