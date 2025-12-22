@@ -11,13 +11,10 @@ namespace Dominio.Entities.Persona
     {
         [Key]
         public int IdrrhDiaevento { get; set; }
-
-        [ForeignKey(nameof(RrhPersona))]
+        [ForeignKey("RrhPersona")]
         public int IdrrhPersona { get; set; }
-
-        [ForeignKey(nameof(GenClasificadortipo))]
+        [ForeignKey("GenClasificadortipo")]
         public int IdgenClasificadortipo { get; set; }
-
         public DateTime Fecha { get; set; }
         public string? Motivo { get; set; }
 

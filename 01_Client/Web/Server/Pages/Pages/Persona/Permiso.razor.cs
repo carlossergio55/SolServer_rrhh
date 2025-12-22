@@ -1,4 +1,4 @@
-using Infraestructura.Abstract;
+ï»¿using Infraestructura.Abstract;
 using Infraestructura.Models.Authentication;
 using Infraestructura.Models.Clasificador;
 using Infraestructura.Models.Permisos;
@@ -38,12 +38,12 @@ namespace Server.Pages.Pages.Persona
         private DateTime? _fechaInicio;
         private DateTime? _fechaFin;
 
-        // Control de diálogos
+        // Control de diÃ¡logos
         private bool _mostrarFormulario = false;
         private bool _mostrarDetalles = false;
         private bool _cargandoDatos = true;
 
-        // Opciones del diálogo
+        // Opciones del diÃ¡logo
         private DialogOptions _dialogOptions = new DialogOptions
         {
             MaxWidth = MaxWidth.Medium,
@@ -53,7 +53,7 @@ namespace Server.Pages.Pages.Persona
         };
 
         // ===============================================
-        // MÉTODOS DE INICIALIZACIÓN
+        // MÃ‰TODOS DE INICIALIZACIÃ“N
         // ===============================================
 
         protected override async Task OnInitializedAsync()
@@ -65,7 +65,7 @@ namespace Server.Pages.Pages.Persona
                 // 1. Obtener usuario logueado desde localStorage
                 await ObtenerUsuarioLogueado();
 
-                // 2. Si tenemos usuario, obtener su información de persona
+                // 2. Si tenemos usuario, obtener su informaciÃ³n de persona
                 if (_usuarioSeg != null && !string.IsNullOrEmpty(_usuarioSeg.loginUsuario))
                 {
                     await ObtenerPersonaPorCi(_usuarioSeg.loginUsuario);
@@ -92,7 +92,7 @@ namespace Server.Pages.Pages.Persona
         }
 
         // ===============================================
-        // MÉTODOS PARA OBTENER DATOS
+        // MÃ‰TODOS PARA OBTENER DATOS
         // ===============================================
 
         /// <summary>
@@ -110,13 +110,13 @@ namespace Server.Pages.Pages.Persona
                 }
                 else
                 {
-                    _MessageShow("No se pudo obtener la información del usuario. Por favor, inicie sesión nuevamente.", State.Warning);
+                    _MessageShow("No se pudo obtener la informaciÃ³n del usuario. Por favor, inicie sesiÃ³n nuevamente.", State.Warning);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener usuario desde localStorage: {ex.Message}");
-                _MessageShow("Error al obtener información del usuario", State.Error);
+                _MessageShow("Error al obtener informaciÃ³n del usuario", State.Error);
             }
         }
 
@@ -136,13 +136,13 @@ namespace Server.Pages.Pages.Persona
                 }
                 else
                 {
-                    _MessageShow("No se encontró información de la persona en el sistema", State.Warning);
+                    _MessageShow("No se encontrÃ³ informaciÃ³n de la persona en el sistema", State.Warning);
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error al obtener persona por CI: {ex.Message}");
-                _MessageShow("Error al obtener información de la persona", State.Error);
+                _MessageShow("Error al obtener informaciÃ³n de la persona", State.Error);
             }
         }
 
@@ -182,9 +182,15 @@ namespace Server.Pages.Pages.Persona
 
                 if (res.State == State.Success && res.Data != null)
                 {
-                    // Filtrar por persona actual
+                    // âœ… FILTRAR: Propias + del personal a cargo
                     _solicitudes = res.Data
-                        .Where(s => s.IdrrhPersona == _personaActual.IdrrhPersona)
+                        .Where(s =>
+                            // Mis solicitudes
+                            s.IdrrhPersona == _personaActual.IdrrhPersona ||
+                            // Solicitudes de mi personal a cargo
+                            (s.Persona != null &&
+                             s.Persona.InmediatoSuperior == _personaActual.IdrrhPersona)
+                        )
                         .OrderByDescending(s => s.FechaSolicitud)
                         .ToList();
 
@@ -199,12 +205,10 @@ namespace Server.Pages.Pages.Persona
             {
                 _solicitudes = new List<SRrhSolicitudDto>();
                 Console.WriteLine($"Error al obtener solicitudes: {ex.Message}");
-                // No mostrar mensaje de error en la primera carga
             }
         }
-
         // ===============================================
-        // MÉTODOS PARA ABRIR/CERRAR FORMULARIOS
+        // MÃ‰TODOS PARA ABRIR/CERRAR FORMULARIOS
         // ===============================================
 
         /// <summary>
@@ -215,7 +219,7 @@ namespace Server.Pages.Pages.Persona
             // Verificar que tengamos la persona cargada
             if (_personaActual == null)
             {
-                _MessageShow("No se pudo cargar la información del usuario. Por favor, recargue la página.", State.Warning);
+                _MessageShow("No se pudo cargar la informaciÃ³n del usuario. Por favor, recargue la pÃ¡gina.", State.Warning);
                 return;
             }
 
@@ -282,7 +286,7 @@ namespace Server.Pages.Pages.Persona
         }
 
         // ===============================================
-        // MÉTODOS PARA GUARDAR/ELIMINAR
+        // MÃ‰TODOS PARA GUARDAR/ELIMINAR
         // ===============================================
 
         /// <summary>
@@ -292,18 +296,11 @@ namespace Server.Pages.Pages.Persona
         {
             try
             {
-                // ===== VALIDACIONES =====
-
-                // Validar que se hayan seleccionado las fechas
-                if (!_fechaInicio.HasValue || !_fechaFin.HasValue)
+                if (!_solicitudActual.FechaInicio.HasValue || !_solicitudActual.FechaFin.HasValue)
                 {
                     _MessageShow("Debes seleccionar ambas fechas", State.Warning);
                     return;
                 }
-
-                // Asignar las fechas al objeto solicitud
-                _solicitudActual.FechaInicio = _fechaInicio.Value;
-                _solicitudActual.FechaFin = _fechaFin.Value;
 
                 if (_solicitudActual.FechaFin < _solicitudActual.FechaInicio)
                 {
@@ -311,64 +308,45 @@ namespace Server.Pages.Pages.Persona
                     return;
                 }
 
-                if (string.IsNullOrWhiteSpace(_solicitudActual.Motivo))
-                {
-                    _MessageShow("Debes indicar el motivo de tu solicitud", State.Warning);
-                    return;
-                }
-
-                if (_solicitudActual.Motivo.Length < 10)
+                if (string.IsNullOrWhiteSpace(_solicitudActual.Motivo) || _solicitudActual.Motivo.Length < 10)
                 {
                     _MessageShow("El motivo debe tener al menos 10 caracteres", State.Warning);
                     return;
                 }
 
-                // Verificar que tenga IdrrhPersona
                 if (_solicitudActual.IdrrhPersona <= 0)
                 {
                     _MessageShow("Error: No se pudo identificar al usuario", State.Error);
                     return;
                 }
 
-                Console.WriteLine($"Guardando solicitud - Persona ID: {_solicitudActual.IdrrhPersona}, Tipo: {_solicitudActual.TipoSolicitud}");
-
                 _Loading.Show();
 
-                ResponseEntity<int?> response;
-
-                if (_solicitudActual.IdrrhSolicitud > 0)
-                {
-                    // ===== ACTUALIZAR SOLICITUD EXISTENTE =====
-                    Console.WriteLine($"Actualizando solicitud ID: {_solicitudActual.IdrrhSolicitud}");
-                    response = await _Rest.PutAsync<int?>("RrhSolicitud", _solicitudActual, _solicitudActual.IdrrhSolicitud);
-                }
-                else
-                {
-                    // ===== CREAR NUEVA SOLICITUD =====
-                    Console.WriteLine("Creando nueva solicitud");
-                    response = await _Rest.PostAsync<int?>("RrhSolicitud", new { Item = _solicitudActual });
-                }
-
-                _Loading.Hide();
+                ResponseEntity<int?> response =
+                    _solicitudActual.IdrrhSolicitud > 0
+                        ? await _Rest.PutAsync<int?>("RrhSolicitud", _solicitudActual, _solicitudActual.IdrrhSolicitud)
+                        : await _Rest.PostAsync<int?>("RrhSolicitud", new { Item = _solicitudActual });
 
                 if (response.State == State.Success)
                 {
-                    _MessageShow("¡Solicitud guardada correctamente!", State.Success);
+                    _MessageShow("Â¡Solicitud guardada correctamente!", State.Success);
                     await ObtenerMisSolicitudes();
                     CerrarFormulario();
-                    StateHasChanged();
                 }
                 else
                 {
                     _MessageShow(response.Message ?? "Error al guardar la solicitud", State.Warning);
-                    response.Errors?.ForEach(x => _MessageShow(x, State.Warning));
                 }
             }
             catch (Exception e)
             {
+                _MessageShow("Error al guardar la solicitud", State.Error);
+                Console.WriteLine(e);
+            }
+            finally
+            {
                 _Loading.Hide();
-                _MessageShow("Error al guardar la solicitud: " + e.Message, State.Error);
-                Console.WriteLine($"Excepción en GuardarSolicitud: {e.Message}\n{e.StackTrace}");
+                StateHasChanged();
             }
         }
 
@@ -377,7 +355,7 @@ namespace Server.Pages.Pages.Persona
         /// </summary>
         private async Task CancelarSolicitud(int idSolicitud)
         {
-            await _MessageConfirm("¿Estás seguro de cancelar esta solicitud de permiso?", async () =>
+            await _MessageConfirm("Â¿EstÃ¡s seguro de cancelar esta solicitud de permiso?", async () =>
             {
                 try
                 {
@@ -405,7 +383,7 @@ namespace Server.Pages.Pages.Persona
         }
 
         // ===============================================
-        // MÉTODOS AUXILIARES PARA UI
+        // MÃ‰TODOS AUXILIARES PARA UI
         // ===============================================
 
         private string ObtenerIconoPermiso(string descripcion)
@@ -415,8 +393,8 @@ namespace Server.Pages.Pages.Persona
             return descripcion.ToUpper() switch
             {
                 "VACACIONES" => Icons.Material.Filled.BeachAccess,
-                "BAJA MEDICA" or "BAJA MÉDICA" or "MÉDICO" => Icons.Material.Filled.MedicalServices,
-                "COMISION" or "COMISIÓN" => Icons.Material.Filled.Work,
+                "BAJA MEDICA" or "BAJA MÃ‰DICA" or "MÃ‰DICO" => Icons.Material.Filled.MedicalServices,
+                "COMISION" or "COMISIÃ“N" => Icons.Material.Filled.Work,
                 "PERMISO SIN GOCE" => Icons.Material.Filled.MoneyOff,
                 _ => Icons.Material.Filled.Description
             };
@@ -429,8 +407,8 @@ namespace Server.Pages.Pages.Persona
             return descripcion.ToUpper() switch
             {
                 "VACACIONES" => Color.Info,
-                "BAJA MEDICA" or "BAJA MÉDICA" or "MÉDICO" => Color.Error,
-                "COMISION" or "COMISIÓN" => Color.Tertiary,
+                "BAJA MEDICA" or "BAJA MÃ‰DICA" or "MÃ‰DICO" => Color.Error,
+                "COMISION" or "COMISIÃ“N" => Color.Tertiary,
                 "PERMISO SIN GOCE" => Color.Warning,
                 _ => Color.Default
             };
@@ -469,11 +447,60 @@ namespace Server.Pages.Pages.Persona
                 _ => estado
             };
         }
-
-        private string CalcularDias(DateTime fechaInicio, DateTime fechaFin)
+        private string CalcularDias(DateTime? fechaInicio, DateTime? fechaFin)
         {
-            var dias = (fechaFin.Date - fechaInicio.Date).Days + 1;
-            return dias == 1 ? "1 día" : $"{dias} días";
+            if (!fechaInicio.HasValue || !fechaFin.HasValue)
+                return "â€”";
+
+            var dias = (fechaFin.Value.Date - fechaInicio.Value.Date).Days + 1;
+            return dias == 1 ? "1 dÃ­a" : $"{dias} dÃ­as";
         }
+
+        /// Cambia el estado de una solicitud (APROBADO/RECHAZADO)
+        private bool EsSuperiorInmediato(SRrhSolicitudDto solicitud)
+        {
+            // Si no tenemos informaciÃ³n de la persona actual, no puede aprobar
+            if (_personaActual == null || solicitud?.Persona == null)
+                return false;
+
+            // Verificar si el ID de la persona actual coincide con el InmediatoSuperior
+            return solicitud.Persona.InmediatoSuperior == _personaActual.IdrrhPersona;
+        }
+        private async Task CambiarEstadoSolicitud(int idSolicitud, string nuevoEstado)
+        {
+            try
+            {
+                _Loading.Show();
+
+                var body = new { idrrhSolicitud = idSolicitud, estado = nuevoEstado };
+                var response = await _Rest.PatchAsync<int>("RrhSolicitud", body, idSolicitud);
+
+                if (response.State == State.Success)
+                {
+                    _MessageShow(
+                        nuevoEstado == "APROBADO"
+                            ? "Solicitud aprobada correctamente"
+                            : "Solicitud rechazada",
+                        State.Success);
+
+                    await ObtenerMisSolicitudes();
+                }
+                else
+                {
+                    _MessageShow(response.Message ?? "Error al cambiar el estado", State.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                _MessageShow("Error al cambiar el estado", State.Error);
+                Console.WriteLine(ex);
+            }
+            finally
+            {
+                _Loading.Hide();
+                StateHasChanged();
+            }
+        }
+
     }
 }

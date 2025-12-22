@@ -44,6 +44,8 @@ namespace Persistencia.Contexts
         public DbSet<RrhComision>           RrhComision           { get; set; }
         public DbSet<SRrhFeriado>           SRrhFeriado           { get; set; }
         public DbSet<SRrhSolicitud>         SRrhSolicitud         { get; set; }
+        public DbSet<RrhJustificacionOmision> RrhJustificacionOmision { get; set; }
+        public DbSet<RrhReporte> RrhReporte { get; set; }
         #endregion
 
     }

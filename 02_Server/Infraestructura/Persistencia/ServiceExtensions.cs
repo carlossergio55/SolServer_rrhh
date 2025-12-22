@@ -1,6 +1,6 @@
 ﻿using Aplicacion.Interfaces;
 using Aplicacion.Interfaces.Repositories;
-
+using Aplicacion.Interfaces.Repositories.Horario;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -8,6 +8,7 @@ using Persistencia.Contexts;
 using Persistencia.Repository.Common.Aplicacion;
 using Persistencia.Repository.Common.Seguridad;
 using Persistencia.Repository.Custom;
+using Persistencia.Repository.Custom.Horario;
 
 
 
@@ -28,10 +29,11 @@ namespace Persistencia
             services.AddTransient<IUnitOfWork, AppUnitOfWork>();
 
 
-            //TODO: Agregar aqui Repositorios especificos elaborados Ej.: services.AddTransient<ILibroRepository, LibroRepository>();
-            //services.AddTransient<IProgramacionAnualRepository, ProgramacionAnualRepository>();
-            //services.AddTransient<IProgSeguimientoRepository, ProgSeguimientoRepository>();
+
             services.AddTransient<IClienteRepository, ClienteRepository>();
+            services.AddTransient<IRrhDiaeventoRepository, RrhDiaeventoRepository>();
+            services.AddTransient<IRrhJustificacionOmisionRepository, RrhJustificacionOmisionRepository>();
+
         }
 
 

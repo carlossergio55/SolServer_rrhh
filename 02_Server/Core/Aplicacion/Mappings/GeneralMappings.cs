@@ -46,19 +46,13 @@ namespace Aplicacion.Mappings
             CreateMap<VwMarcacionBiometrico, VwMarcacionBiometricoDto>();
             CreateMap<RrhhTurnodia,          RrhhTurnodiaDto>();
             CreateMap<RrhhTurnotolerancia,   RrhhTurnotoleranciaDto>();
-
             CreateMap<RrhhTurnotolerancia,   ToleranciaDto>();
             CreateMap<RrhhTurnodia,          TurnoDiaDto>();
-
             CreateMap<GenClasificadortipo,   HorarioCompletoDto>();
-
-
             CreateMap<RrhDiaevento,          RrhDiaeventoDto>();
             CreateMap<RrhPersona,            RrhPersonaCumpleanieroDto>();
             CreateMap<GenGrupoturno,         GenGrupoturnoDto>();
             CreateMap<GenGrupoturnoDetalle,  GenGrupoturnoDetalleDto>();
-
-
             CreateMap<RrhContrato,           RrhContratoDto>();     //RrhContrato RrhContrato RrhContrato ...
             CreateMap<RrhBajaMedica,         RrhBajaMedicaDto>();
             CreateMap<RrhFalta,              RrhFaltaDto>();  //Falta ...
@@ -68,6 +62,8 @@ namespace Aplicacion.Mappings
 
             CreateMap<SRrhFeriado, SRrhFeriadoDto>();
             CreateMap<SRrhSolicitud, SRrhSolicitudDto>();
+            CreateMap<CrearJustificacionDto, RrhJustificacionOmision>();
+            CreateMap<RrhReporte, RrhReporteDto>();
 
 
 
@@ -99,6 +95,8 @@ namespace Aplicacion.Mappings
             CreateMap<PersonaMinDto,            RrhPersona>();
             CreateMap<SRrhFeriadoDto,           SRrhFeriado>();
             CreateMap<SRrhSolicitudDto,         SRrhSolicitud>();
+            CreateMap<RrhJustificacionOmision, JustificacionDto>();
+            CreateMap<RrhReporteDto, RrhReporte>();
 
 
             #endregion

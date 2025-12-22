@@ -9,8 +9,8 @@ namespace Infraestructura.Models.Permisos
         public int IdrrhSolicitud { get; set; }
         public int IdrrhPersona { get; set; }
         public int TipoSolicitud { get; set; }
-        public DateTime FechaInicio { get; set; }
-        public DateTime FechaFin { get; set; }
+        public DateTime? FechaInicio { get; set; }
+        public DateTime? FechaFin { get; set; }
         public string? Motivo { get; set; }
         public string Estado { get; set; } = "SOLICITADO";
         public DateTime FechaSolicitud { get; set; }

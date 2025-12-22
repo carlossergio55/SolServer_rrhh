@@ -2,9 +2,7 @@
 using System.Threading.Tasks;
 using Infraestructura.Abstract;
 using System;
-using Aplicacion.Features.Asistencia;
 using Infraestructura.Models.Biometrico;
-using System.Linq;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.JSInterop;
 using MudBlazor;
@@ -24,7 +22,6 @@ namespace Server.Pages.Pages.Biometrico
         public ObjectEntity _usuarioSeg;  //A  field
         protected List<VwMarcacionBiometricoDto> Marcaciones { get; set; } = new();  //A property
 
-
         protected override async Task OnInitializedAsync()
         {
             //Obtener el usuario desde localStorage
@@ -38,7 +35,7 @@ namespace Server.Pages.Pages.Biometrico
             FechaInicio = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 20).AddMonths(-1);
             //Ejecutar la consulta automáticamente con los filtros por defecto
             await GetMarcaciones();
-            await MostrarDialogoBienvenida();
+            // ❌ ELIMINADO: await MostrarDialogoBienvenida();
         }
 
 
@@ -51,28 +48,29 @@ namespace Server.Pages.Pages.Biometrico
                 {
                     _usuarioSeg = JsonSerializer.Deserialize<ObjectEntity>(localStorageValue);
 
-                    _MessageShow($"_UsuarioSeg.nombreCompleto...: {_usuarioSeg.nombreCompleto}", State.Success);
-                    _MessageShow($"_UsuarioSeg.loginUsuario...: {_usuarioSeg.loginUsuario}", State.Success);
-
+                    // Solo en desarrollo - eliminar en producción
+#if DEBUG
+                    _MessageShow($"Usuario: {_usuarioSeg?.nombreCompleto}", State.Success);
+#endif
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error al obtener el usuario desde localStorage: " + ex.Message);
+                Console.WriteLine($"Error al obtener usuario desde localStorage: {ex.Message}");
+                _usuarioSeg = null;
             }
         }
-
 
         private async Task GetMarcaciones()
         {
             try
             {
                 var queryParams = new Dictionary<string, string>
-                {
-                    { "Ci", BusquedaCi },
-                    { "FechaInicio", FechaInicio?.ToString("yyyy-MM-dd") ?? string.Empty },
-                    { "FechaFin", FechaFin?.ToString("yyyy-MM-dd") ?? string.Empty }
-                };
+        {
+            { "Ci", BusquedaCi ?? string.Empty },
+            { "FechaInicio", FechaInicio?.ToString("yyyy-MM-dd") ?? string.Empty },
+            { "FechaFin", FechaFin?.ToString("yyyy-MM-dd") ?? string.Empty }
+        };
 
                 var url = QueryHelpers.AddQueryString("Biometrico/GetAllbioCi", queryParams);
                 var response = await _Rest.GetAsync<List<VwMarcacionBiometricoDto>>(url);
@@ -80,23 +78,26 @@ namespace Server.Pages.Pages.Biometrico
                 if (response.State == State.Success && response.Data != null)
                 {
                     Marcaciones = response.Data;
+
+                    // Solo en desarrollo - eliminar en producción
+#if DEBUG
+                    foreach (var m in Marcaciones)
+                    {
+                        Console.WriteLine($"{m.NombreApellido} - {m.Timestamp} - {m.TipoRegistro}");
+                    }
+#endif
                 }
-
-
-                /* It's gold ... */
-                foreach (var m in Marcaciones)
+                else
                 {
-                    Console.WriteLine($"{m.NombreApellido} - {m.Timestamp} - {m.TipoRegistro}");
+                    Marcaciones = new(); // Lista vacía si no hay datos
                 }
-
             }
             catch (Exception ex)
             {
                 _MessageShow($"Error al obtener marcaciones: {ex.Message}", State.Error);
+                Marcaciones = new(); // Lista vacía en caso de error
             }
         }
-
-
         private async Task MostrarDialogoBienvenida()
         {
             var options = new DialogOptions

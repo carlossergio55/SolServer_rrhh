@@ -1,6 +1,9 @@
 ﻿using Aplicacion.Interfaces;
+using Aplicacion.Interfaces.Jasper;
+using Aplicacion.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Configuration;
 using Shared.Services;
 
 namespace Shared
@@ -17,6 +20,13 @@ namespace Shared
         {                       
             services.AddTransient<IDateTimeService, DateTimeService>();
             services.AddTransient<ICastMappingUpdate, CastMappingUpdate>();
+            services.AddScoped<IFileService, FileService>();
+            services.Configure<ReportesSettings>(configuration.GetSection("Reportes"));
+
+            // 👉 NUEVO: Servicio de Jasper con HttpClient
+            services.AddHttpClient<IJasperReportService, JasperReportService>();
+
         }
+
     }
 }

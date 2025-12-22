@@ -13,9 +13,13 @@
 
   <ItemGroup>
     <Compile Remove="Hubs\**" />
+    <Compile Remove="Service\SendWhAtsapp\**" />
     <Content Remove="Hubs\**" />
+    <Content Remove="Service\SendWhAtsapp\**" />
     <EmbeddedResource Remove="Hubs\**" />
+    <EmbeddedResource Remove="Service\SendWhAtsapp\**" />
     <None Remove="Hubs\**" />
+    <None Remove="Service\SendWhAtsapp\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,10 +46,6 @@
     <ProjectReference Include="..\..\Infraestructura\Identity\Identity.csproj" />
     <ProjectReference Include="..\..\Infraestructura\Persistencia\Persistencia.csproj" />
     <ProjectReference Include="..\..\Infraestructura\Shared\Shared.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Service\SendWhAtsapp\" />
   </ItemGroup>
 
   <ProjectExtensions><VisualStudio><UserProperties appsettings_1development_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>

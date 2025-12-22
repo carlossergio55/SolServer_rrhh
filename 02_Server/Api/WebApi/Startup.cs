@@ -1,5 +1,3 @@
-using System;
-using System.Reflection;
 using Aplicacion;
 using Aplicacion.Interfaces.Repositories;
 using Identity;
@@ -12,6 +10,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Persistencia;
 using Shared;
+using Shared.Services.BackgroundJobs;
+using System;
+using System.Reflection;
 using Webapi.Extensions;
 
 
@@ -53,6 +54,7 @@ namespace Webapi
             services.AddPersistenciaInfraestructura(Configuration);
             services.AddSharedInfraestructura(Configuration);
             services.AddApiVersioningExtension();
+            services.AddHostedService<ReporteGeneradorBackgroundService>();
 
             services.AddSwaggerGen(c =>
             {

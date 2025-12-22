@@ -1,6 +1,5 @@
 ﻿using Aplicacion.Features.Permisos.Commads;
 using Aplicacion.Features.Permisos.Queries;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
@@ -32,6 +31,16 @@ namespace WebApi.Controllers.v1.Permisos
                 return BadRequest();
             return Ok(await Mediator.Send(command));
         }
+
+        [HttpPatch("{id}")]
+        [Authorize]
+        public async Task<IActionResult> PatchEstado(int id, UpdateRrhSolicitudEstadoCommand command)
+        {
+            if (id != command.IdrrhSolicitud) return BadRequest();
+            return Ok(await Mediator.Send(command));
+        }
+
+
         [HttpDelete("{id}")]
         [Authorize]
         public async Task<IActionResult> Delete(int id)

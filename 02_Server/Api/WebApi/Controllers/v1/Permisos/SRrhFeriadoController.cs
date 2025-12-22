@@ -1,6 +1,5 @@
 ﻿using Aplicacion.Features.Permisos.Commads;
 using Aplicacion.Features.Permisos.Queries;
-using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;

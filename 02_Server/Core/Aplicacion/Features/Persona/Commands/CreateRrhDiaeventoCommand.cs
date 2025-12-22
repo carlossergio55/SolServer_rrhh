@@ -4,10 +4,6 @@ using Aplicacion.Wrappers;
 using AutoMapper;
 using Dominio.Entities.Persona;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 

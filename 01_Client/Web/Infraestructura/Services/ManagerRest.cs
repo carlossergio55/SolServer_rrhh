@@ -24,6 +24,7 @@ namespace Infraestructura.Services
             _localStorageService = localStorageService;
         }
 
+
         public async Task<ResponseEntity<T>> GetAsyncFromQuery<T>(string pControlador, object parametros)
         {
             HttpResponseMessage result = new();
@@ -34,7 +35,8 @@ namespace Infraestructura.Services
             foreach (var item in JsonSerializer.Deserialize<JsonElement>(jObj).EnumerateObject())
             {
                 value += item.Name + "=" + item.Value.ToString() + "&";
-            };
+            }
+            ;
             value = value.Substring(0, value.Length - 1);
             result = await cliente.GetAsync(pControlador + "?" + value);
 
@@ -64,7 +66,8 @@ namespace Infraestructura.Services
                 foreach (var item in JsonSerializer.Deserialize<JsonElement>(jObj).EnumerateObject())
                 {
                     value += "/" + item.Value.ToString();
-                };
+                }
+                ;
             }
             else
             {
@@ -111,7 +114,7 @@ namespace Infraestructura.Services
                 return JsonSerializer.Deserialize<ResponseEntity<T>>(errorres);
             }
         }
-   
+
 
 
         public async Task<T> GetPlainAsync<T>(string controllerUrl)
@@ -189,7 +192,7 @@ namespace Infraestructura.Services
                 var data = await JsonSerializer.DeserializeAsync<ResponseEntity<T>>(responseStream, new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
 
                 data.State = data.Succeeded == true ? State.Success : State.Warning;
-                data.Message = data.Succeeded == true ? $"Se actualizó el registro Nro : { id } correctamente." : data.Message;
+                data.Message = data.Succeeded == true ? $"Se actualizó el registro Nro : {id} correctamente." : data.Message;
                 return data;
             }
             else
@@ -230,6 +233,7 @@ namespace Infraestructura.Services
         }
 
 
+
         public async Task<ResponseEntity<T>> DeleteAsync<T>(string pControlador, int id)
         {
             var cliente = await GetCliente();
@@ -243,7 +247,7 @@ namespace Infraestructura.Services
 
 
                 data.State = data.Succeeded == true ? State.Success : State.Warning;
-                data.Message = data.Succeeded == true ? $"Se Elimino el registro { id } correctamente" : data.Message;
+                data.Message = data.Succeeded == true ? $"Se Elimino el registro {id} correctamente" : data.Message;
 
                 return data;
             }
@@ -288,6 +292,38 @@ namespace Infraestructura.Services
             cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", await _localStorageService.GetItemAsStringAsync("KEYACCES"));
             return cliente;
         }
+
+        public async Task<ResponseEntity<T>> PostMultipartAsync<T>(
+    string pControlador,
+    MultipartFormDataContent content)
+        {
+            var cliente = await GetCliente();
+
+            // ⚠️ IMPORTANTE: no usar PostAsJsonAsync
+            var response = await cliente.PostAsync(pControlador, content);
+
+            var responseString = await response.Content.ReadAsStringAsync();
+
+            if (response.IsSuccessStatusCode)
+            {
+                var data = JsonSerializer.Deserialize<ResponseEntity<T>>(
+                    responseString,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+
+                data.State = data.Succeeded ? State.Success : State.Warning;
+                return data;
+            }
+            else
+            {
+                // Manejo de error estándar
+                return JsonSerializer.Deserialize<ResponseEntity<T>>(
+                    responseString,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
+                );
+            }
+        }
+
 
     }
 

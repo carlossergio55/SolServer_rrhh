@@ -137,10 +137,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="temp\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="EPPlus" Version="7.0.2" />
   </ItemGroup>
 

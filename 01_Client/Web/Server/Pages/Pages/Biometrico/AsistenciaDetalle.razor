@@ -7,19 +7,12 @@
 @using Server.Pages.Pages.Biometrico
 @using MudBlazor
 @using Syncfusion.Blazor.Buttons
-
 @using Infraestructura.Models.Persona
-
-
 @inherits MainBaseComponent
 @layout MainLayout
 @inject NavigationManager Navigation
 @inject NavigationManager Nav
 @inject NavigationManager NavigationManager
-
-
-
-
 @inject IJSRuntime JSRuntime
 @inject IDialogService DialogService
 @inject IJSRuntime JS
@@ -42,13 +35,6 @@
             </MudCardContent>
         </MudCard>
     }
-
-    <MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Success" Class="my-2">
-        <b>LISTA DEL PERSONAL DE ENVIBOL</b>
-    </MudText>
-
-
-
     <!-- ░░░░░  FORMULARIO DE FILTRO  ░░░░░ -->
     <MudCard Class="mb-6" Outlined="true" Elevation="1">
         <MudCardHeader>
@@ -123,37 +109,15 @@
 </MudContainer>
 
 
-
-
-<MudText Typo="Typo.h6" Align="Align.Center" Color="Color.Success" Class="my-2">
-    <b>BILLETERA MOVIL </b>
-</MudText>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @code {
-    // Variables para ordenamiento
     private string _sortBy = nameof(SVistaAsistenciasDto.ShiftDate);
     private Syncfusion.Blazor.Grids.SortDirection _sortDirection = Syncfusion.Blazor.Grids.SortDirection.Descending;
+
     private bool HayParametrosValidos =>
-
-    FechaInicio.HasValue &&
-    FechaFin.HasValue &&
-    FechaInicio <= FechaFin;
-
- 
+        !string.IsNullOrEmpty(BusquedaCi) &&
+        FechaInicio.HasValue &&
+        FechaFin.HasValue &&
+        FechaInicio <= FechaFin;
 }
 <style>
     .custom-table .missing-register {

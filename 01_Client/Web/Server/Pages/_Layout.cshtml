@@ -48,6 +48,13 @@
     <script src="js/site.js"></script>
     <script type="module" src="js/scrollSync.js"></script>
     <script>
+                window.createObjectUrl = (file) => {
+            return URL.createObjectURL(file);
+        };
+
+        window.revokeObjectUrl = (url) => {
+            URL.revokeObjectURL(url);
+        };
         function downloadFile(filename, content) {
             const element = document.createElement('a');
             element.setAttribute('href', 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + content);
